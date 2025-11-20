@@ -107,6 +107,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
         card_id,
         name,
         group,
+        era,
         rarity
       )
     `)
@@ -120,7 +121,8 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
   const listingText = listings
     .map((listing: any) => {
       const card = listing.cards;
-      return `**ID ${listing.listing_id}** | ${getRarityEmoji(card.rarity)} ${card.name} (${card.group}) | ${listing.price} coins | x${listing.quantity}`;
+      const eraText = card.era ? ` - ${card.era}` : '';
+      return `**ID ${listing.listing_id}** | ${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText}) | ${listing.price} coins | x${listing.quantity}`;
     })
     .join('\n');
 
@@ -146,6 +148,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
         card_id,
         name,
         group,
+        era,
         rarity
       )
     `)
@@ -198,12 +201,13 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   }
 
   const card = listing.cards as any;
+  const eraText = card.era ? ` - ${card.era}` : '';
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
     .setTitle('✅ Purchase Complete!')
     .setDescription(`You bought ${card.name}!`)
     .addFields(
-      { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group})`, inline: true },
+      { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, inline: true },
       { name: 'Price', value: `${result.price} coins`, inline: true },
       { name: 'Remaining Coins', value: `${result.new_balance}`, inline: true }
     )

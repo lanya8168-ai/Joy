@@ -17,6 +17,10 @@ export const data = new SlashCommandBuilder()
       .setDescription('New group name')
       .setRequired(false))
   .addStringOption(option =>
+    option.setName('era')
+      .setDescription('New era or album name')
+      .setRequired(false))
+  .addStringOption(option =>
     option.setName('rarity')
       .setDescription('New rarity')
       .setRequired(false)
@@ -41,6 +45,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const cardId = interaction.options.getInteger('card_id', true);
   const name = interaction.options.getString('name');
   const group = interaction.options.getString('group');
+  const era = interaction.options.getString('era');
   const rarity = interaction.options.getString('rarity');
   const imageUrl = interaction.options.getString('image_url');
 
@@ -58,6 +63,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const updates: any = {};
   if (name) updates.name = name;
   if (group) updates.group = group;
+  if (era) updates.era = era;
   if (rarity) updates.rarity = rarity;
   if (imageUrl) updates.image_url = imageUrl;
 

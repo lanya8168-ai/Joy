@@ -23,6 +23,10 @@ export const data = new SlashCommandBuilder()
         { name: 'Legendary', value: 'legendary' }
       ))
   .addStringOption(option =>
+    option.setName('era')
+      .setDescription('Era or album name (optional)')
+      .setRequired(false))
+  .addStringOption(option =>
     option.setName('image_url')
       .setDescription('Image URL for the card')
       .setRequired(false))
@@ -36,6 +40,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const name = interaction.options.getString('name', true);
   const group = interaction.options.getString('group', true);
+  const era = interaction.options.getString('era');
   const rarity = interaction.options.getString('rarity', true);
   const imageUrl = interaction.options.getString('image_url');
 
@@ -44,6 +49,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .insert([{
       name: name,
       group: group,
+      era: era,
       rarity: rarity,
       image_url: imageUrl
     }])
@@ -64,6 +70,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       { name: 'Group', value: group, inline: true }
     )
     .setTimestamp();
+
+  if (era) {
+    embed.addFields({ name: 'Era', value: era, inline: true });
+  }
 
   if (imageUrl) {
     embed.setThumbnail(imageUrl);

@@ -83,6 +83,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     )
     .setTimestamp();
 
+  if (selectedCard.era) {
+    embed.addFields({ name: 'Era', value: selectedCard.era, inline: true });
+  }
+
   if (selectedCard.image_url) {
     embed.setImage(selectedCard.image_url);
   }

@@ -28,6 +28,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         card_id,
         name,
         group,
+        era,
         rarity
       )
     `)
@@ -48,7 +49,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const cardList = inventory
     .map((item: any) => {
       const card = item.cards;
-      return `${getRarityEmoji(card.rarity)} **${card.name}** (${card.group}) x${item.quantity}`;
+      const eraText = card.era ? ` - ${card.era}` : '';
+      return `${getRarityEmoji(card.rarity)} **${card.name}** (${card.group}${eraText}) x${item.quantity}`;
     })
     .join('\n');
 

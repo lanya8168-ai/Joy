@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS cards (
   card_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   "group" TEXT NOT NULL,
+  era TEXT,
   rarity TEXT CHECK (rarity IN ('common', 'rare', 'epic', 'legendary')) NOT NULL,
   image_url TEXT,
   created_at TIMESTAMP DEFAULT NOW()
