@@ -22,14 +22,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  if (user.coins < PACK_COST) {
-    await interaction.reply({ 
-      content: `❌ You need ${PACK_COST} coins to open a pack! You have ${user.coins} coins.\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more!`, 
-      ephemeral: true 
-    });
-    return;
-  }
-
   const { data: allCards } = await supabase
     .from('cards')
     .select('*');
@@ -48,36 +40,35 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     ? cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)]
     : allCards[Math.floor(Math.random() * allCards.length)];
 
-  const { error: updateCoinsError } = await supabase
-    .from('users')
-    .update({ coins: user.coins - PACK_COST })
-    .eq('user_id', userId);
+  const { data, error } = await supabase.rpc('open_card_pack', {
+    p_user_id: userId,
+    p_pack_cost: PACK_COST,
+    p_card_id: selectedCard.card_id
+  });
 
-  if (updateCoinsError) {
-    await interaction.reply({ content: '❌ Error processing payment. Please try again!', ephemeral: true });
+  if (error || !data) {
+    await interaction.reply({ content: '❌ Error opening pack. Please try again!', ephemeral: true });
     return;
   }
 
-  const { data: existingCard } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('card_id', selectedCard.card_id)
-    .single();
+  const result = data as any;
 
-  if (existingCard) {
-    await supabase
-      .from('inventory')
-      .update({ quantity: existingCard.quantity + 1 })
-      .eq('id', existingCard.id);
-  } else {
-    await supabase
-      .from('inventory')
-      .insert([{
-        user_id: userId,
-        card_id: selectedCard.card_id,
-        quantity: 1
-      }]);
+  if (!result.success) {
+    if (result.error === 'user_not_found') {
+      await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+      return;
+    }
+
+    if (result.error === 'insufficient_funds') {
+      await interaction.reply({ 
+        content: `❌ You need ${PACK_COST} coins to open a pack! You have ${result.available} coins.\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more!`, 
+        ephemeral: true 
+      });
+      return;
+    }
+
+    await interaction.reply({ content: '❌ Error opening pack. Please try again!', ephemeral: true });
+    return;
   }
 
   const embed = new EmbedBuilder()
@@ -88,7 +79,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       { name: 'Card Name', value: selectedCard.name, inline: true },
       { name: 'Group', value: selectedCard.group, inline: true },
       { name: 'Rarity', value: `${getRarityEmoji(selectedCard.rarity)} ${selectedCard.rarity.toUpperCase()}`, inline: true },
-      { name: 'Remaining Coins', value: `${user.coins - PACK_COST}`, inline: true }
+      { name: 'Remaining Coins', value: `${result.new_balance}`, inline: true }
     )
     .setTimestamp();
 

@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
-import { getCooldownRemaining, formatCooldown } from '../utils/cooldowns.js';
+import { formatCooldown } from '../utils/cooldowns.js';
 
 const SURF_COOLDOWN_HOURS = 1;
 
@@ -10,42 +10,38 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
-
-  const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-
-  if (!user) {
-    await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
-    return;
-  }
-
-  const cooldown = getCooldownRemaining(user.last_surf, SURF_COOLDOWN_HOURS);
-
-  if (cooldown > 0) {
-    const embed = new EmbedBuilder()
-      .setColor(0xff0000)
-      .setTitle('⏰ Surf On Cooldown')
-      .setDescription(`Come back in **${formatCooldown(cooldown)}**`)
-      .setTimestamp();
-
-    await interaction.reply({ embeds: [embed], ephemeral: true });
-    return;
-  }
-
   const reward = Math.floor(Math.random() * 20) + 10;
 
-  const { error } = await supabase
-    .from('users')
-    .update({
-      coins: user.coins + reward,
-      last_surf: new Date().toISOString()
-    })
-    .eq('user_id', userId);
+  const { data, error } = await supabase.rpc('claim_surf_reward', {
+    p_user_id: userId,
+    p_reward: reward,
+    p_cooldown_hours: SURF_COOLDOWN_HOURS
+  });
 
-  if (error) {
+  if (error || !data) {
+    await interaction.reply({ content: '❌ Error surfing. Please try again!', ephemeral: true });
+    return;
+  }
+
+  const result = data as any;
+
+  if (!result.success) {
+    if (result.error === 'user_not_found') {
+      await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+      return;
+    }
+
+    if (result.error === 'on_cooldown') {
+      const embed = new EmbedBuilder()
+        .setColor(0xff0000)
+        .setTitle('⏰ Surf On Cooldown')
+        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`)
+        .setTimestamp();
+
+      await interaction.reply({ embeds: [embed], ephemeral: true });
+      return;
+    }
+
     await interaction.reply({ content: '❌ Error surfing. Please try again!', ephemeral: true });
     return;
   }
@@ -53,10 +49,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
     .setTitle('🏄 Surfing Complete!')
-    .setDescription(`You found **${reward} coins** while surfing!`)
+    .setDescription(`You found **${result.reward} coins** while surfing!`)
     .addFields(
-      { name: 'Reward', value: `${reward} coins`, inline: true },
-      { name: 'New Balance', value: `${user.coins + reward} coins`, inline: true }
+      { name: 'Reward', value: `${result.reward} coins`, inline: true },
+      { name: 'New Balance', value: `${result.new_balance} coins`, inline: true }
     )
     .setTimestamp();
 

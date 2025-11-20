@@ -29,6 +29,11 @@ export const data = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+    await interaction.reply({ content: '❌ You need Administrator permission to use this command!', ephemeral: true });
+    return;
+  }
+
   const name = interaction.options.getString('name', true);
   const group = interaction.options.getString('group', true);
   const rarity = interaction.options.getString('rarity', true);

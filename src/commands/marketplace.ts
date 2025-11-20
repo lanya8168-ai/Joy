@@ -54,50 +54,29 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   const price = interaction.options.getInteger('price', true);
   const quantity = interaction.options.getInteger('quantity') || 1;
 
-  const { data: inventoryItem } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('card_id', cardId)
-    .single();
+  const { data, error } = await supabase.rpc('list_card_on_marketplace', {
+    p_user_id: userId,
+    p_card_id: cardId,
+    p_price: price,
+    p_quantity: quantity
+  });
 
-  if (!inventoryItem || inventoryItem.quantity < quantity) {
-    await interaction.reply({ 
-      content: `❌ You don't have enough of this card! Check your inventory with \`/inventory\`.`, 
-      ephemeral: true 
-    });
+  if (error || !data) {
+    await interaction.reply({ content: '❌ Error creating listing.', ephemeral: true });
     return;
   }
 
-  const { error: updateError } = await supabase
-    .from('inventory')
-    .update({ quantity: inventoryItem.quantity - quantity })
-    .eq('user_id', userId)
-    .eq('card_id', cardId);
+  const result = data as any;
 
-  if (updateError) {
-    await interaction.reply({ content: '❌ Error updating inventory.', ephemeral: true });
-    return;
-  }
+  if (!result.success) {
+    if (result.error === 'insufficient_cards') {
+      await interaction.reply({ 
+        content: `❌ You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`, 
+        ephemeral: true 
+      });
+      return;
+    }
 
-  if (inventoryItem.quantity - quantity === 0) {
-    await supabase
-      .from('inventory')
-      .delete()
-      .eq('user_id', userId)
-      .eq('card_id', cardId);
-  }
-
-  const { error: listError } = await supabase
-    .from('marketplace')
-    .insert([{
-      seller_id: userId,
-      card_id: cardId,
-      price: price,
-      quantity: quantity
-    }]);
-
-  if (listError) {
     await interaction.reply({ content: '❌ Error creating listing.', ephemeral: true });
     return;
   }
@@ -107,9 +86,9 @@ async function handleList(interaction: ChatInputCommandInteraction) {
     .setTitle('✅ Card Listed!')
     .setDescription(`Your card has been listed on the marketplace!`)
     .addFields(
-      { name: 'Card ID', value: `${cardId}`, inline: true },
-      { name: 'Price', value: `${price} coins`, inline: true },
-      { name: 'Quantity', value: `${quantity}`, inline: true }
+      { name: 'Listing ID', value: `${result.listing_id}`, inline: true },
+      { name: 'Price', value: `${result.price} coins`, inline: true },
+      { name: 'Quantity', value: `${result.quantity}`, inline: true }
     )
     .setTimestamp();
 
@@ -178,69 +157,45 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  if (listing.seller_id === userId) {
-    await interaction.reply({ content: '❌ You cannot buy your own listing!', ephemeral: true });
+  const { data, error } = await supabase.rpc('purchase_marketplace_listing', {
+    p_buyer_id: userId,
+    p_listing_id: listingId
+  });
+
+  if (error || !data) {
+    await interaction.reply({ content: '❌ Error purchasing card.', ephemeral: true });
     return;
   }
 
-  const { data: buyer } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
+  const result = data as any;
 
-  if (!buyer || buyer.coins < listing.price) {
-    await interaction.reply({ 
-      content: `❌ You need ${listing.price} coins! You have ${buyer?.coins || 0} coins.`, 
-      ephemeral: true 
-    });
+  if (!result.success) {
+    if (result.error === 'listing_not_found') {
+      await interaction.reply({ content: '❌ Listing not found or already sold!', ephemeral: true });
+      return;
+    }
+
+    if (result.error === 'cannot_buy_own_listing') {
+      await interaction.reply({ content: '❌ You cannot buy your own listing!', ephemeral: true });
+      return;
+    }
+
+    if (result.error === 'buyer_not_found') {
+      await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+      return;
+    }
+
+    if (result.error === 'insufficient_funds') {
+      await interaction.reply({ 
+        content: `❌ You need ${result.required} coins! You have ${result.available} coins.`, 
+        ephemeral: true 
+      });
+      return;
+    }
+
+    await interaction.reply({ content: '❌ Error purchasing card.', ephemeral: true });
     return;
   }
-
-  await supabase
-    .from('users')
-    .update({ coins: buyer.coins - listing.price })
-    .eq('user_id', userId);
-
-  const { data: seller } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', listing.seller_id)
-    .single();
-
-  if (seller) {
-    await supabase
-      .from('users')
-      .update({ coins: seller.coins + listing.price })
-      .eq('user_id', listing.seller_id);
-  }
-
-  const { data: existingCard } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('card_id', listing.card_id)
-    .single();
-
-  if (existingCard) {
-    await supabase
-      .from('inventory')
-      .update({ quantity: existingCard.quantity + listing.quantity })
-      .eq('id', existingCard.id);
-  } else {
-    await supabase
-      .from('inventory')
-      .insert([{
-        user_id: userId,
-        card_id: listing.card_id,
-        quantity: listing.quantity
-      }]);
-  }
-
-  await supabase
-    .from('marketplace')
-    .delete()
-    .eq('listing_id', listingId);
 
   const card = listing.cards as any;
   const embed = new EmbedBuilder()
@@ -249,8 +204,8 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .setDescription(`You bought ${card.name}!`)
     .addFields(
       { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group})`, inline: true },
-      { name: 'Price', value: `${listing.price} coins`, inline: true },
-      { name: 'Remaining Coins', value: `${buyer.coins - listing.price}`, inline: true }
+      { name: 'Price', value: `${result.price} coins`, inline: true },
+      { name: 'Remaining Coins', value: `${result.new_balance}`, inline: true }
     )
     .setTimestamp();
 

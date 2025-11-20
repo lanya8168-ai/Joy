@@ -4,6 +4,8 @@
 A Discord bot that allows users to collect K-pop trading cards with an economy system, marketplace, and admin management tools. Built with Discord.js v14 and Supabase for persistent storage.
 
 ## Recent Changes
+- **2025-11-20**: Implemented atomic transaction safety using Supabase RPC functions for all economy and marketplace operations
+- **2025-11-20**: Added runtime permission checks to all admin commands
 - **2025-11-20**: Initial project setup with Node.js, TypeScript, Discord.js v14, and Supabase client
 
 ## Features
@@ -30,12 +32,18 @@ A Discord bot that allows users to collect K-pop trading cards with an economy s
 ## Project Architecture
 - **Language**: TypeScript with Node.js 20
 - **Framework**: Discord.js v14
-- **Database**: Supabase (PostgreSQL)
+- **Database**: Supabase (PostgreSQL) with atomic RPC functions
 - **Structure**:
   - `src/index.ts` - Bot initialization
   - `src/commands/` - Slash command handlers
-  - `src/database/` - Supabase client and schema
-  - `src/utils/` - Helper functions
+  - `src/database/` - Supabase client, schema, and RPC functions
+  - `src/utils/` - Helper functions (cooldowns, card rarities)
+
+## Security Features
+- **Atomic Transactions**: All coin/inventory operations use PostgreSQL RPC functions with row-level locking
+- **Race Condition Prevention**: Database-level locks prevent double-spend and concurrent modification issues
+- **Admin Protection**: Runtime permission checks enforce administrator-only access to card management
+- **Transaction Rollback**: Failed operations automatically rollback to prevent data loss
 
 ## Environment Variables
 - `DISCORD_TOKEN` - Discord bot token from Developer Portal

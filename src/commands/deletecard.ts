@@ -11,6 +11,11 @@ export const data = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+    await interaction.reply({ content: '❌ You need Administrator permission to use this command!', ephemeral: true });
+    return;
+  }
+
   const cardId = interaction.options.getInteger('card_id', true);
 
   const { data: card } = await supabase
