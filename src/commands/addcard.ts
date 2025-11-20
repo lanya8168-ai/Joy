@@ -1,0 +1,68 @@
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { supabase } from '../database/supabase.js';
+
+export const data = new SlashCommandBuilder()
+  .setName('addcard')
+  .setDescription('Add a new K-pop card to the database (Admin only)')
+  .addStringOption(option =>
+    option.setName('name')
+      .setDescription('Card name (e.g., member name)')
+      .setRequired(true))
+  .addStringOption(option =>
+    option.setName('group')
+      .setDescription('K-pop group name')
+      .setRequired(true))
+  .addStringOption(option =>
+    option.setName('rarity')
+      .setDescription('Card rarity')
+      .setRequired(true)
+      .addChoices(
+        { name: 'Common', value: 'common' },
+        { name: 'Rare', value: 'rare' },
+        { name: 'Epic', value: 'epic' },
+        { name: 'Legendary', value: 'legendary' }
+      ))
+  .addStringOption(option =>
+    option.setName('image_url')
+      .setDescription('Image URL for the card')
+      .setRequired(false))
+  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+
+export async function execute(interaction: ChatInputCommandInteraction) {
+  const name = interaction.options.getString('name', true);
+  const group = interaction.options.getString('group', true);
+  const rarity = interaction.options.getString('rarity', true);
+  const imageUrl = interaction.options.getString('image_url');
+
+  const { data, error } = await supabase
+    .from('cards')
+    .insert([{
+      name: name,
+      group: group,
+      rarity: rarity,
+      image_url: imageUrl
+    }])
+    .select();
+
+  if (error) {
+    await interaction.reply({ content: '❌ Error adding card to database.', ephemeral: true });
+    return;
+  }
+
+  const embed = new EmbedBuilder()
+    .setColor(0x00ff00)
+    .setTitle('✅ Card Added!')
+    .setDescription(`Successfully added **${name}** from ${group}`)
+    .addFields(
+      { name: 'Card ID', value: `${data[0].card_id}`, inline: true },
+      { name: 'Rarity', value: rarity, inline: true },
+      { name: 'Group', value: group, inline: true }
+    )
+    .setTimestamp();
+
+  if (imageUrl) {
+    embed.setThumbnail(imageUrl);
+  }
+
+  await interaction.reply({ embeds: [embed] });
+}
