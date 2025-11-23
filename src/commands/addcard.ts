@@ -15,13 +15,14 @@ export const data = new SlashCommandBuilder()
       .setRequired(true))
   .addIntegerOption(option =>
     option.setName('rarity')
-      .setDescription('Card rarity (1=Common, 2=Rare, 3=Epic, 4=Legendary)')
+      .setDescription('Card rarity (1-5)')
       .setRequired(true)
       .addChoices(
         { name: 'Common (1)', value: 1 },
-        { name: 'Rare (2)', value: 2 },
-        { name: 'Epic (3)', value: 3 },
-        { name: 'Legendary (4)', value: 4 }
+        { name: 'Uncommon (2)', value: 2 },
+        { name: 'Rare (3)', value: 3 },
+        { name: 'Epic (4)', value: 4 },
+        { name: 'Legendary (5)', value: 5 }
       ))
   .addStringOption(option =>
     option.setName('era')

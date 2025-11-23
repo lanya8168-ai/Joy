@@ -4,6 +4,7 @@
 A Discord bot that allows users to collect K-pop trading cards with an economy system, marketplace, and admin management tools. Built with Discord.js v14 and Supabase for persistent storage.
 
 ## Recent Changes
+- **2025-11-23**: Changed rarity system from 1-4 to 1-5 (Common, Uncommon, Rare, Epic, Legendary)
 - **2025-11-20**: Added "era" field to cards table for tracking album/era information
 - **2025-11-20**: Implemented atomic transaction safety using Supabase RPC functions for all economy and marketplace operations
 - **2025-11-20**: Added runtime permission checks to all admin commands
