@@ -4,6 +4,7 @@
 A Discord bot that allows users to collect K-pop trading cards with an economy system, marketplace, and admin management tools. Built with Discord.js v14 and Supabase for persistent storage.
 
 ## Recent Changes
+- **2025-11-23**: Fixed /drop to only select droppable cards, added pagination and filters to /inventory (page, rarity, group)
 - **2025-11-23**: Added cardcode and droppable fields to cards table, updated /addcard and /editcard commands
 - **2025-11-23**: Made /drop FREE with 2-minute cooldown (no cost), converted /shop to sell card packs (100/200/500/1000 coins), display rarities as numbers only, fixed /addcard timeout by adding deferReply()
 - **2025-11-23**: Changed rarity system from 1-4 to 1-5 (Common, Uncommon, Rare, Epic, Legendary)
