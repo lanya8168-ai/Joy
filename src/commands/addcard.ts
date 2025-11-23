@@ -60,7 +60,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .select();
 
   if (error) {
-    await interaction.editReply({ content: '❌ Error adding card to database.' });
+    console.error('Database error:', error);
+    await interaction.editReply({ content: `❌ Error adding card to database: ${error.message}` });
     return;
   }
 

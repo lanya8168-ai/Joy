@@ -82,7 +82,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('card_id', cardId);
 
   if (error) {
-    await interaction.editReply({ content: '❌ Error updating card.' });
+    console.error('Database error:', error);
+    await interaction.editReply({ content: `❌ Error updating card: ${error.message}` });
     return;
   }
 
