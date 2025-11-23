@@ -12,6 +12,10 @@ export const data = new SlashCommandBuilder()
     option.setName('group')
       .setDescription('K-pop group name')
       .setRequired(true))
+  .addStringOption(option =>
+    option.setName('cardcode')
+      .setDescription('Card code/ID (e.g., BP001)')
+      .setRequired(true))
   .addIntegerOption(option =>
     option.setName('rarity')
       .setDescription('Card rarity (1-5)')
@@ -26,6 +30,10 @@ export const data = new SlashCommandBuilder()
   .addStringOption(option =>
     option.setName('era')
       .setDescription('Era or album name (optional)')
+      .setRequired(false))
+  .addBooleanOption(option =>
+    option.setName('droppable')
+      .setDescription('Can this card be dropped? (default: true)')
       .setRequired(false))
   .addStringOption(option =>
     option.setName('image_url')
@@ -44,8 +52,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const name = interaction.options.getString('name', true);
   const group = interaction.options.getString('group', true);
+  const cardcode = interaction.options.getString('cardcode', true);
   const era = interaction.options.getString('era');
   const rarity = interaction.options.getInteger('rarity', true);
+  const droppable = interaction.options.getBoolean('droppable') ?? true;
   const imageUrl = interaction.options.getString('image_url');
 
   const { data, error } = await supabase
@@ -53,8 +63,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .insert([{
       name: name,
       group: group,
+      cardcode: cardcode,
       era: era,
       rarity: rarity,
+      droppable: droppable,
       image_url: imageUrl
     }])
     .select();
@@ -71,8 +83,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(`Successfully added **${name}** from ${group}`)
     .addFields(
       { name: 'Card ID', value: `${data[0].card_id}`, inline: true },
+      { name: 'Card Code', value: `${cardcode}`, inline: true },
       { name: 'Rarity', value: `${rarity}`, inline: true },
-      { name: 'Group', value: group, inline: true }
+      { name: 'Group', value: group, inline: true },
+      { name: 'Droppable', value: droppable ? '✅ Yes' : '❌ No', inline: true }
     )
     .setTimestamp();
 

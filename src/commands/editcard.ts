@@ -17,6 +17,10 @@ export const data = new SlashCommandBuilder()
       .setDescription('New group name')
       .setRequired(false))
   .addStringOption(option =>
+    option.setName('cardcode')
+      .setDescription('New card code/ID')
+      .setRequired(false))
+  .addStringOption(option =>
     option.setName('era')
       .setDescription('New era or album name')
       .setRequired(false))
@@ -31,6 +35,10 @@ export const data = new SlashCommandBuilder()
         { name: 'Epic (4)', value: 4 },
         { name: 'Legendary (5)', value: 5 }
       ))
+  .addBooleanOption(option =>
+    option.setName('droppable')
+      .setDescription('Can this card be dropped?')
+      .setRequired(false))
   .addStringOption(option =>
     option.setName('image_url')
       .setDescription('New image URL')
@@ -49,8 +57,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const cardId = interaction.options.getInteger('card_id', true);
   const name = interaction.options.getString('name');
   const group = interaction.options.getString('group');
+  const cardcode = interaction.options.getString('cardcode');
   const era = interaction.options.getString('era');
   const rarity = interaction.options.getInteger('rarity');
+  const droppable = interaction.options.getBoolean('droppable');
   const imageUrl = interaction.options.getString('image_url');
 
   const { data: existingCard } = await supabase
@@ -67,8 +77,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const updates: any = {};
   if (name) updates.name = name;
   if (group) updates.group = group;
+  if (cardcode) updates.cardcode = cardcode;
   if (era) updates.era = era;
   if (rarity) updates.rarity = rarity;
+  if (droppable !== null) updates.droppable = droppable;
   if (imageUrl) updates.image_url = imageUrl;
 
   if (Object.keys(updates).length === 0) {

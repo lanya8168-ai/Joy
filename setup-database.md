@@ -29,8 +29,10 @@ CREATE TABLE IF NOT EXISTS cards (
   card_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   "group" TEXT NOT NULL,
+  cardcode TEXT NOT NULL,
   era TEXT,
   rarity INTEGER CHECK (rarity IN (1, 2, 3, 4, 5)) NOT NULL,
+  droppable BOOLEAN DEFAULT true,
   image_url TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
