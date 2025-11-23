@@ -34,13 +34,13 @@ export const data = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  // Defer the reply FIRST to allow time for database operations
+  await interaction.deferReply({ ephemeral: true });
+
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.reply({ content: '❌ You need Administrator permission to use this command!', ephemeral: true });
+    await interaction.editReply({ content: '❌ You need Administrator permission to use this command!' });
     return;
   }
-
-  // Defer the reply to allow time for database operations
-  await interaction.deferReply({ ephemeral: true });
 
   const name = interaction.options.getString('name', true);
   const group = interaction.options.getString('group', true);

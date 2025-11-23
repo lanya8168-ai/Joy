@@ -38,13 +38,13 @@ export const data = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  // Defer the reply FIRST to allow time for database operations
+  await interaction.deferReply({ ephemeral: true });
+
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.reply({ content: '❌ You need Administrator permission to use this command!', ephemeral: true });
+    await interaction.editReply({ content: '❌ You need Administrator permission to use this command!' });
     return;
   }
-
-  // Defer the reply to allow time for database operations
-  await interaction.deferReply({ ephemeral: true });
 
   const cardId = interaction.options.getInteger('card_id', true);
   const name = interaction.options.getString('name');
@@ -72,7 +72,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (imageUrl) updates.image_url = imageUrl;
 
   if (Object.keys(updates).length === 0) {
-    await interaction.reply({ content: '❌ Please provide at least one field to update!', ephemeral: true });
+    await interaction.editReply({ content: '❌ Please provide at least one field to update!' });
     return;
   }
 
