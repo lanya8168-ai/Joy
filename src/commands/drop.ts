@@ -89,7 +89,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('user_id', userId);
 
   if (error) {
-    await interaction.reply({ content: '❌ Error processing drop. Please try again!', ephemeral: true });
+    console.error('Drop error updating last_drop:', error);
+    await interaction.reply({ content: `❌ Error processing drop: ${error.message}`, ephemeral: true });
     return;
   }
 
