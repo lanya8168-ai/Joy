@@ -40,11 +40,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const { data: allCards } = await supabase
     .from('cards')
-    .select('*');
+    .select('*')
+    .eq('droppable', true);
 
   if (!allCards || allCards.length === 0) {
     await interaction.reply({ 
-      content: '❌ No cards available yet! Ask an admin to add cards using `/addcard`.', 
+      content: '❌ No droppable cards available yet! Ask an admin to add cards using `/addcard`.', 
       ephemeral: true 
     });
     return;
