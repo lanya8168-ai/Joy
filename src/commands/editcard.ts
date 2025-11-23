@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
 export const data = new SlashCommandBuilder()
@@ -39,7 +39,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   // Defer the reply FIRST to allow time for database operations
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
     await interaction.editReply({ content: '❌ You need Administrator permission to use this command!' });
