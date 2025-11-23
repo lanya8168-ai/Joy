@@ -1,6 +1,5 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { supabase } from '../database/supabase.js';
-import { getRarityName } from '../utils/cards.js';
 
 export const data = new SlashCommandBuilder()
   .setName('addcard')
@@ -68,7 +67,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(`Successfully added **${name}** from ${group}`)
     .addFields(
       { name: 'Card ID', value: `${data[0].card_id}`, inline: true },
-      { name: 'Rarity', value: getRarityName(rarity), inline: true },
+      { name: 'Rarity', value: `${rarity}`, inline: true },
       { name: 'Group', value: group, inline: true }
     )
     .setTimestamp();

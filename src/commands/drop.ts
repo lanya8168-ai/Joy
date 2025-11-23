@@ -1,12 +1,12 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
-import { getRandomRarity, getRarityEmoji, getRarityColor, getRarityName } from '../utils/cards.js';
+import { getRandomRarity, getRarityEmoji, getRarityColor } from '../utils/cards.js';
 
-const PACK_COST = 50;
+const COOLDOWN_HOURS = 24;
 
 export const data = new SlashCommandBuilder()
   .setName('drop')
-  .setDescription('Open a card pack and get a random K-pop card!');
+  .setDescription('Open a FREE card pack! (24 hour cooldown)');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
@@ -20,6 +20,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!user) {
     await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
     return;
+  }
+
+  // Check cooldown
+  if (user.last_drop) {
+    const lastDropTime = new Date(user.last_drop).getTime();
+    const nowTime = Date.now();
+    const hoursPassed = (nowTime - lastDropTime) / (1000 * 60 * 60);
+    
+    if (hoursPassed < COOLDOWN_HOURS) {
+      const hoursRemaining = Math.ceil(COOLDOWN_HOURS - hoursPassed);
+      await interaction.reply({ 
+        content: `⏳ You can use /drop again in **${hoursRemaining}** hours!`, 
+        ephemeral: true 
+      });
+      return;
+    }
   }
 
   const { data: allCards } = await supabase
@@ -40,46 +56,51 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     ? cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)]
     : allCards[Math.floor(Math.random() * allCards.length)];
 
-  const { data, error } = await supabase.rpc('open_card_pack', {
-    p_user_id: userId,
-    p_pack_cost: PACK_COST,
-    p_card_id: selectedCard.card_id
-  });
+  // Add card to inventory and update last_drop time
+  const { data: existingItem } = await supabase
+    .from('inventory')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('card_id', selectedCard.card_id)
+    .single();
 
-  if (error || !data) {
-    await interaction.reply({ content: '❌ Error opening pack. Please try again!', ephemeral: true });
-    return;
+  if (existingItem) {
+    // Update quantity
+    await supabase
+      .from('inventory')
+      .update({ quantity: existingItem.quantity + 1 })
+      .eq('id', existingItem.id);
+  } else {
+    // Insert new item
+    await supabase
+      .from('inventory')
+      .insert({
+        user_id: userId,
+        card_id: selectedCard.card_id,
+        quantity: 1
+      });
   }
 
-  const result = data as any;
+  // Update last_drop timestamp
+  const { error } = await supabase
+    .from('users')
+    .update({ last_drop: new Date().toISOString() })
+    .eq('user_id', userId);
 
-  if (!result.success) {
-    if (result.error === 'user_not_found') {
-      await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
-      return;
-    }
-
-    if (result.error === 'insufficient_funds') {
-      await interaction.reply({ 
-        content: `❌ You need ${PACK_COST} coins to open a pack! You have ${result.available} coins.\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more!`, 
-        ephemeral: true 
-      });
-      return;
-    }
-
-    await interaction.reply({ content: '❌ Error opening pack. Please try again!', ephemeral: true });
+  if (error) {
+    await interaction.reply({ content: '❌ Error processing drop. Please try again!', ephemeral: true });
     return;
   }
 
   const embed = new EmbedBuilder()
     .setColor(getRarityColor(selectedCard.rarity))
     .setTitle('🎴 Card Drop!')
-    .setDescription(`You opened a card pack!`)
+    .setDescription(`You opened a FREE card pack!`)
     .addFields(
       { name: 'Card Name', value: selectedCard.name, inline: true },
       { name: 'Group', value: selectedCard.group, inline: true },
-      { name: 'Rarity', value: `${getRarityEmoji(selectedCard.rarity)} ${getRarityName(selectedCard.rarity)}`, inline: true },
-      { name: 'Remaining Coins', value: `${result.new_balance}`, inline: true }
+      { name: 'Rarity', value: `${getRarityEmoji(selectedCard.rarity)} ${selectedCard.rarity}`, inline: true },
+      { name: 'Next Drop', value: `In 24 hours`, inline: true }
     )
     .setTimestamp();
 

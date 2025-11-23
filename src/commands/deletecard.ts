@@ -45,7 +45,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(`Successfully deleted **${card.name}** from ${card.group}`)
     .addFields(
       { name: 'Card ID', value: `${cardId}`, inline: true },
-      { name: 'Rarity', value: card.rarity, inline: true }
+      { name: 'Rarity', value: `${card.rarity}`, inline: true }
     )
     .setTimestamp();
 

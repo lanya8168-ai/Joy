@@ -4,6 +4,7 @@
 A Discord bot that allows users to collect K-pop trading cards with an economy system, marketplace, and admin management tools. Built with Discord.js v14 and Supabase for persistent storage.
 
 ## Recent Changes
+- **2025-11-23**: Made /drop FREE with 24-hour cooldown, converted /shop to sell card packs (100/200/500/1000 coins), display rarities as numbers only
 - **2025-11-23**: Changed rarity system from 1-4 to 1-5 (Common, Uncommon, Rare, Epic, Legendary)
 - **2025-11-20**: Added "era" field to cards table for tracking album/era information
 - **2025-11-20**: Implemented atomic transaction safety using Supabase RPC functions for all economy and marketplace operations
@@ -11,21 +12,26 @@ A Discord bot that allows users to collect K-pop trading cards with an economy s
 - **2025-11-20**: Initial project setup with Node.js, TypeScript, Discord.js v14, and Supabase client
 
 ## Features
-- **Card Collection**: Drop and collect K-pop cards with rarity tiers
-- **Economy System**: Earn coins through daily/weekly rewards and surfing
+- **Free Daily Drops**: Get one free card pack every 24 hours via /drop
+- **Card Shop**: Buy packs with coins (Starter: 1 card, Double: 2 cards, Premium: 5 cards, Ultimate: 10 cards)
+- **Economy System**: Earn coins through daily/weekly rewards and surfing, then spend in shop
 - **Marketplace**: Buy and sell cards with other users
 - **Admin Tools**: Add, edit, and delete cards from the database
+- **Rarity System**: 5 tiers (1=Common, 2=Uncommon, 3=Rare, 4=Epic, 5=Legendary)
 - **Slash Commands**: Modern Discord interaction system
 
 ## Commands
 - `/start` - Initialize user profile
-- `/drop` - Open a card pack
+- `/drop` - Open a FREE card pack with 24-hour cooldown
 - `/inventory` - View your card collection
 - `/daily` - Claim daily coin reward
 - `/weekly` - Claim weekly coin reward
 - `/surf` - Surf for coins
-- `/shop` - Browse and buy card packs
-- `/mp` - Access marketplace
+- `/shop browse` - View available card packs
+- `/shop buy` - Purchase card packs (100, 200, 500, 1000 coins)
+- `/mp list` - List cards for sale
+- `/mp browse` - View marketplace listings
+- `/mp buy` - Purchase cards from marketplace
 - `/cooldowns` - Check cooldown timers
 - `/addcard` - (Admin) Add new card
 - `/deletecard` - (Admin) Remove card

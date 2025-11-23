@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   last_daily TIMESTAMP,
   last_weekly TIMESTAMP,
   last_surf TIMESTAMP,
+  last_drop TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
