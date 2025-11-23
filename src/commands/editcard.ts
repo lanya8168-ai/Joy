@@ -43,6 +43,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  // Defer the reply to allow time for database operations
+  await interaction.deferReply({ ephemeral: true });
+
   const cardId = interaction.options.getInteger('card_id', true);
   const name = interaction.options.getString('name');
   const group = interaction.options.getString('group');
@@ -57,7 +60,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!existingCard) {
-    await interaction.reply({ content: '❌ Card not found!', ephemeral: true });
+    await interaction.editReply({ content: '❌ Card not found!' });
     return;
   }
 
@@ -79,7 +82,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('card_id', cardId);
 
   if (error) {
-    await interaction.reply({ content: '❌ Error updating card.', ephemeral: true });
+    await interaction.editReply({ content: '❌ Error updating card.' });
     return;
   }
 
@@ -94,5 +97,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     )
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }

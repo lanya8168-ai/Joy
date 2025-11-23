@@ -39,6 +39,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  // Defer the reply to allow time for database operations
+  await interaction.deferReply({ ephemeral: true });
+
   const name = interaction.options.getString('name', true);
   const group = interaction.options.getString('group', true);
   const era = interaction.options.getString('era');
@@ -57,7 +60,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .select();
 
   if (error) {
-    await interaction.reply({ content: '❌ Error adding card to database.', ephemeral: true });
+    await interaction.editReply({ content: '❌ Error adding card to database.' });
     return;
   }
 
@@ -80,5 +83,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     embed.setThumbnail(imageUrl);
   }
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }

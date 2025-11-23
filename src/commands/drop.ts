@@ -2,11 +2,11 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from '
 import { supabase } from '../database/supabase.js';
 import { getRandomRarity, getRarityEmoji, getRarityColor } from '../utils/cards.js';
 
-const COOLDOWN_HOURS = 24;
+const COOLDOWN_MINUTES = 2;
 
 export const data = new SlashCommandBuilder()
   .setName('drop')
-  .setDescription('Open a FREE card pack! (24 hour cooldown)');
+  .setDescription('Open a FREE card pack! (2 minute cooldown)');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
@@ -26,12 +26,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (user.last_drop) {
     const lastDropTime = new Date(user.last_drop).getTime();
     const nowTime = Date.now();
-    const hoursPassed = (nowTime - lastDropTime) / (1000 * 60 * 60);
+    const minutesPassed = (nowTime - lastDropTime) / (1000 * 60);
     
-    if (hoursPassed < COOLDOWN_HOURS) {
-      const hoursRemaining = Math.ceil(COOLDOWN_HOURS - hoursPassed);
+    if (minutesPassed < COOLDOWN_MINUTES) {
+      const secondsRemaining = Math.ceil((COOLDOWN_MINUTES - minutesPassed) * 60);
       await interaction.reply({ 
-        content: `⏳ You can use /drop again in **${hoursRemaining}** hours!`, 
+        content: `⏳ You can use /drop again in **${secondsRemaining}** seconds!`, 
         ephemeral: true 
       });
       return;
@@ -100,7 +100,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       { name: 'Card Name', value: selectedCard.name, inline: true },
       { name: 'Group', value: selectedCard.group, inline: true },
       { name: 'Rarity', value: `${getRarityEmoji(selectedCard.rarity)} ${selectedCard.rarity}`, inline: true },
-      { name: 'Next Drop', value: `In 24 hours`, inline: true }
+      { name: 'Next Drop', value: `In 2 minutes`, inline: true }
     )
     .setTimestamp();
 
