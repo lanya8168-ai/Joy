@@ -22,7 +22,7 @@ A Discord bot that allows users to collect K-pop trading cards with an economy s
 
 ## Commands
 - `/start` - Initialize user profile
-- `/drop` - Open a FREE card pack with 24-hour cooldown
+- `/drop` - Open a FREE card pack with 2-minute cooldown
 - `/inventory` - View your card collection
 - `/daily` - Claim daily coin reward
 - `/weekly` - Claim weekly coin reward
@@ -36,6 +36,7 @@ A Discord bot that allows users to collect K-pop trading cards with an economy s
 - `/addcard` - (Admin) Add new card
 - `/deletecard` - (Admin) Remove card
 - `/editcard` - (Admin) Modify card
+- `/reload` - (Admin) Refresh command registrations
 
 ## Project Architecture
 - **Language**: TypeScript with Node.js 20

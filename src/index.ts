@@ -24,9 +24,14 @@ async function loadCommands() {
   const commandsPath = join(__dirname, 'commands');
   const commandFiles = (await readdir(commandsPath)).filter(file => file.endsWith('.js'));
 
+  // Clear existing commands
+  commands.clear();
+
   for (const file of commandFiles) {
     const filePath = join(commandsPath, file);
-    const command = await import(filePath);
+    // Clear require cache to force reimport
+    delete (globalThis as any)[filePath];
+    const command = await import(`${filePath}?t=${Date.now()}`);
     
     if ('data' in command && 'execute' in command) {
       commands.set(command.data.name, command);
@@ -99,6 +104,32 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 });
+
+// Expose reload function for admin commands
+export async function reloadCommands() {
+  console.log('🔄 Reloading commands...');
+  await loadCommands();
+  const token = process.env.DISCORD_TOKEN;
+  const clientId = process.env.DISCORD_CLIENT_ID;
+
+  if (token && clientId) {
+    const rest = new REST().setToken(token);
+    const commandData = Array.from(commands.values()).map(cmd => cmd.data.toJSON());
+
+    try {
+      await rest.put(
+        Routes.applicationCommands(clientId),
+        { body: commandData }
+      );
+      console.log('✅ Commands reloaded and registered!');
+      return true;
+    } catch (error) {
+      console.error('❌ Error registering reloaded commands:', error);
+      return false;
+    }
+  }
+  return false;
+}
 
 async function main() {
   console.log('🚀 Starting K-pop Card Bot...');
