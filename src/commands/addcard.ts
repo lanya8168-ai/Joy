@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { getRarityName } from '../utils/cards.js';
 
 export const data = new SlashCommandBuilder()
   .setName('addcard')
@@ -12,15 +13,15 @@ export const data = new SlashCommandBuilder()
     option.setName('group')
       .setDescription('K-pop group name')
       .setRequired(true))
-  .addStringOption(option =>
+  .addIntegerOption(option =>
     option.setName('rarity')
-      .setDescription('Card rarity')
+      .setDescription('Card rarity (1=Common, 2=Rare, 3=Epic, 4=Legendary)')
       .setRequired(true)
       .addChoices(
-        { name: 'Common', value: 'common' },
-        { name: 'Rare', value: 'rare' },
-        { name: 'Epic', value: 'epic' },
-        { name: 'Legendary', value: 'legendary' }
+        { name: 'Common (1)', value: 1 },
+        { name: 'Rare (2)', value: 2 },
+        { name: 'Epic (3)', value: 3 },
+        { name: 'Legendary (4)', value: 4 }
       ))
   .addStringOption(option =>
     option.setName('era')
@@ -41,7 +42,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const name = interaction.options.getString('name', true);
   const group = interaction.options.getString('group', true);
   const era = interaction.options.getString('era');
-  const rarity = interaction.options.getString('rarity', true);
+  const rarity = interaction.options.getInteger('rarity', true);
   const imageUrl = interaction.options.getString('image_url');
 
   const { data, error } = await supabase
@@ -66,7 +67,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(`Successfully added **${name}** from ${group}`)
     .addFields(
       { name: 'Card ID', value: `${data[0].card_id}`, inline: true },
-      { name: 'Rarity', value: rarity, inline: true },
+      { name: 'Rarity', value: getRarityName(rarity), inline: true },
       { name: 'Group', value: group, inline: true }
     )
     .setTimestamp();

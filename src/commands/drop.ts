@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
-import { getRandomRarity, getRarityEmoji, getRarityColor } from '../utils/cards.js';
+import { getRandomRarity, getRarityEmoji, getRarityColor, getRarityName } from '../utils/cards.js';
 
 const PACK_COST = 50;
 
@@ -78,7 +78,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addFields(
       { name: 'Card Name', value: selectedCard.name, inline: true },
       { name: 'Group', value: selectedCard.group, inline: true },
-      { name: 'Rarity', value: `${getRarityEmoji(selectedCard.rarity)} ${selectedCard.rarity.toUpperCase()}`, inline: true },
+      { name: 'Rarity', value: `${getRarityEmoji(selectedCard.rarity)} ${getRarityName(selectedCard.rarity)}`, inline: true },
       { name: 'Remaining Coins', value: `${result.new_balance}`, inline: true }
     )
     .setTimestamp();

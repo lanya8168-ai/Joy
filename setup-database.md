@@ -29,10 +29,16 @@ CREATE TABLE IF NOT EXISTS cards (
   name TEXT NOT NULL,
   "group" TEXT NOT NULL,
   era TEXT,
-  rarity TEXT CHECK (rarity IN ('common', 'rare', 'epic', 'legendary')) NOT NULL,
+  rarity INTEGER CHECK (rarity IN (1, 2, 3, 4)) NOT NULL,
   image_url TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Rarity Levels:
+-- 1 = Common
+-- 2 = Rare
+-- 3 = Epic
+-- 4 = Legendary
 
 -- Inventory table
 CREATE TABLE IF NOT EXISTS inventory (
@@ -224,21 +230,21 @@ To add some sample K-pop cards to test with, run this SQL:
 
 ```sql
 INSERT INTO cards (name, "group", era, rarity, image_url) VALUES
-  ('Jisoo', 'BLACKPINK', 'Born Pink', 'legendary', 'https://i.imgur.com/placeholder1.jpg'),
-  ('Jennie', 'BLACKPINK', 'Born Pink', 'legendary', 'https://i.imgur.com/placeholder2.jpg'),
-  ('Rosé', 'BLACKPINK', 'The Album', 'epic', 'https://i.imgur.com/placeholder3.jpg'),
-  ('Lisa', 'BLACKPINK', 'The Album', 'epic', 'https://i.imgur.com/placeholder4.jpg'),
-  ('RM', 'BTS', 'Proof', 'legendary', 'https://i.imgur.com/placeholder5.jpg'),
-  ('Jin', 'BTS', 'Proof', 'epic', 'https://i.imgur.com/placeholder6.jpg'),
-  ('Suga', 'BTS', 'Map of the Soul: 7', 'epic', 'https://i.imgur.com/placeholder7.jpg'),
-  ('J-Hope', 'BTS', 'Map of the Soul: 7', 'rare', 'https://i.imgur.com/placeholder8.jpg'),
-  ('Jimin', 'BTS', 'Map of the Soul: 7', 'rare', 'https://i.imgur.com/placeholder9.jpg'),
-  ('V', 'BTS', 'Love Yourself: Answer', 'rare', 'https://i.imgur.com/placeholder10.jpg'),
-  ('Jungkook', 'BTS', 'Love Yourself: Answer', 'common', 'https://i.imgur.com/placeholder11.jpg'),
-  ('Karina', 'aespa', 'MY WORLD', 'epic', 'https://i.imgur.com/placeholder12.jpg'),
-  ('Winter', 'aespa', 'MY WORLD', 'rare', 'https://i.imgur.com/placeholder13.jpg'),
-  ('Giselle', 'aespa', 'Girls', 'rare', 'https://i.imgur.com/placeholder14.jpg'),
-  ('Ningning', 'aespa', 'Girls', 'common', 'https://i.imgur.com/placeholder15.jpg');
+  ('Jisoo', 'BLACKPINK', 'Born Pink', 4, 'https://i.imgur.com/placeholder1.jpg'),
+  ('Jennie', 'BLACKPINK', 'Born Pink', 4, 'https://i.imgur.com/placeholder2.jpg'),
+  ('Rosé', 'BLACKPINK', 'The Album', 3, 'https://i.imgur.com/placeholder3.jpg'),
+  ('Lisa', 'BLACKPINK', 'The Album', 3, 'https://i.imgur.com/placeholder4.jpg'),
+  ('RM', 'BTS', 'Proof', 4, 'https://i.imgur.com/placeholder5.jpg'),
+  ('Jin', 'BTS', 'Proof', 3, 'https://i.imgur.com/placeholder6.jpg'),
+  ('Suga', 'BTS', 'Map of the Soul: 7', 3, 'https://i.imgur.com/placeholder7.jpg'),
+  ('J-Hope', 'BTS', 'Map of the Soul: 7', 2, 'https://i.imgur.com/placeholder8.jpg'),
+  ('Jimin', 'BTS', 'Map of the Soul: 7', 2, 'https://i.imgur.com/placeholder9.jpg'),
+  ('V', 'BTS', 'Love Yourself: Answer', 2, 'https://i.imgur.com/placeholder10.jpg'),
+  ('Jungkook', 'BTS', 'Love Yourself: Answer', 1, 'https://i.imgur.com/placeholder11.jpg'),
+  ('Karina', 'aespa', 'MY WORLD', 3, 'https://i.imgur.com/placeholder12.jpg'),
+  ('Winter', 'aespa', 'MY WORLD', 2, 'https://i.imgur.com/placeholder13.jpg'),
+  ('Giselle', 'aespa', 'Girls', 2, 'https://i.imgur.com/placeholder14.jpg'),
+  ('Ningning', 'aespa', 'Girls', 1, 'https://i.imgur.com/placeholder15.jpg');
 ```
 
 ## Step 4: Verify Setup

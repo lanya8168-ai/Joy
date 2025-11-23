@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { getRarityName } from '../utils/cards.js';
 
 export const data = new SlashCommandBuilder()
   .setName('editcard')
@@ -20,15 +21,15 @@ export const data = new SlashCommandBuilder()
     option.setName('era')
       .setDescription('New era or album name')
       .setRequired(false))
-  .addStringOption(option =>
+  .addIntegerOption(option =>
     option.setName('rarity')
-      .setDescription('New rarity')
+      .setDescription('New rarity (1=Common, 2=Rare, 3=Epic, 4=Legendary)')
       .setRequired(false)
       .addChoices(
-        { name: 'Common', value: 'common' },
-        { name: 'Rare', value: 'rare' },
-        { name: 'Epic', value: 'epic' },
-        { name: 'Legendary', value: 'legendary' }
+        { name: 'Common (1)', value: 1 },
+        { name: 'Rare (2)', value: 2 },
+        { name: 'Epic (3)', value: 3 },
+        { name: 'Legendary (4)', value: 4 }
       ))
   .addStringOption(option =>
     option.setName('image_url')
@@ -46,7 +47,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const name = interaction.options.getString('name');
   const group = interaction.options.getString('group');
   const era = interaction.options.getString('era');
-  const rarity = interaction.options.getString('rarity');
+  const rarity = interaction.options.getInteger('rarity');
   const imageUrl = interaction.options.getString('image_url');
 
   const { data: existingCard } = await supabase
@@ -88,7 +89,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(`Successfully updated card ID ${cardId}`)
     .addFields(
       { name: 'Previous Name', value: existingCard.name, inline: true },
-      { name: 'New Name', value: name || existingCard.name, inline: true }
+      { name: 'New Name', value: name || existingCard.name, inline: true },
+      { name: 'Rarity', value: rarity ? getRarityName(rarity) : getRarityName(existingCard.rarity), inline: true }
     )
     .setTimestamp();
 

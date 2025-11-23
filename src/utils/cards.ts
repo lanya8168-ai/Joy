@@ -1,30 +1,40 @@
 import { Card } from '../database/supabase.js';
 
-export function getRandomRarity(): 'common' | 'rare' | 'epic' | 'legendary' {
+export function getRandomRarity(): number {
   const random = Math.random() * 100;
   
-  if (random < 50) return 'common';
-  if (random < 80) return 'rare';
-  if (random < 95) return 'epic';
-  return 'legendary';
+  if (random < 50) return 1; // Common
+  if (random < 80) return 2; // Rare
+  if (random < 95) return 3; // Epic
+  return 4; // Legendary
 }
 
-export function getRarityEmoji(rarity: string): string {
+export function getRarityName(rarity: number): string {
   switch (rarity) {
-    case 'common': return '⚪';
-    case 'rare': return '🔵';
-    case 'epic': return '🟣';
-    case 'legendary': return '🟡';
+    case 1: return 'Common';
+    case 2: return 'Rare';
+    case 3: return 'Epic';
+    case 4: return 'Legendary';
+    default: return 'Unknown';
+  }
+}
+
+export function getRarityEmoji(rarity: number): string {
+  switch (rarity) {
+    case 1: return '⚪';
+    case 2: return '🔵';
+    case 3: return '🟣';
+    case 4: return '🟡';
     default: return '⚪';
   }
 }
 
-export function getRarityColor(rarity: string): number {
+export function getRarityColor(rarity: number): number {
   switch (rarity) {
-    case 'common': return 0x808080;
-    case 'rare': return 0x0099ff;
-    case 'epic': return 0x9933ff;
-    case 'legendary': return 0xffcc00;
+    case 1: return 0x808080;
+    case 2: return 0x0099ff;
+    case 3: return 0x9933ff;
+    case 4: return 0xffcc00;
     default: return 0x808080;
   }
 }

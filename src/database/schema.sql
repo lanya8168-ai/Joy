@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS cards (
   name TEXT NOT NULL,
   "group" TEXT NOT NULL,
   era TEXT,
-  rarity TEXT CHECK (rarity IN ('common', 'rare', 'epic', 'legendary')) NOT NULL,
+  rarity INTEGER CHECK (rarity IN (1, 2, 3, 4)) NOT NULL,
   image_url TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
