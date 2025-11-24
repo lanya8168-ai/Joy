@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits, Collection, Events, REST, Routes } from 'dis
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readdir } from 'fs/promises';
+import { createServer } from 'http';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -131,6 +132,34 @@ export async function reloadCommands() {
   return false;
 }
 
+function startHealthCheckServer() {
+  const PORT = process.env.PORT || 3000;
+  
+  const server = createServer((req, res) => {
+    if (req.url === '/health' || req.url === '/') {
+      const isReady = client.isReady();
+      const status = isReady ? 200 : 503;
+      
+      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        status: isReady ? 'ok' : 'not_ready',
+        bot: isReady ? client.user?.tag : 'not logged in',
+        servers: client.guilds.cache.size,
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString()
+      }));
+    } else {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Not found' }));
+    }
+  });
+
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🏥 Health check server running on port ${PORT}`);
+    console.log(`   Access at: http://localhost:${PORT}/health`);
+  });
+}
+
 async function main() {
   console.log('🚀 Starting K-pop Card Bot...');
   
@@ -147,6 +176,8 @@ async function main() {
     console.log('- SUPABASE_KEY: Your Supabase anon/public key');
     process.exit(1);
   }
+
+  startHealthCheckServer();
 
   await loadCommands();
   await registerCommands();
