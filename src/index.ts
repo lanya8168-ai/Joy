@@ -81,6 +81,14 @@ client.once(Events.ClientReady, async (c) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
+  if (interaction.isButton()) {
+    // Handle pagination buttons
+    if (interaction.customId.startsWith('inv_')) {
+      await handleInventoryButton(interaction);
+    }
+    return;
+  }
+
   if (!interaction.isChatInputCommand()) return;
 
   const command = commands.get(interaction.commandName);
@@ -105,6 +113,148 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 });
+
+async function handleInventoryButton(interaction: any) {
+  const { supabase } = await import('./database/supabase.js');
+  const { mergeCardImages } = await import('./utils/imageUtils.js');
+  const { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = await import('discord.js');
+
+  try {
+    await interaction.deferUpdate();
+
+    const parts = interaction.customId.split('_');
+    const action = parts[1]; // 'prev' or 'next' or 'page'
+    
+    if (action === 'page') return; // Just a display button
+
+    const userId = parts[2];
+    const rarityFilter = parts[3] === 'all' ? null : parseInt(parts[3]);
+    const groupFilter = parts[4] === 'all' ? null : parts[4];
+
+    // Only allow user to interact with their own inventory
+    if (interaction.user.id !== userId) {
+      await interaction.followUp({ content: '❌ This is not your inventory!', ephemeral: true });
+      return;
+    }
+
+    // Get user and inventory
+    const { data: user } = await supabase
+      .from('users')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (!user) return;
+
+    let query = supabase
+      .from('inventory')
+      .select(`
+        quantity,
+        cards (
+          card_id,
+          name,
+          group,
+          era,
+          rarity,
+          cardcode,
+          image_url
+        )
+      `)
+      .eq('user_id', userId);
+
+    const { data: inventory } = await query;
+    if (!inventory || inventory.length === 0) return;
+
+    // Apply filters
+    let filteredInventory = inventory;
+    if (rarityFilter !== null) {
+      filteredInventory = filteredInventory.filter((item: any) => item.cards.rarity === rarityFilter);
+    }
+    if (groupFilter) {
+      filteredInventory = filteredInventory.filter((item: any) => 
+        item.cards.group.toLowerCase() === groupFilter.toLowerCase()
+      );
+    }
+
+    // Get current page from message
+    const currentMessage = interaction.message;
+    const pageMatch = currentMessage.embeds[0]?.timestamp?.toString() || '1 / 1';
+    const pageText = currentMessage.components[0]?.components[1]?.label || '1 / 1';
+    const [currentPage] = pageText.split(' / ').map(Number);
+
+    const CARDS_PER_PAGE = 3;
+    const totalPages = Math.ceil(filteredInventory.length / CARDS_PER_PAGE);
+    let newPage = currentPage;
+
+    if (action === 'prev') newPage = Math.max(1, currentPage - 1);
+    if (action === 'next') newPage = Math.min(totalPages, currentPage + 1);
+
+    const startIndex = (newPage - 1) * CARDS_PER_PAGE;
+    const endIndex = startIndex + CARDS_PER_PAGE;
+    const pageCards = filteredInventory.slice(startIndex, endIndex);
+
+    const cardList = pageCards
+      .map((item: any, index: number) => {
+        const card = item.cards;
+        const eraText = card.era ? ` • ${card.era}` : '';
+        return `**Card ${index + 1}:** ${card.name} (${card.group}${eraText}) • \`${card.cardcode}\` • Qty: ${item.quantity}`;
+      })
+      .join('\n');
+
+    let attachment = null;
+    try {
+      const imageUrls = pageCards
+        .map((item: any) => item.cards.image_url)
+        .filter((url: string) => url);
+
+      if (imageUrls.length > 0) {
+        const mergedImageBuffer = await mergeCardImages(imageUrls);
+        attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'inventory_cards.png' });
+      }
+    } catch (error) {
+      console.error('Error merging images:', error);
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor(0xff69b4)
+      .setTitle('📦 Your K-pop Card Collection')
+      .setDescription(cardList)
+      .setTimestamp();
+
+    if (attachment) {
+      embed.setImage('attachment://inventory_cards.png');
+    }
+
+    // Create pagination buttons
+    const row = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}`)
+          .setLabel('← Previous')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(newPage === 1),
+        new ButtonBuilder()
+          .setCustomId(`inv_page`)
+          .setLabel(`${newPage} / ${totalPages}`)
+          .setStyle(ButtonStyle.Primary)
+          .setDisabled(true),
+        new ButtonBuilder()
+          .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}`)
+          .setLabel('Next →')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(newPage === totalPages)
+      );
+
+    if (attachment) {
+      await interaction.editReply({ embeds: [embed], files: [attachment], components: [row] });
+    } else {
+      await interaction.editReply({ embeds: [embed], components: [row] });
+    }
+  } catch (error) {
+    console.error('Error handling inventory button:', error);
+    await interaction.followUp({ content: '❌ An error occurred!', ephemeral: true });
+  }
+}
 
 // Expose reload function for admin commands
 export async function reloadCommands() {

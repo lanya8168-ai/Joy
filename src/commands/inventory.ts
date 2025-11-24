@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 
@@ -116,11 +116,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     })
     .join('\n');
 
-  const totalCards = inventory.reduce((sum: number, item: any) => sum + item.quantity, 0);
-  const filterSummary = rarityFilter || groupFilter 
-    ? `\n\n*(Filtered: ${rarityFilter ? `Rarity ${rarityFilter}` : ''} ${groupFilter ? `Group: ${groupFilter}` : ''})*`
-    : '';
-
   let attachment = null;
   try {
     const imageUrls = pageCards
@@ -138,19 +133,36 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
     .setTitle('📦 Your K-pop Card Collection')
-    .setDescription(cardList + filterSummary)
-    .addFields(
-      { name: 'Total Cards', value: `${totalCards}`, inline: true },
-      { name: 'Unique Cards', value: `${inventory.length}`, inline: true },
-      { name: 'Coins', value: `${user.coins}`, inline: true },
-      { name: 'Page', value: `${validPage} / ${totalPages}`, inline: true }
-    )
+    .setDescription(cardList)
     .setTimestamp();
 
   if (attachment) {
     embed.setImage('attachment://inventory_cards.png');
-    await interaction.editReply({ embeds: [embed], files: [attachment] });
+  }
+
+  // Create pagination buttons
+  const row = new ActionRowBuilder<ButtonBuilder>()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}`)
+        .setLabel('← Previous')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(validPage === 1),
+      new ButtonBuilder()
+        .setCustomId(`inv_page`)
+        .setLabel(`${validPage} / ${totalPages}`)
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(true),
+      new ButtonBuilder()
+        .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}`)
+        .setLabel('Next →')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(validPage === totalPages)
+    );
+
+  if (attachment) {
+    await interaction.editReply({ embeds: [embed], files: [attachment], components: [row] });
   } else {
-    await interaction.editReply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed], components: [row] });
   }
 }
