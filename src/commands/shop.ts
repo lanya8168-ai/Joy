@@ -1,11 +1,12 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { mergeCardImages } from '../utils/imageUtils.js';
 
 const PACKS = [
-  { id: '1', name: 'Starter Pack', cost: 100, cards: 1 },
-  { id: '2', name: 'Double Pack', cost: 200, cards: 2 },
-  { id: '3', name: 'Premium Pack', cost: 500, cards: 5 },
-  { id: '4', name: 'Ultimate Pack', cost: 1000, cards: 10 }
+  { id: '1', name: 'Sandy Shells', cost: 150, cards: 1 },
+  { id: '2', name: 'Tide Pool', cost: 300, cards: 2 },
+  { id: '3', name: 'Coral Reef', cost: 750, cards: 5 },
+  { id: '4', name: 'Deep Dive', cost: 1500, cards: 10 }
 ];
 
 export const data = new SlashCommandBuilder()
@@ -24,10 +25,10 @@ export const data = new SlashCommandBuilder()
           .setDescription('Pack type to buy')
           .setRequired(true)
           .addChoices(
-            { name: 'Starter Pack - 100 coins (1 card)', value: '1' },
-            { name: 'Double Pack - 200 coins (2 cards)', value: '2' },
-            { name: 'Premium Pack - 500 coins (5 cards)', value: '3' },
-            { name: 'Ultimate Pack - 1000 coins (10 cards)', value: '4' }
+            { name: 'Sandy Shells - 150 coins (1 card)', value: '1' },
+            { name: 'Tide Pool - 300 coins (2 cards)', value: '2' },
+            { name: 'Coral Reef - 750 coins (5 cards)', value: '3' },
+            { name: 'Deep Dive - 1500 coins (10 cards)', value: '4' }
           )));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -162,8 +163,22 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   }
 
   const cardsInfo = cardsList
-    .map((card: any) => `• **${card.name}** (${card.group}) - Rarity: ${card.rarity}`)
+    .map((card: any) => `• **${card.name}** (${card.group}) • \`${card.cardcode}\``)
     .join('\n');
+
+  let attachment = null;
+  try {
+    const imageUrls = cardsList
+      .map((card: any) => card.image_url)
+      .filter((url: string) => url);
+
+    if (imageUrls.length > 0) {
+      const mergedImageBuffer = await mergeCardImages(imageUrls);
+      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'pack_cards.png' });
+    }
+  } catch (error) {
+    console.error('Error merging images:', error);
+  }
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
@@ -183,5 +198,10 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     )
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  if (attachment) {
+    embed.setImage('attachment://pack_cards.png');
+    await interaction.reply({ embeds: [embed], files: [attachment] });
+  } else {
+    await interaction.reply({ embeds: [embed] });
+  }
 }

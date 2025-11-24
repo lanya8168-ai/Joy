@@ -4,7 +4,7 @@ import { formatCooldown } from '../utils/cooldowns.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 import { getRandomRarity } from '../utils/cards.js';
 
-const WEEKLY_REWARD = 300;
+const WEEKLY_REWARD = 1500;
 const WEEKLY_COOLDOWN_HOURS = 168;
 
 export const data = new SlashCommandBuilder()
