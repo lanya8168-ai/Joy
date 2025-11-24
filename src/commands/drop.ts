@@ -94,7 +94,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const description = `**Idol:** ${selectedCard.name}\n**Group:** ${selectedCard.group}\n**Era:** ${selectedCard.era || 'N/A'}\n**Rarity:** ${getRarityEmoji(selectedCard.rarity)} ${selectedCard.rarity}\n**Card code:** ${selectedCard.cardcode}`;
+  const description = `**Idol:** ${selectedCard.name}\n**Group:** ${selectedCard.group}\n**Era:** ${selectedCard.era || 'N/A'}\n**Rarity:** ${selectedCard.rarity}\n**Card code:** ${selectedCard.cardcode}`;
 
   const embed = new EmbedBuilder()
     .setColor(getRarityColor(selectedCard.rarity))
