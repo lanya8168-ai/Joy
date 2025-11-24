@@ -1,56 +1,72 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
-function getRarityColor(rarity: number): number {
-  const colors: { [key: number]: number } = {
-    1: 0xcccccc,
-    2: 0x66ff66,
-    3: 0x0066ff,
-    4: 0xff00ff,
-    5: 0xffff00
-  };
-  return colors[rarity] || 0xffffff;
-}
+const CARDS_PER_PAGE = 5;
 
 export const data = new SlashCommandBuilder()
   .setName('cardid')
-  .setDescription('Look up a card by code and see its database ID')
-  .addStringOption(option =>
-    option.setName('cardcode')
-      .setDescription('Card code (e.g., BP001)')
-      .setRequired(true));
+  .setDescription('View all card IDs with pagination')
+  .addIntegerOption(option =>
+    option.setName('page')
+      .setDescription('Page number (default: 1)')
+      .setRequired(false)
+      .setMinValue(1));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
-  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
+  const page = interaction.options.getInteger('page') || 1;
+  const userId = interaction.user.id;
 
-  const { data: card, error } = await supabase
+  const { data: allCards } = await supabase
     .from('cards')
     .select('*')
-    .eq('cardcode', cardcode)
-    .single();
+    .order('card_id', { ascending: true });
 
-  if (error || !card) {
-    await interaction.editReply({ content: `❌ Card with code **${cardcode}** not found!` });
+  if (!allCards || allCards.length === 0) {
+    await interaction.editReply({ content: '❌ No cards available yet!' });
     return;
   }
 
-  const description = `**${card.name}** (${card.group})\n${card.era || 'N/A'} • \`${card.cardcode}\``;
+  // Calculate pagination
+  const totalPages = Math.ceil(allCards.length / CARDS_PER_PAGE);
+  const validPage = Math.max(1, Math.min(page, totalPages));
+  const startIndex = (validPage - 1) * CARDS_PER_PAGE;
+  const endIndex = startIndex + CARDS_PER_PAGE;
+  const pageCards = allCards.slice(startIndex, endIndex);
+
+  const cardList = pageCards
+    .map((card: any) => {
+      return `**ID: ${card.card_id}** • ${card.name} (${card.group}) • \`${card.cardcode}\` • Rarity: ${card.rarity}`;
+    })
+    .join('\n');
 
   const embed = new EmbedBuilder()
-    .setColor(getRarityColor(card.rarity))
-    .setTitle('🎴 Card ID Lookup')
-    .setDescription(description)
-    .addFields(
-      { name: 'Card ID', value: `\`${card.card_id}\``, inline: true }
-    )
-    .setFooter({ text: `Rarity: ${card.rarity}/5 • Droppable: ${card.droppable ? 'Yes' : 'No'}` })
+    .setColor(0x00d4ff)
+    .setTitle('🎴 All Card IDs')
+    .setDescription(cardList)
+    .setFooter({ text: `Page ${validPage} / ${totalPages}` })
     .setTimestamp();
 
-  if (card.image_url) {
-    embed.setImage(card.image_url);
-  }
+  // Create pagination buttons
+  const row = new ActionRowBuilder<ButtonBuilder>()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(`cardid_prev_${userId}`)
+        .setLabel('← Previous')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(validPage === 1),
+      new ButtonBuilder()
+        .setCustomId(`cardid_page`)
+        .setLabel(`${validPage} / ${totalPages}`)
+        .setStyle(ButtonStyle.Primary)
+        .setDisabled(true),
+      new ButtonBuilder()
+        .setCustomId(`cardid_next_${userId}`)
+        .setLabel('Next →')
+        .setStyle(ButtonStyle.Secondary)
+        .setDisabled(validPage === totalPages)
+    );
 
-  await interaction.editReply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed], components: [row] });
 }
