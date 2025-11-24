@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 
-export async function mergeCardImages(imageUrls: string[]): Promise<Buffer> {
+export async function mergeCardImages(imageUrls: string[], columns?: number): Promise<Buffer> {
   try {
     const imageBuffers = await Promise.all(
       imageUrls.map(async (url) => {
@@ -37,21 +37,32 @@ export async function mergeCardImages(imageUrls: string[]): Promise<Buffer> {
       )
     );
 
-    const totalWidth = (CARD_WIDTH * resizedImages.length) + (SPACING * (resizedImages.length - 1));
+    // Determine layout: grid or single row
+    const cardsPerRow = columns || resizedImages.length;
+    const rows = Math.ceil(resizedImages.length / cardsPerRow);
+    
+    const totalWidth = (CARD_WIDTH * cardsPerRow) + (SPACING * (cardsPerRow - 1));
+    const totalHeight = (CARD_HEIGHT * rows) + (SPACING * (rows - 1));
+
     const canvas = sharp({
       create: {
         width: totalWidth,
-        height: CARD_HEIGHT,
+        height: totalHeight,
         channels: 4,
         background: { r: 0, g: 0, b: 0, alpha: 0 }
       }
     });
 
-    const compositeImages = resizedImages.map((buffer, index) => ({
-      input: buffer,
-      left: index * (CARD_WIDTH + SPACING),
-      top: 0
-    }));
+    const compositeImages = resizedImages.map((buffer, index) => {
+      const row = Math.floor(index / cardsPerRow);
+      const col = index % cardsPerRow;
+      
+      return {
+        input: buffer,
+        left: col * (CARD_WIDTH + SPACING),
+        top: row * (CARD_HEIGHT + SPACING)
+      };
+    });
 
     return await canvas.composite(compositeImages).png().toBuffer();
   } catch (error) {

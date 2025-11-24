@@ -3,10 +3,10 @@ import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 
 const PACKS = [
-  { id: '1', name: 'Sandy Shells', cost: 150, cards: 1 },
-  { id: '2', name: 'Tide Pool', cost: 300, cards: 2 },
-  { id: '3', name: 'Coral Reef', cost: 750, cards: 5 },
-  { id: '4', name: 'Deep Dive', cost: 1500, cards: 10 }
+  { id: '1', name: 'Sandy Shells', cost: 200, cards: 1 },
+  { id: '2', name: 'Tide Pool', cost: 400, cards: 2 },
+  { id: '3', name: 'Coral Reef', cost: 1000, cards: 5 },
+  { id: '4', name: 'Deep Dive', cost: 2000, cards: 10 }
 ];
 
 export const data = new SlashCommandBuilder()
@@ -25,10 +25,10 @@ export const data = new SlashCommandBuilder()
           .setDescription('Pack type to buy')
           .setRequired(true)
           .addChoices(
-            { name: 'Sandy Shells - 150 coins (1 card)', value: '1' },
-            { name: 'Tide Pool - 300 coins (2 cards)', value: '2' },
-            { name: 'Coral Reef - 750 coins (5 cards)', value: '3' },
-            { name: 'Deep Dive - 1500 coins (10 cards)', value: '4' }
+            { name: 'Sandy Shells - 200 coins (1 card)', value: '1' },
+            { name: 'Tide Pool - 400 coins (2 cards)', value: '2' },
+            { name: 'Coral Reef - 1000 coins (5 cards)', value: '3' },
+            { name: 'Deep Dive - 2000 coins (10 cards)', value: '4' }
           )));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -173,7 +173,8 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
       .filter((url: string) => url);
 
     if (imageUrls.length > 0) {
-      const mergedImageBuffer = await mergeCardImages(imageUrls);
+      const columns = pack.cards === 10 ? 5 : undefined;
+      const mergedImageBuffer = await mergeCardImages(imageUrls, columns);
       attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'pack_cards.png' });
     }
   } catch (error) {
