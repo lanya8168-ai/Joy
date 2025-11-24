@@ -94,21 +94,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  const description = `**Idol:** ${selectedCard.name}\n**Group:** ${selectedCard.group}\n**Era:** ${selectedCard.era || 'N/A'}\n**Rarity:** ${getRarityEmoji(selectedCard.rarity)} ${selectedCard.rarity}\n**Card code:** ${selectedCard.cardcode}`;
+
   const embed = new EmbedBuilder()
     .setColor(getRarityColor(selectedCard.rarity))
-    .setTitle('🎴 Card Drop!')
-    .setDescription(`You opened a FREE card pack!`)
-    .addFields(
-      { name: 'Card Name', value: selectedCard.name, inline: true },
-      { name: 'Group', value: selectedCard.group, inline: true },
-      { name: 'Rarity', value: `${getRarityEmoji(selectedCard.rarity)} ${selectedCard.rarity}`, inline: true },
-      { name: 'Next Drop', value: `In 2 minutes`, inline: true }
-    )
+    .setAuthor({ 
+      name: interaction.user.username, 
+      iconURL: interaction.user.avatarURL() || undefined 
+    })
+    .setTitle('🎣 You fished and found..')
+    .setDescription(description)
+    .setFooter({ text: 'Card dropped' })
     .setTimestamp();
-
-  if (selectedCard.era) {
-    embed.addFields({ name: 'Era', value: selectedCard.era, inline: true });
-  }
 
   if (selectedCard.image_url) {
     embed.setImage(selectedCard.image_url);
