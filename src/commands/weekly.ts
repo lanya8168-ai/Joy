@@ -1,6 +1,8 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
+import { mergeCardImages } from '../utils/imageUtils.js';
+import { getRandomRarity } from '../utils/cards.js';
 
 const WEEKLY_REWARD = 300;
 const WEEKLY_COOLDOWN_HOURS = 168;
@@ -25,7 +27,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const result = data as any;
 
-  if (!result.success) {
+  if (!result || !result.success) {
     if (result.error === 'user_not_found') {
       await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
       return;
@@ -46,15 +48,88 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  // Get all droppable cards
+  const { data: allCards } = await supabase
+    .from('cards')
+    .select('*')
+    .eq('droppable', true);
+
+  if (!allCards || allCards.length === 0) {
+    const embed = new EmbedBuilder()
+      .setColor(0x00ff00)
+      .setTitle('✅ Weekly Reward Claimed!')
+      .setDescription(`You received **${result.reward} coins**!\n\n*No cards available yet.*`)
+      .setTimestamp();
+
+    await interaction.reply({ embeds: [embed] });
+    return;
+  }
+
+  // Select 4 random cards
+  const selectedCards = [];
+  for (let i = 0; i < 4; i++) {
+    const rarity = getRandomRarity();
+    const cardsOfRarity = allCards.filter(c => c.rarity === rarity);
+    const card = cardsOfRarity.length > 0
+      ? cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)]
+      : allCards[Math.floor(Math.random() * allCards.length)];
+    selectedCards.push(card);
+
+    // Add to inventory
+    const { data: existingItem } = await supabase
+      .from('inventory')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('card_id', card.card_id)
+      .single();
+
+    if (existingItem) {
+      await supabase
+        .from('inventory')
+        .update({ quantity: existingItem.quantity + 1 })
+        .eq('id', existingItem.id);
+    } else {
+      await supabase
+        .from('inventory')
+        .insert({
+          user_id: userId,
+          card_id: card.card_id,
+          quantity: 1
+        });
+    }
+  }
+
+  // Create card info description
+  const cardInfos = selectedCards.map((card, index) => 
+    `**Card ${index + 1}:** ${card.name} (${card.group}) - ${card.era || 'N/A'} - Rarity ${card.rarity} - \`${card.cardcode}\``
+  ).join('\n');
+
+  const description = `You received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`;
+
+  let attachment = null;
+  try {
+    const imageUrls = selectedCards
+      .filter(card => card.image_url)
+      .map(card => card.image_url);
+
+    if (imageUrls.length > 0) {
+      const mergedImageBuffer = await mergeCardImages(imageUrls);
+      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'weekly_cards.png' });
+    }
+  } catch (error) {
+    console.error('Error merging images:', error);
+  }
+
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
     .setTitle('✅ Weekly Reward Claimed!')
-    .setDescription(`You received **${result.reward} coins**!`)
-    .addFields(
-      { name: 'Previous Balance', value: `${result.old_balance} coins`, inline: true },
-      { name: 'New Balance', value: `${result.new_balance} coins`, inline: true }
-    )
+    .setDescription(description)
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  if (attachment) {
+    embed.setImage('attachment://weekly_cards.png');
+    await interaction.reply({ embeds: [embed], files: [attachment] });
+  } else {
+    await interaction.reply({ embeds: [embed] });
+  }
 }

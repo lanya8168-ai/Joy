@@ -1,6 +1,6 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
-import { getRarityEmoji } from '../utils/cards.js';
+import { mergeCardImages } from '../utils/imageUtils.js';
 
 export const data = new SlashCommandBuilder()
   .setName('inventory')
@@ -26,7 +26,7 @@ export const data = new SlashCommandBuilder()
       .setDescription('Filter by group name')
       .setRequired(false));
 
-const CARDS_PER_PAGE = 10;
+const CARDS_PER_PAGE = 3;
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
@@ -54,7 +54,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         name,
         group,
         era,
-        rarity
+        rarity,
+        cardcode,
+        image_url
       )
     `)
     .eq('user_id', userId);
@@ -106,17 +108,31 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const pageCards = filteredInventory.slice(startIndex, endIndex);
 
   const cardList = pageCards
-    .map((item: any) => {
+    .map((item: any, index: number) => {
       const card = item.cards;
       const eraText = card.era ? ` - ${card.era}` : '';
-      return `${getRarityEmoji(card.rarity)} **${card.name}** (${card.group}${eraText}) x${item.quantity}`;
+      return `**Card ${index + 1}:** ${card.name} (${card.group}${eraText}) - Rarity ${card.rarity} - \`${card.cardcode}\` - Qty: ${item.quantity}`;
     })
     .join('\n');
 
   const totalCards = inventory.reduce((sum: number, item: any) => sum + item.quantity, 0);
   const filterSummary = rarityFilter || groupFilter 
-    ? `\n*(Filtered: ${rarityFilter ? `Rarity ${rarityFilter}` : ''} ${groupFilter ? `Group: ${groupFilter}` : ''})*`
+    ? `\n\n*(Filtered: ${rarityFilter ? `Rarity ${rarityFilter}` : ''} ${groupFilter ? `Group: ${groupFilter}` : ''})*`
     : '';
+
+  let attachment = null;
+  try {
+    const imageUrls = pageCards
+      .map((item: any) => item.cards.image_url)
+      .filter((url: string) => url);
+
+    if (imageUrls.length > 0) {
+      const mergedImageBuffer = await mergeCardImages(imageUrls);
+      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'inventory_cards.png' });
+    }
+  } catch (error) {
+    console.error('Error merging images:', error);
+  }
 
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
@@ -130,5 +146,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     )
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  if (attachment) {
+    embed.setImage('attachment://inventory_cards.png');
+    await interaction.reply({ embeds: [embed], files: [attachment] });
+  } else {
+    await interaction.reply({ embeds: [embed] });
+  }
 }
