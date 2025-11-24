@@ -4,6 +4,7 @@
 A Discord bot that allows users to collect K-pop trading cards with an economy system, marketplace, and admin management tools. Built with Discord.js v14 and Supabase for persistent storage.
 
 ## Recent Changes
+- **2025-11-24**: Added Render deployment support with health check endpoint and Uptime Robot monitoring configuration
 - **2025-11-23**: Reformatted /drop embed with user author, "You fished and found.." title, and clean field display (Idol, Group, Era, Rarity, Card code), added drop cooldown to /cooldowns
 - **2025-11-23**: Fixed /drop to only select droppable cards, added pagination and filters to /inventory (page, rarity, group)
 - **2025-11-23**: Added cardcode and droppable fields to cards table, updated /addcard and /editcard commands
@@ -45,11 +46,15 @@ A Discord bot that allows users to collect K-pop trading cards with an economy s
 - **Language**: TypeScript with Node.js 20
 - **Framework**: Discord.js v14
 - **Database**: Supabase (PostgreSQL) with atomic RPC functions
+- **Deployment**: Render (24/7 hosting) with Uptime Robot monitoring
+- **Health Check**: Built-in HTTP server on port 3000 for monitoring
 - **Structure**:
-  - `src/index.ts` - Bot initialization
+  - `src/index.ts` - Bot initialization with health check server
   - `src/commands/` - Slash command handlers
   - `src/database/` - Supabase client, schema, and RPC functions
   - `src/utils/` - Helper functions (cooldowns, card rarities)
+  - `render.yaml` - Render deployment configuration
+  - `DEPLOYMENT.md` - Complete deployment guide for Render and Uptime Robot
 
 ## Security Features
 - **Atomic Transactions**: All coin/inventory operations use PostgreSQL RPC functions with row-level locking
@@ -59,5 +64,16 @@ A Discord bot that allows users to collect K-pop trading cards with an economy s
 
 ## Environment Variables
 - `DISCORD_TOKEN` - Discord bot token from Developer Portal
+- `DISCORD_CLIENT_ID` - Discord application/client ID
 - `SUPABASE_URL` - Supabase project URL
 - `SUPABASE_KEY` - Supabase anon/public key
+- `PORT` - (Optional) HTTP server port, defaults to 3000
+- `NODE_ENV` - (Optional) Environment mode, set to "production" on Render
+
+## Deployment
+The bot is configured for deployment to Render with Uptime Robot monitoring. See `DEPLOYMENT.md` for detailed deployment instructions including:
+- Pushing code to GitHub
+- Creating a Render web service
+- Setting up environment variables
+- Configuring Uptime Robot for 24/7 monitoring
+- Troubleshooting common issues
