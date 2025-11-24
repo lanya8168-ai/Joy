@@ -47,7 +47,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   // Defer the reply FIRST to allow time for database operations
-  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+  await interaction.deferReply();
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
     await interaction.editReply({ content: '❌ You need Administrator permission to use this command!' });
@@ -99,15 +99,35 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  const fields = [];
+  
+  if (name) {
+    fields.push({ name: 'Name', value: `${existingCard.name} → ${name}`, inline: false });
+  }
+  if (group) {
+    fields.push({ name: 'Group', value: `${existingCard.group} → ${group}`, inline: false });
+  }
+  if (cardcode) {
+    fields.push({ name: 'Card Code', value: `${existingCard.cardcode} → ${cardcode}`, inline: false });
+  }
+  if (era) {
+    fields.push({ name: 'Era', value: `${existingCard.era || 'None'} → ${era}`, inline: false });
+  }
+  if (rarity) {
+    fields.push({ name: 'Rarity', value: `${existingCard.rarity} → ${rarity}`, inline: false });
+  }
+  if (droppable !== null) {
+    fields.push({ name: 'Droppable', value: `${existingCard.droppable ? 'Yes' : 'No'} → ${droppable ? 'Yes' : 'No'}`, inline: false });
+  }
+  if (imageUrl) {
+    fields.push({ name: 'Image URL', value: 'Updated', inline: false });
+  }
+
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
     .setTitle('✏️ Card Updated!')
-    .setDescription(`Successfully updated card ID ${cardId}`)
-    .addFields(
-      { name: 'Previous Name', value: existingCard.name, inline: true },
-      { name: 'New Name', value: name || existingCard.name, inline: true },
-      { name: 'Rarity', value: `${rarity || existingCard.rarity}`, inline: true }
-    )
+    .setDescription(`Successfully updated card ID **${cardId}** (${existingCard.name})`)
+    .addFields(...fields)
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });
