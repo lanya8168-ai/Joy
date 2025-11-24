@@ -60,7 +60,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
       .setTitle('Daily Reward Claimed!')
-      .setDescription(`<:2_shell:1436124721413357770> You received **${result.reward} coins**!\n\n*No legendary cards available yet.*`)
+      .setDescription(`🐚 You received **${result.reward} coins**!\n\n*No legendary cards available yet.*`)
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
@@ -92,12 +92,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       });
   }
 
-  const cardInfo = `**Idol:** ${selectedCard.name}\n**Group:** ${selectedCard.group}\n**Era:** ${selectedCard.era || 'N/A'}\n**Rarity:** 5\n**Card code:** \`${selectedCard.cardcode}\``;
+  const cardInfo = `**${selectedCard.name}** (${selectedCard.group})\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
     .setTitle('Daily Reward Claimed!')
-    .setDescription(`<:2_shell:1436124721413357770> You received **${dailyReward} coins**!\n\n**You also received:**\n${cardInfo}`)
+    .setDescription(`🐚 You received **${dailyReward} coins**!\n\n- You also received **${cardInfo}**`)
     .setTimestamp();
 
   if (selectedCard.image_url) {

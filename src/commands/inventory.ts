@@ -110,8 +110,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const cardList = pageCards
     .map((item: any, index: number) => {
       const card = item.cards;
-      const eraText = card.era ? ` - ${card.era}` : '';
-      return `**Card ${index + 1}:** ${card.name} (${card.group}${eraText}) - Rarity ${card.rarity} - \`${card.cardcode}\` - Qty: ${item.quantity}`;
+      const eraText = card.era ? ` • ${card.era}` : '';
+      return `**Card ${index + 1}:** ${card.name} (${card.group}${eraText}) • \`${card.cardcode}\` • Qty: ${item.quantity}`;
     })
     .join('\n');
 

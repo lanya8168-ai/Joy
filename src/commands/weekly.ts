@@ -101,7 +101,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Create card info description
   const cardInfos = selectedCards.map((card, index) => 
-    `**Card ${index + 1}:** ${card.name} (${card.group}) - ${card.era || 'N/A'} - Rarity ${card.rarity} - \`${card.cardcode}\``
+    `**Card ${index + 1}:** ${card.name} (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``
   ).join('\n');
 
   const description = `You received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`;
