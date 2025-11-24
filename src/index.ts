@@ -138,12 +138,12 @@ function startHealthCheckServer() {
   const server = createServer((req, res) => {
     if (req.url === '/health' || req.url === '/') {
       const isReady = client.isReady();
-      const status = isReady ? 200 : 503;
       
-      res.writeHead(status, { 'Content-Type': 'application/json' });
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
-        status: isReady ? 'ok' : 'not_ready',
-        bot: isReady ? client.user?.tag : 'not logged in',
+        status: 'ok',
+        ready: isReady,
+        bot: isReady ? client.user?.tag : 'starting up',
         servers: client.guilds.cache.size,
         uptime: process.uptime(),
         timestamp: new Date().toISOString()
@@ -154,7 +154,7 @@ function startHealthCheckServer() {
     }
   });
 
-  server.listen(PORT, '0.0.0.0', () => {
+  server.listen(Number(PORT), '0.0.0.0', () => {
     console.log(`🏥 Health check server running on port ${PORT}`);
     console.log(`   Access at: http://localhost:${PORT}/health`);
   });
