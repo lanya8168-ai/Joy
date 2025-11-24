@@ -86,12 +86,14 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
 }
 
 async function handleBuy(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
+  
   const userId = interaction.user.id;
   const packId = interaction.options.getString('pack', true);
 
   const pack = PACKS.find(p => p.id === packId);
   if (!pack) {
-    await interaction.reply({ content: '❌ Invalid pack!', ephemeral: true });
+    await interaction.editReply({ content: '❌ Invalid pack!' });
     return;
   }
 
@@ -102,14 +104,13 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.editReply({ content: '❌ Please use `/start` first to create your account!' });
     return;
   }
 
   if (user.coins < pack.cost) {
-    await interaction.reply({ 
-      content: `❌ You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.`, 
-      ephemeral: true 
+    await interaction.editReply({ 
+      content: `❌ You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
     });
     return;
   }
@@ -119,9 +120,8 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .select('*');
 
   if (!allCards || allCards.length === 0) {
-    await interaction.reply({ 
-      content: '❌ No cards available yet! Ask an admin to add cards.', 
-      ephemeral: true 
+    await interaction.editReply({ 
+      content: '❌ No cards available yet! Ask an admin to add cards.' 
     });
     return;
   }
@@ -163,7 +163,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   }
 
   const cardsInfo = cardsList
-    .map((card: any) => `• **${card.name}** (${card.group}) • \`${card.cardcode}\``)
+    .map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``)
     .join('\n');
 
   let attachment = null;
@@ -201,8 +201,8 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   if (attachment) {
     embed.setImage('attachment://pack_cards.png');
-    await interaction.reply({ embeds: [embed], files: [attachment] });
+    await interaction.editReply({ embeds: [embed], files: [attachment] });
   } else {
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
   }
 }
