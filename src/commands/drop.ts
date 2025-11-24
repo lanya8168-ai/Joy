@@ -22,8 +22,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Check cooldown
-  if (user.last_drop) {
+  // Check cooldown (skip for whitelisted user)
+  if (userId !== '1403958587843149937' && user.last_drop) {
     const lastDropTime = new Date(user.last_drop).getTime();
     const nowTime = Date.now();
     const minutesPassed = (nowTime - lastDropTime) / (1000 * 60);
