@@ -9,14 +9,9 @@ export const data = new SlashCommandBuilder()
       .setDescription('User to gift to')
       .setRequired(true))
   .addStringOption(option =>
-    option.setName('cardcode')
-      .setDescription('Card code to gift (e.g., BP001)')
-      .setRequired(true))
-  .addIntegerOption(option =>
-    option.setName('quantity')
-      .setDescription('Number of copies to gift')
-      .setRequired(true)
-      .setMinValue(1));
+    option.setName('cards')
+      .setDescription('Card codes separated by commas (e.g., BP001, LSCW#501, BP002)')
+      .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -24,8 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const senderUserId = interaction.user.id;
   const receiverUser = interaction.options.getUser('user', true);
   const receiverUserId = receiverUser.id;
-  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
-  const quantity = interaction.options.getInteger('quantity', true);
+  const cardsInput = interaction.options.getString('cards', true);
 
   // Check sender exists
   const { data: sender } = await supabase
@@ -57,73 +51,96 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Find the card
-  const { data: card } = await supabase
-    .from('cards')
-    .select('*')
-    .eq('cardcode', cardcode)
-    .single();
+  // Parse card codes
+  const cardcodes = cardsInput.split(',').map(c => c.trim().toUpperCase());
+  const giftedCards = [];
+  const failedCards = [];
 
-  if (!card) {
-    await interaction.editReply({ content: `❌ Card with code **${cardcode}** not found!` });
+  for (const cardcode of cardcodes) {
+    // Find the card
+    const { data: card } = await supabase
+      .from('cards')
+      .select('*')
+      .eq('cardcode', cardcode)
+      .single();
+
+    if (!card) {
+      failedCards.push(`${cardcode} (not found)`);
+      continue;
+    }
+
+    // Check sender has the card
+    const { data: senderInventory } = await supabase
+      .from('inventory')
+      .select('*')
+      .eq('user_id', senderUserId)
+      .eq('card_id', card.card_id)
+      .single();
+
+    if (!senderInventory || senderInventory.quantity < 1) {
+      failedCards.push(`${cardcode} (don't own)`);
+      continue;
+    }
+
+    // Update sender inventory
+    const newSenderQuantity = senderInventory.quantity - 1;
+    if (newSenderQuantity > 0) {
+      await supabase
+        .from('inventory')
+        .update({ quantity: newSenderQuantity })
+        .eq('id', senderInventory.id);
+    } else {
+      await supabase
+        .from('inventory')
+        .delete()
+        .eq('id', senderInventory.id);
+    }
+
+    // Update receiver inventory
+    const { data: receiverInventory } = await supabase
+      .from('inventory')
+      .select('*')
+      .eq('user_id', receiverUserId)
+      .eq('card_id', card.card_id)
+      .single();
+
+    if (receiverInventory) {
+      await supabase
+        .from('inventory')
+        .update({ quantity: receiverInventory.quantity + 1 })
+        .eq('id', receiverInventory.id);
+    } else {
+      await supabase
+        .from('inventory')
+        .insert({
+          user_id: receiverUserId,
+          card_id: card.card_id,
+          quantity: 1
+        });
+    }
+
+    giftedCards.push(`**${card.name}** (\`${card.cardcode}\`)`);
+  }
+
+  let description = '';
+  if (giftedCards.length > 0) {
+    description = `✅ Gifted to ${receiverUser.username}:\n${giftedCards.join('\n')}`;
+  }
+
+  if (failedCards.length > 0) {
+    if (description) description += '\n\n';
+    description += `❌ Failed:\n${failedCards.join('\n')}`;
+  }
+
+  if (!description) {
+    await interaction.editReply({ content: '❌ No cards were gifted!' });
     return;
-  }
-
-  // Check sender has the card and quantity
-  const { data: senderInventory } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', senderUserId)
-    .eq('card_id', card.card_id)
-    .single();
-
-  if (!senderInventory || senderInventory.quantity < quantity) {
-    const available = senderInventory?.quantity || 0;
-    await interaction.editReply({ content: `❌ You only have **${available}** copy/copies of this card, but tried to gift **${quantity}**!` });
-    return;
-  }
-
-  // Update sender inventory
-  const newSenderQuantity = senderInventory.quantity - quantity;
-  if (newSenderQuantity > 0) {
-    await supabase
-      .from('inventory')
-      .update({ quantity: newSenderQuantity })
-      .eq('id', senderInventory.id);
-  } else {
-    await supabase
-      .from('inventory')
-      .delete()
-      .eq('id', senderInventory.id);
-  }
-
-  // Update receiver inventory
-  const { data: receiverInventory } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', receiverUserId)
-    .eq('card_id', card.card_id)
-    .single();
-
-  if (receiverInventory) {
-    await supabase
-      .from('inventory')
-      .update({ quantity: receiverInventory.quantity + quantity })
-      .eq('id', receiverInventory.id);
-  } else {
-    await supabase
-      .from('inventory')
-      .insert({
-        user_id: receiverUserId,
-        card_id: card.card_id,
-        quantity: quantity
-      });
   }
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
     .setTitle('🎁 Gift Sent!')
-    .setDescription(`You gifted **${quantity}** copy/copies of **${card.name}** (\`${card.cardcode}\`) to ${receiverUser.username}!`)
+    .setDescription(description)
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });
