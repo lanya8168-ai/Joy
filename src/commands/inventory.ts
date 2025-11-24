@@ -29,6 +29,7 @@ export const data = new SlashCommandBuilder()
 const CARDS_PER_PAGE = 3;
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
   const userId = interaction.user.id;
   const page = interaction.options.getInteger('page') || 1;
   const rarityFilter = interaction.options.getInteger('rarity');
@@ -41,7 +42,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.editReply({ content: '❌ Please use `/start` first to create your account!' });
     return;
   }
 
@@ -71,7 +72,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .addFields({ name: 'Coins', value: `${user.coins}` })
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
     return;
   }
 
@@ -96,7 +97,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .addFields({ name: 'Coins', value: `${user.coins}` })
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
     return;
   }
 
@@ -148,8 +149,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (attachment) {
     embed.setImage('attachment://inventory_cards.png');
-    await interaction.reply({ embeds: [embed], files: [attachment] });
+    await interaction.editReply({ embeds: [embed], files: [attachment] });
   } else {
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
   }
 }

@@ -12,6 +12,7 @@ export const data = new SlashCommandBuilder()
   .setDescription('Claim your weekly coin reward!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
   const userId = interaction.user.id;
 
   const { data, error } = await supabase.rpc('claim_weekly_reward', {
@@ -21,7 +22,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.reply({ content: '❌ Error claiming weekly reward. Please try again!', ephemeral: true });
+    await interaction.editReply({ content: '❌ Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -29,7 +30,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result || !result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+      await interaction.editReply({ content: '❌ Please use `/start` first to create your account!' });
       return;
     }
 
@@ -40,11 +41,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`)
         .setTimestamp();
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.editReply({ embeds: [embed] });
       return;
     }
 
-    await interaction.reply({ content: '❌ Error claiming weekly reward. Please try again!', ephemeral: true });
+    await interaction.editReply({ content: '❌ Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -61,7 +62,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setDescription(`You received **${result.reward} coins**!\n\n*No cards available yet.*`)
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
     return;
   }
 
@@ -128,8 +129,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (attachment) {
     embed.setImage('attachment://weekly_cards.png');
-    await interaction.reply({ embeds: [embed], files: [attachment] });
+    await interaction.editReply({ embeds: [embed], files: [attachment] });
   } else {
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
   }
 }
