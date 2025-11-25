@@ -24,6 +24,10 @@ export const data = new SlashCommandBuilder()
   .addStringOption(option =>
     option.setName('group')
       .setDescription('Filter by group name')
+      .setRequired(false))
+  .addStringOption(option =>
+    option.setName('idol')
+      .setDescription('Filter by idol/member name')
       .setRequired(false));
 
 const CARDS_PER_PAGE = 3;
@@ -34,6 +38,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const page = interaction.options.getInteger('page') || 1;
   const rarityFilter = interaction.options.getInteger('rarity');
   const groupFilter = interaction.options.getString('group');
+  const idolFilter = interaction.options.getString('idol');
 
   const { data: user } = await supabase
     .from('users')
@@ -86,6 +91,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (groupFilter) {
     filteredInventory = filteredInventory.filter((item: any) => 
       item.cards.group.toLowerCase() === groupFilter.toLowerCase()
+    );
+  }
+
+  if (idolFilter) {
+    filteredInventory = filteredInventory.filter((item: any) =>
+      item.cards.name.toLowerCase() === idolFilter.toLowerCase()
     );
   }
 
