@@ -40,13 +40,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
-    .setTitle('🎉 Welcome to K-pop Card Collecting!')
-    .setDescription('Your journey begins now!')
+    .setTitle('🏝️ Welcome to K-pop Card Collecting!')
+    .setDescription('Your beach adventure begins now! 🌊')
     .addFields(
       { name: '💰 Starting Coins', value: '100', inline: true },
       { name: '🎴 Cards', value: '0', inline: true },
       { name: '\u200B', value: '\u200B' },
-      { name: '📋 Commands', value: '`/daily` - Daily coins\n`/weekly` - Weekly coins\n`/surf` - Surf for coins\n`/drop` - Open a card pack\n`/inventory` - View your cards\n`/shop` - Buy card packs\n`/mp` - Marketplace' }
+      { name: '📋 Commands', value: '🌅 `/daily` - Daily coins\n🌊 `/weekly` - Weekly coins\n🏄 `/surf` - Surf for coins\n🤿 `/drop` - Dive for cards\n📦 `/inventory` - View your collection\n🛒 `/shop` - Buy card packs\n🏪 `/mp` - Marketplace' }
     )
     .setTimestamp();
 

@@ -61,8 +61,8 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('🛒 Card Pack Shop')
-    .setDescription('Buy packs with your coins!')
+    .setTitle('🏖️ Card Pack Shop')
+    .setDescription('Buy packs with your shells! 🐚')
     .addFields(
       {
         name: '📦 Available Packs',

@@ -72,8 +72,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('💰 Coins Sent!')
-    .setDescription(`You sent **${amount} coins** to ${receiverUser.username}!\n\nYour new balance: **${sender.coins - amount} coins**`)
+    .setTitle('💸 Coins Sent!')
+    .setDescription(`🏖️ You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Your new balance: **${sender.coins - amount} coins**`)
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });

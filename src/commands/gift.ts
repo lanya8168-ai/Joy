@@ -105,7 +105,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const confirmEmbed = new EmbedBuilder()
     .setColor(0x87ceeb)
-    .setTitle('🏖️ Confirm Gift')
+    .setTitle('🎁 Confirm Beach Gift')
     .setDescription(`Send to ${receiverUser.username}?\n\n${confirmCards}`)
     .setTimestamp();
 

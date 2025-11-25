@@ -148,7 +148,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
-    .setTitle('📦 Your K-pop Card Collection')
+    .setTitle('🏖️ Your K-pop Card Collection')
     .setDescription(cardList)
     .setTimestamp();
 

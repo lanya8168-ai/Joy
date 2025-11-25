@@ -40,7 +40,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(getRarityColor(card.rarity))
-    .setTitle('🎴 Card Info')
+    .setTitle('🏖️ Card Info')
     .setDescription(description)
     .setFooter({ text: `Rarity: ${card.rarity}/5 • Droppable: ${card.droppable ? 'Yes' : 'No'}` })
     .setTimestamp();

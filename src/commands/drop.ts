@@ -102,9 +102,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       name: interaction.user.username, 
       iconURL: interaction.user.avatarURL() || undefined 
     })
-    .setTitle('🎣 You fished and found..')
+    .setTitle('🤿 You dove and found..')
     .setDescription(description)
-    .setFooter({ text: 'Card dropped' })
+    .setFooter({ text: '🏖️ Card dropped' })
     .setTimestamp();
 
   if (selectedCard.image_url) {

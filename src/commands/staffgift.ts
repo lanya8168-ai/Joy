@@ -1,5 +1,6 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { mergeCardImages } from '../utils/imageUtils.js';
 
 export const data = new SlashCommandBuilder()
   .setName('staffgift')
@@ -48,11 +49,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Parse card codes
   const cardcodes = cardsInput.split(',').map(c => c.trim().toUpperCase());
-  const giftedCards = [];
+  const cardsToGift = [];
   const failedCards = [];
 
+  // Fetch all cards and validate
   for (const cardcode of cardcodes) {
-    // Find the card
     const { data: card } = await supabase
       .from('cards')
       .select('*')
@@ -64,52 +65,63 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       continue;
     }
 
-    // Update receiver inventory
-    const { data: receiverInventory } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('user_id', receiverUserId)
-      .eq('card_id', card.card_id)
-      .single();
+    cardsToGift.push(card);
+  }
 
-    if (receiverInventory) {
-      await supabase
-        .from('inventory')
-        .update({ quantity: receiverInventory.quantity + 1 })
-        .eq('id', receiverInventory.id);
-    } else {
-      await supabase
-        .from('inventory')
-        .insert({
-          user_id: receiverUserId,
-          card_id: card.card_id,
-          quantity: 1
-        });
+  if (cardsToGift.length === 0) {
+    let errorMsg = '❌ No valid cards to gift!';
+    if (failedCards.length > 0) {
+      errorMsg += `\n${failedCards.join('\n')}`;
     }
-
-    giftedCards.push(`**${card.name}** (\`${card.cardcode}\`)`);
-  }
-
-  let description = '';
-  if (giftedCards.length > 0) {
-    description = `✅ Staff gifted to ${receiverUser.username}:\n${giftedCards.join('\n')}`;
-  }
-
-  if (failedCards.length > 0) {
-    if (description) description += '\n\n';
-    description += `❌ Failed:\n${failedCards.join('\n')}`;
-  }
-
-  if (!description) {
-    await interaction.editReply({ content: '❌ No cards were gifted!' });
+    await interaction.editReply({ content: errorMsg });
     return;
   }
 
-  const embed = new EmbedBuilder()
+  // Build confirmation embed
+  const confirmCards = cardsToGift
+    .map((card) => {
+      const rarityStars = '🌟'.repeat(card.rarity);
+      return `${card.name} (${card.group}) ${rarityStars} • \`${card.cardcode}\``;
+    })
+    .join('\n');
+
+  const confirmEmbed = new EmbedBuilder()
     .setColor(0xff00ff)
-    .setTitle('🎁 Staff Gift Sent!')
-    .setDescription(description)
+    .setTitle('🏖️ Confirm Staff Gift')
+    .setDescription(`Send to ${receiverUser.username}?\n\n${confirmCards}`)
     .setTimestamp();
 
-  await interaction.editReply({ embeds: [embed] });
+  // Merge images for preview
+  let attachment = null;
+  try {
+    const imageUrls = cardsToGift
+      .map((card: any) => card.image_url)
+      .filter((url: string) => url);
+
+    if (imageUrls.length > 0) {
+      const mergedImageBuffer = await mergeCardImages(imageUrls);
+      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'staffgift_preview.png' });
+      confirmEmbed.setImage('attachment://staffgift_preview.png');
+    }
+  } catch (error) {
+    console.error('Error merging images:', error);
+  }
+
+  const row = new ActionRowBuilder<ButtonBuilder>()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(`staffgift_confirm_${senderUserId}_${receiverUserId}`)
+        .setLabel('✅ Send Gift')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId(`staffgift_cancel_${senderUserId}`)
+        .setLabel('❌ Cancel')
+        .setStyle(ButtonStyle.Danger)
+    );
+
+  if (attachment) {
+    await interaction.editReply({ embeds: [confirmEmbed], files: [attachment], components: [row] });
+  } else {
+    await interaction.editReply({ embeds: [confirmEmbed], components: [row] });
+  }
 }

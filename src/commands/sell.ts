@@ -112,7 +112,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('💸 Cards Sold!')
+    .setTitle('🏖️ Cards Sold!')
     .setDescription(description)
     .addFields({ name: 'New Balance', value: `${user.coins + totalCoins} coins`, inline: true })
     .setTimestamp();
