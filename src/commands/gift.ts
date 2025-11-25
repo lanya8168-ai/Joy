@@ -1,5 +1,6 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { mergeCardImages } from '../utils/imageUtils.js';
 
 export const data = new SlashCommandBuilder()
   .setName('gift')
@@ -54,6 +55,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // Parse card codes
   const cardcodes = cardsInput.split(',').map(c => c.trim().toUpperCase());
   const giftedCards = [];
+  const giftedCardObjects = [];
   const failedCards = [];
 
   for (const cardcode of cardcodes) {
@@ -119,7 +121,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         });
     }
 
-    giftedCards.push(`**${card.name}** (\`${card.cardcode}\`)`);
+    const rarityStars = '⭐'.repeat(card.rarity);
+    giftedCards.push(`${card.name} (${card.group}) ${rarityStars} • \`${card.cardcode}\``);
+    giftedCardObjects.push(card);
   }
 
   let description = '';
@@ -143,5 +147,25 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(description)
     .setTimestamp();
 
-  await interaction.editReply({ embeds: [embed] });
+  // Merge images if cards were gifted
+  let attachment = null;
+  try {
+    const imageUrls = giftedCardObjects
+      .map((card: any) => card.image_url)
+      .filter((url: string) => url);
+
+    if (imageUrls.length > 0) {
+      const mergedImageBuffer = await mergeCardImages(imageUrls);
+      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'gifted_cards.png' });
+      embed.setImage('attachment://gifted_cards.png');
+    }
+  } catch (error) {
+    console.error('Error merging images:', error);
+  }
+
+  if (attachment) {
+    await interaction.editReply({ embeds: [embed], files: [attachment] });
+  } else {
+    await interaction.editReply({ embeds: [embed] });
+  }
 }

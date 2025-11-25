@@ -5,6 +5,10 @@ import { mergeCardImages } from '../utils/imageUtils.js';
 export const data = new SlashCommandBuilder()
   .setName('inventory')
   .setDescription('View your K-pop card collection')
+  .addUserOption(option =>
+    option.setName('user')
+      .setDescription('User to check inventory for (default: yourself)')
+      .setRequired(false))
   .addIntegerOption(option =>
     option.setName('page')
       .setDescription('Page number (default: 1)')
@@ -34,7 +38,8 @@ const CARDS_PER_PAGE = 3;
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
-  const userId = interaction.user.id;
+  const targetUser = interaction.options.getUser('user');
+  const userId = targetUser ? targetUser.id : interaction.user.id;
   const page = interaction.options.getInteger('page') || 1;
   const rarityFilter = interaction.options.getInteger('rarity');
   const groupFilter = interaction.options.getString('group');
