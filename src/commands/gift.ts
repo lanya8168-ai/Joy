@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 
@@ -54,12 +54,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Parse card codes
   const cardcodes = cardsInput.split(',').map(c => c.trim().toUpperCase());
-  const giftedCards = [];
-  const giftedCardObjects = [];
+  const cardsToGift = [];
   const failedCards = [];
 
+  // Fetch all cards and validate
   for (const cardcode of cardcodes) {
-    // Find the card
     const { data: card } = await supabase
       .from('cards')
       .select('*')
@@ -84,88 +83,63 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       continue;
     }
 
-    // Update sender inventory
-    const newSenderQuantity = senderInventory.quantity - 1;
-    if (newSenderQuantity > 0) {
-      await supabase
-        .from('inventory')
-        .update({ quantity: newSenderQuantity })
-        .eq('id', senderInventory.id);
-    } else {
-      await supabase
-        .from('inventory')
-        .delete()
-        .eq('id', senderInventory.id);
+    cardsToGift.push({ card, senderInventory });
+  }
+
+  if (cardsToGift.length === 0) {
+    let errorMsg = '❌ No valid cards to gift!';
+    if (failedCards.length > 0) {
+      errorMsg += `\n${failedCards.join('\n')}`;
     }
-
-    // Update receiver inventory
-    const { data: receiverInventory } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('user_id', receiverUserId)
-      .eq('card_id', card.card_id)
-      .single();
-
-    if (receiverInventory) {
-      await supabase
-        .from('inventory')
-        .update({ quantity: receiverInventory.quantity + 1 })
-        .eq('id', receiverInventory.id);
-    } else {
-      await supabase
-        .from('inventory')
-        .insert({
-          user_id: receiverUserId,
-          card_id: card.card_id,
-          quantity: 1
-        });
-    }
-
-    const rarityStars = '⭐'.repeat(card.rarity);
-    giftedCards.push(`${card.name} (${card.group}) ${rarityStars} • \`${card.cardcode}\``);
-    giftedCardObjects.push(card);
-  }
-
-  let description = '';
-  if (giftedCards.length > 0) {
-    description = `✅ Gifted to ${receiverUser.username}:\n${giftedCards.join('\n')}`;
-  }
-
-  if (failedCards.length > 0) {
-    if (description) description += '\n\n';
-    description += `❌ Failed:\n${failedCards.join('\n')}`;
-  }
-
-  if (!description) {
-    await interaction.editReply({ content: '❌ No cards were gifted!' });
+    await interaction.editReply({ content: errorMsg });
     return;
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0x00ff00)
-    .setTitle('🎁 Gift Sent!')
-    .setDescription(description)
+  // Build confirmation embed
+  const confirmCards = cardsToGift
+    .map(({ card }) => {
+      const rarityStars = '🌟'.repeat(card.rarity);
+      return `${card.name} (${card.group}) ${rarityStars} • \`${card.cardcode}\``;
+    })
+    .join('\n');
+
+  const confirmEmbed = new EmbedBuilder()
+    .setColor(0x87ceeb)
+    .setTitle('🏖️ Confirm Gift')
+    .setDescription(`Send to ${receiverUser.username}?\n\n${confirmCards}`)
     .setTimestamp();
 
-  // Merge images if cards were gifted
+  // Merge images for preview
   let attachment = null;
   try {
-    const imageUrls = giftedCardObjects
-      .map((card: any) => card.image_url)
+    const imageUrls = cardsToGift
+      .map(({ card }: any) => card.image_url)
       .filter((url: string) => url);
 
     if (imageUrls.length > 0) {
       const mergedImageBuffer = await mergeCardImages(imageUrls);
-      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'gifted_cards.png' });
-      embed.setImage('attachment://gifted_cards.png');
+      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'gift_preview.png' });
+      confirmEmbed.setImage('attachment://gift_preview.png');
     }
   } catch (error) {
     console.error('Error merging images:', error);
   }
 
+  const row = new ActionRowBuilder<ButtonBuilder>()
+    .addComponents(
+      new ButtonBuilder()
+        .setCustomId(`gift_confirm_${senderUserId}_${receiverUserId}`)
+        .setLabel('✅ Send Gift')
+        .setStyle(ButtonStyle.Success),
+      new ButtonBuilder()
+        .setCustomId(`gift_cancel_${senderUserId}`)
+        .setLabel('❌ Cancel')
+        .setStyle(ButtonStyle.Danger)
+    );
+
   if (attachment) {
-    await interaction.editReply({ embeds: [embed], files: [attachment] });
+    await interaction.editReply({ embeds: [confirmEmbed], files: [attachment], components: [row] });
   } else {
-    await interaction.editReply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [confirmEmbed], components: [row] });
   }
 }
