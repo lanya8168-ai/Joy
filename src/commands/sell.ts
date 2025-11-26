@@ -1,5 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { getRarityEmoji } from '../utils/cards.js';
 
 const RARITY_PRICES: { [key: number]: number } = {
   5: 10000,
@@ -84,7 +85,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const price = RARITY_PRICES[card.rarity] || 0;
     totalCoins += price;
 
-    soldCards.push(`**${card.name}** (\`${card.cardcode}\`) • ${price} coins`);
+    const rarityEmoji = getRarityEmoji(card.rarity);
+    soldCards.push(`**${card.name}** ${rarityEmoji} (\`${card.cardcode}\`) • ${price} coins`);
   }
 
   if (totalCoins > 0) {

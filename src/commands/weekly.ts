@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, Attachm
 import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
-import { getRandomRarity } from '../utils/cards.js';
+import { getRandomRarity, getRarityEmoji } from '../utils/cards.js';
 
 const WEEKLY_REWARD = 1500;
 const WEEKLY_COOLDOWN_HOURS = 168;
@@ -101,9 +101,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   // Create card info description
-  const cardInfos = selectedCards.map((card, index) => 
-    `**Card ${index + 1}:** ${card.name} (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``
-  ).join('\n');
+  const cardInfos = selectedCards.map((card, index) => {
+    const rarityEmoji = getRarityEmoji(card.rarity);
+    return `**Card ${index + 1}:** ${card.name} (${card.group}) ${rarityEmoji} • ${card.era || 'N/A'} • \`${card.cardcode}\``;
+  }).join('\n');
 
   const description = `You received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`;
 

@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
+import { getRarityEmoji } from '../utils/cards.js';
 
 export const data = new SlashCommandBuilder()
   .setName('gift')
@@ -98,8 +99,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // Build confirmation embed
   const confirmCards = cardsToGift
     .map(({ card }) => {
-      const rarityStars = '🌟'.repeat(card.rarity);
-      return `${card.name} (${card.group}) ${rarityStars} • \`${card.cardcode}\``;
+      const rarityEmoji = getRarityEmoji(card.rarity);
+      return `${card.name} (${card.group}) ${rarityEmoji} • \`${card.cardcode}\``;
     })
     .join('\n');
 

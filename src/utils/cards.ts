@@ -22,14 +22,8 @@ export function getRarityName(rarity: number): string {
 }
 
 export function getRarityEmoji(rarity: number): string {
-  switch (rarity) {
-    case 1: return '⚪';
-    case 2: return '🟢';
-    case 3: return '🔵';
-    case 4: return '🟣';
-    case 5: return '🟡';
-    default: return '⚪';
-  }
+  const emoji = '<:JOY_rarity:1442701432384917514>';
+  return emoji.repeat(Math.max(1, rarity));
 }
 
 export function getRarityColor(rarity: number): number {

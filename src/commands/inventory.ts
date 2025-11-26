@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
+import { getRarityEmoji } from '../utils/cards.js';
 
 export const data = new SlashCommandBuilder()
   .setName('inventory')
@@ -128,7 +129,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .map((item: any, index: number) => {
       const card = item.cards;
       const eraText = card.era ? ` • ${card.era}` : '';
-      return `**Card ${index + 1}:** ${card.name} (${card.group}${eraText}) • \`${card.cardcode}\` • Qty: ${item.quantity}`;
+      const rarityEmoji = getRarityEmoji(card.rarity);
+      return `**Card ${index + 1}:** ${card.name} (${card.group}) ${rarityEmoji}${eraText} • \`${card.cardcode}\` • Qty: ${item.quantity}`;
     })
     .join('\n');
 

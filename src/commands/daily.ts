@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
+import { getRarityEmoji } from '../utils/cards.js';
 
 const MIN_COINS = 50;
 const MAX_COINS = 100;
@@ -92,7 +93,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       });
   }
 
-  const cardInfo = `**${selectedCard.name}** (${selectedCard.group})\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
+  const rarityEmoji = getRarityEmoji(selectedCard.rarity);
+  const cardInfo = `**${selectedCard.name}** (${selectedCard.group}) ${rarityEmoji}\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
