@@ -35,7 +35,7 @@ export const data = new SlashCommandBuilder()
             { name: 'Legendary Treasure - 35000 coins (3 legendary)', value: '5' },
             { name: 'Idol Pack 5 - 8000 coins (5 cards)', value: '6' },
             { name: 'Idol Pack 10 - 15000 coins (10 cards)', value: '7' }
-          )
+          ))
       .addStringOption(option =>
         option.setName('idol')
           .setDescription('Idol name for idol packs')
