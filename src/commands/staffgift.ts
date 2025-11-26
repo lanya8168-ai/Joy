@@ -26,7 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Check if sender has admin permissions
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> This command is staff only!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> This command is staff only!' });
     return;
   }
 
@@ -38,13 +38,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!receiver) {
-    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> ${receiverUser.username} needs to use \`/start\` first!` });
+    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> ${receiverUser.username} needs to use \`/start\` first!` });
     return;
   }
 
   // Prevent self-gifting
   if (senderUserId === receiverUserId) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> You can\'t gift to yourself!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You can\'t gift to yourself!' });
     return;
   }
 
@@ -70,7 +70,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   if (cardsToGift.length === 0) {
-    let errorMsg = '<:DSwhiteno:1416237223979782306> No valid cards to gift!';
+    let errorMsg = '<:IMG_9904:1443371148543791218> No valid cards to gift!';
     if (failedCards.length > 0) {
       errorMsg += `\n${failedCards.join('\n')}`;
     }
@@ -112,11 +112,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addComponents(
       new ButtonBuilder()
         .setCustomId(`staffgift_confirm_${senderUserId}_${receiverUserId}`)
-        .setLabel('<:DSwhitecheck:1416237178694139934> Send Gift')
+        .setLabel('<:IMG_9902:1443367697286172874> Send Gift')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId(`staffgift_cancel_${senderUserId}`)
-        .setLabel('<:DSwhiteno:1416237223979782306> Cancel')
+        .setLabel('<:IMG_9904:1443371148543791218> Cancel')
         .setStyle(ButtonStyle.Danger)
     );
 

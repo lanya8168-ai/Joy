@@ -22,7 +22,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Error claiming weekly reward. Please try again!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -30,7 +30,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result || !result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
+      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
       return;
     }
 
@@ -45,7 +45,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Error claiming weekly reward. Please try again!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -58,7 +58,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!allCards || allCards.length === 0) {
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle('<:DSwhitecheck:1416237178694139934> Weekly Reward Claimed!')
+      .setTitle('<:IMG_9902:1443367697286172874> Weekly Reward Claimed!')
       .setDescription(`You received **${result.reward} coins**!\n\n*No cards available yet.*`)
       .setTimestamp();
 

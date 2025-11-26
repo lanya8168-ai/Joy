@@ -50,7 +50,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> You need Administrator permission to use this command!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You need Administrator permission to use this command!' });
     return;
   }
 
@@ -70,7 +70,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!existingCard) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Card not found!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Card not found!' });
     return;
   }
 
@@ -84,7 +84,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (imageUrl) updates.image_url = imageUrl;
 
   if (Object.keys(updates).length === 0) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please provide at least one field to update!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please provide at least one field to update!' });
     return;
   }
 
@@ -95,7 +95,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Database error:', error);
-    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> Error updating card: ${error.message}` });
+    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Error updating card: ${error.message}` });
     return;
   }
 

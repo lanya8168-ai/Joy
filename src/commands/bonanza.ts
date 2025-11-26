@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const member = interaction.member as any;
   if (userId !== BOOSTER_USER_ID && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
     await interaction.editReply({ 
-      content: '<:DSwhiteno:1416237223979782306> This command is only available to boosters!' 
+      content: '<:IMG_9904:1443371148543791218> This command is only available to boosters!' 
     });
     return;
   }
@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
     return;
   }
 

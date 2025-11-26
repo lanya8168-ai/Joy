@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -45,7 +45,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!allCards || allCards.length === 0) {
     await interaction.editReply({ 
-      content: '<:DSwhiteno:1416237223979782306> No droppable cards available yet! Ask an admin to add cards using `/addcard`.' 
+      content: '<:IMG_9904:1443371148543791218> No droppable cards available yet! Ask an admin to add cards using `/addcard`.' 
     });
     return;
   }
@@ -89,7 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Drop error updating last_drop:', error);
-    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> Error processing drop: ${error.message}` });
+    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Error processing drop: ${error.message}` });
     return;
   }
 

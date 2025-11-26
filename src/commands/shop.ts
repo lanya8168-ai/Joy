@@ -61,7 +61,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!', ephemeral: true });
     return;
   }
 
@@ -103,7 +103,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const pack = PACKS.find(p => p.id === packId);
   if (!pack) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Invalid pack!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Invalid pack!' });
     return;
   }
 
@@ -114,13 +114,13 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
     return;
   }
 
   if (user.coins < pack.cost) {
     await interaction.editReply({ 
-      content: `<:DSwhiteno:1416237223979782306> You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
+      content: `<:IMG_9904:1443371148543791218> You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
     });
     return;
   }
@@ -131,7 +131,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   if (!allCards || allCards.length === 0) {
     await interaction.editReply({ 
-      content: '<:DSwhiteno:1416237223979782306> No cards available yet! Ask an admin to add cards.' 
+      content: '<:IMG_9904:1443371148543791218> No cards available yet! Ask an admin to add cards.' 
     });
     return;
   }
@@ -151,7 +151,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     availableCards = allCards.filter((card: any) => card.rarity === 5);
     if (availableCards.length === 0) {
       await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Not enough legendary cards available!' });
+      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Not enough legendary cards available!' });
       return;
     }
   } else if ((pack as any).groupPack) {
@@ -159,7 +159,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     const groupOrIdol = interaction.options.getString('group_or_idol');
     if (!groupOrIdol) {
       await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please specify a group or idol name!' });
+      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please specify a group or idol name!' });
       return;
     }
     availableCards = allCards.filter((card: any) => 
@@ -168,7 +168,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     );
     if (availableCards.length === 0) {
       await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> No cards found for "${groupOrIdol}"!` });
+      await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> No cards found for "${groupOrIdol}"!` });
       return;
     }
     
@@ -179,7 +179,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     if (legendaryPercentage >= 50) {
       await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
       await interaction.editReply({ 
-        content: `<:DSwhiteno:1416237223979782306> "${groupOrIdol}" has too many legendary cards! Use the **Legendary Treasure** pack instead to collect these cards.` 
+        content: `<:IMG_9904:1443371148543791218> "${groupOrIdol}" has too many legendary cards! Use the **Legendary Treasure** pack instead to collect these cards.` 
       });
       return;
     }

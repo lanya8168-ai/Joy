@@ -63,7 +63,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error creating listing.', ephemeral: true });
+    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.', ephemeral: true });
     return;
   }
 
@@ -72,19 +72,19 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   if (!result.success) {
     if (result.error === 'insufficient_cards') {
       await interaction.reply({ 
-        content: `<:DSwhiteno:1416237223979782306> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`, 
+        content: `<:IMG_9904:1443371148543791218> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`, 
         ephemeral: true 
       });
       return;
     }
 
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error creating listing.', ephemeral: true });
+    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.', ephemeral: true });
     return;
   }
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('<:DSwhitecheck:1416237178694139934> Card Listed!')
+    .setTitle('<:IMG_9902:1443367697286172874> Card Listed!')
     .setDescription(`Your card has been listed on the marketplace!`)
     .addFields(
       { name: 'Listing ID', value: `${result.listing_id}`, inline: true },
@@ -157,7 +157,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!listing) {
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Listing not found!', ephemeral: true });
+    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Listing not found!', ephemeral: true });
     return;
   }
 
@@ -167,7 +167,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error purchasing card.', ephemeral: true });
+    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Error purchasing card.', ephemeral: true });
     return;
   }
 
@@ -175,29 +175,29 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   if (!result.success) {
     if (result.error === 'listing_not_found') {
-      await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Listing not found or already sold!', ephemeral: true });
+      await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Listing not found or already sold!', ephemeral: true });
       return;
     }
 
     if (result.error === 'cannot_buy_own_listing') {
-      await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> You cannot buy your own listing!', ephemeral: true });
+      await interaction.reply({ content: '<:IMG_9904:1443371148543791218> You cannot buy your own listing!', ephemeral: true });
       return;
     }
 
     if (result.error === 'buyer_not_found') {
-      await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
+      await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!', ephemeral: true });
       return;
     }
 
     if (result.error === 'insufficient_funds') {
       await interaction.reply({ 
-        content: `<:DSwhiteno:1416237223979782306> You need ${result.required} coins! You have ${result.available} coins.`, 
+        content: `<:IMG_9904:1443371148543791218> You need ${result.required} coins! You have ${result.available} coins.`, 
         ephemeral: true 
       });
       return;
     }
 
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error purchasing card.', ephemeral: true });
+    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Error purchasing card.', ephemeral: true });
     return;
   }
 
@@ -205,7 +205,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   const eraText = card.era ? ` - ${card.era}` : '';
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('<:DSwhitecheck:1416237178694139934> Purchase Complete!')
+    .setTitle('<:IMG_9902:1443367697286172874> Purchase Complete!')
     .setDescription(`You bought ${card.name}!`)
     .addFields(
       { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, inline: true },

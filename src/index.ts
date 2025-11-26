@@ -36,7 +36,7 @@ async function loadCommands() {
     
     if ('data' in command && 'execute' in command) {
       commands.set(command.data.name, command);
-      console.log(`<:DSwhitecheck:1416237178694139934> Loaded command: ${command.data.name}`);
+      console.log(`<:IMG_9902:1443367697286172874> Loaded command: ${command.data.name}`);
     } else {
       console.log(`⚠️  Skipped ${file}: missing data or execute`);
     }
@@ -48,7 +48,7 @@ async function registerCommands() {
   const clientId = process.env.DISCORD_CLIENT_ID;
 
   if (!token || !clientId) {
-    console.error('<:DSwhiteno:1416237223979782306> Missing DISCORD_TOKEN or DISCORD_CLIENT_ID environment variables!');
+    console.error('<:IMG_9904:1443371148543791218> Missing DISCORD_TOKEN or DISCORD_CLIENT_ID environment variables!');
     console.log('\nPlease set these environment variables:');
     console.log('- DISCORD_TOKEN: Your bot token from Discord Developer Portal');
     console.log('- DISCORD_CLIENT_ID: Your bot\'s application ID');
@@ -68,14 +68,14 @@ async function registerCommands() {
       { body: commandData }
     );
 
-    console.log('<:DSwhitecheck:1416237178694139934> Successfully registered slash commands globally!');
+    console.log('<:IMG_9902:1443367697286172874> Successfully registered slash commands globally!');
   } catch (error) {
-    console.error('<:DSwhiteno:1416237223979782306> Error registering commands:', error);
+    console.error('<:IMG_9904:1443371148543791218> Error registering commands:', error);
   }
 }
 
 client.once(Events.ClientReady, async (c) => {
-  console.log(`<:DSwhitecheck:1416237178694139934> Bot is online as ${c.user.tag}!`);
+  console.log(`<:IMG_9902:1443367697286172874> Bot is online as ${c.user.tag}!`);
   console.log(`📊 Serving ${commands.size} commands`);
   console.log(`🏠 Connected to ${c.guilds.cache.size} servers`);
 });
@@ -106,17 +106,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
   const command = commands.get(interaction.commandName);
 
   if (!command) {
-    console.error(`<:DSwhiteno:1416237223979782306> Command not found: ${interaction.commandName}`);
+    console.error(`<:IMG_9904:1443371148543791218> Command not found: ${interaction.commandName}`);
     return;
   }
 
   try {
     await command.execute(interaction);
-    console.log(`<:DSwhitecheck:1416237178694139934> ${interaction.user.tag} used /${interaction.commandName}`);
+    console.log(`<:IMG_9902:1443367697286172874> ${interaction.user.tag} used /${interaction.commandName}`);
   } catch (error) {
-    console.error(`<:DSwhiteno:1416237223979782306> Error executing ${interaction.commandName}:`, error);
+    console.error(`<:IMG_9904:1443371148543791218> Error executing ${interaction.commandName}:`, error);
     
-    const errorMessage = { content: '<:DSwhiteno:1416237223979782306> An error occurred while executing this command!', ephemeral: true };
+    const errorMessage = { content: '<:IMG_9904:1443371148543791218> An error occurred while executing this command!', ephemeral: true };
     
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp(errorMessage);
@@ -145,7 +145,7 @@ async function handleInventoryButton(interaction: any) {
 
     // Only allow user to interact with their own inventory
     if (interaction.user.id !== userId) {
-      await interaction.followUp({ content: '<:DSwhiteno:1416237223979782306> This is not your inventory!', ephemeral: true });
+      await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> This is not your inventory!', ephemeral: true });
       return;
     }
 
@@ -264,7 +264,7 @@ async function handleInventoryButton(interaction: any) {
     }
   } catch (error) {
     console.error('Error handling inventory button:', error);
-    await interaction.followUp({ content: '<:DSwhiteno:1416237223979782306> An error occurred!', ephemeral: true });
+    await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> An error occurred!', ephemeral: true });
   }
 }
 
@@ -276,7 +276,7 @@ async function handleGiftButton(interaction: any) {
     const action = interaction.customId.split('_')[1]; // 'confirm' or 'cancel'
 
     if (action === 'cancel') {
-      await interaction.update({ content: '<:DSwhiteno:1416237223979782306> Gift cancelled!', components: [] });
+      await interaction.update({ content: '<:IMG_9904:1443371148543791218> Gift cancelled!', components: [] });
       return;
     }
 
@@ -288,7 +288,7 @@ async function handleGiftButton(interaction: any) {
 
       // Only allow sender to confirm
       if (interaction.user.id !== senderUserId) {
-        await interaction.followUp({ content: '<:DSwhiteno:1416237223979782306> Only the sender can confirm this gift!', ephemeral: true });
+        await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> Only the sender can confirm this gift!', ephemeral: true });
         return;
       }
 
@@ -362,7 +362,7 @@ async function handleGiftButton(interaction: any) {
 
       const resultEmbed = new EmbedBuilder()
         .setColor(0x00ff00)
-        .setTitle('<:DSwhitecheck:1416237178694139934> Gift Sent!')
+        .setTitle('<:IMG_9902:1443367697286172874> Gift Sent!')
         .setDescription('🎁 Your gift has been delivered!')
         .setTimestamp();
 
@@ -370,7 +370,7 @@ async function handleGiftButton(interaction: any) {
     }
   } catch (error) {
     console.error('Error handling gift button:', error);
-    await interaction.followUp({ content: '<:DSwhiteno:1416237223979782306> An error occurred!', ephemeral: true });
+    await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> An error occurred!', ephemeral: true });
   }
 }
 
@@ -382,7 +382,7 @@ async function handleStaffGiftButton(interaction: any) {
     const action = interaction.customId.split('_')[1]; // 'confirm' or 'cancel'
 
     if (action === 'cancel') {
-      await interaction.update({ content: '<:DSwhiteno:1416237223979782306> Staff gift cancelled!', components: [] });
+      await interaction.update({ content: '<:IMG_9904:1443371148543791218> Staff gift cancelled!', components: [] });
       return;
     }
 
@@ -391,7 +391,7 @@ async function handleStaffGiftButton(interaction: any) {
 
       // Check if sender is admin
       if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-        await interaction.followUp({ content: '<:DSwhiteno:1416237223979782306> This command is staff only!', ephemeral: true });
+        await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> This command is staff only!', ephemeral: true });
         return;
       }
 
@@ -443,7 +443,7 @@ async function handleStaffGiftButton(interaction: any) {
 
       const resultEmbed = new EmbedBuilder()
         .setColor(0xff00ff)
-        .setTitle('<:DSwhitecheck:1416237178694139934> Staff Gift Sent!')
+        .setTitle('<:IMG_9902:1443367697286172874> Staff Gift Sent!')
         .setDescription('🎁 Your staff gift has been delivered!')
         .setTimestamp();
 
@@ -451,7 +451,7 @@ async function handleStaffGiftButton(interaction: any) {
     }
   } catch (error) {
     console.error('Error handling staff gift button:', error);
-    await interaction.followUp({ content: '<:DSwhiteno:1416237223979782306> An error occurred!', ephemeral: true });
+    await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> An error occurred!', ephemeral: true });
   }
 }
 
@@ -490,7 +490,7 @@ async function handleCollectButton(interaction: any) {
     const { data: allCards } = await query;
 
     if (!allCards || allCards.length === 0) {
-      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> No cards match your filters!' });
+      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> No cards match your filters!' });
       return;
     }
 
@@ -520,7 +520,7 @@ async function handleCollectButton(interaction: any) {
     const cardList = pageCards
       .map((card: any) => {
         const hasCard = userCardIds.has(card.card_id);
-        const checkMark = hasCard ? '<:DSwhitecheck:1416237178694139934>' : '<:DSwhiteno:1416237223979782306>';
+        const checkMark = hasCard ? '<:IMG_9902:1443367697286172874>' : '<:IMG_9904:1443371148543791218>';
         const rarityEmoji = getRarityEmoji(card.rarity);
         const eraText = card.era ? ` • ${card.era}` : '';
         return `${checkMark} **${card.name}** (${card.group}) ${rarityEmoji}${eraText} • \`${card.cardcode}\``;
@@ -590,7 +590,7 @@ async function handleCollectButton(interaction: any) {
     }
   } catch (error) {
     console.error('Error handling collect button:', error);
-    await interaction.followUp({ content: '<:DSwhiteno:1416237223979782306> An error occurred!', ephemeral: true });
+    await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> An error occurred!', ephemeral: true });
   }
 }
 
@@ -610,10 +610,10 @@ export async function reloadCommands() {
         Routes.applicationCommands(clientId),
         { body: commandData }
       );
-      console.log('<:DSwhitecheck:1416237178694139934> Commands reloaded and registered!');
+      console.log('<:IMG_9902:1443367697286172874> Commands reloaded and registered!');
       return true;
     } catch (error) {
-      console.error('<:DSwhiteno:1416237223979782306> Error registering reloaded commands:', error);
+      console.error('<:IMG_9904:1443371148543791218> Error registering reloaded commands:', error);
       return false;
     }
   }
@@ -656,7 +656,7 @@ async function main() {
   const supabaseKey = process.env.SUPABASE_KEY;
 
   if (!token || !supabaseUrl || !supabaseKey) {
-    console.error('<:DSwhiteno:1416237223979782306> Missing required environment variables!');
+    console.error('<:IMG_9904:1443371148543791218> Missing required environment variables!');
     console.log('\nRequired environment variables:');
     console.log('- DISCORD_TOKEN: Your bot token');
     console.log('- DISCORD_CLIENT_ID: Your bot\'s application ID');
@@ -673,7 +673,7 @@ async function main() {
   try {
     await client.login(token);
   } catch (error) {
-    console.error('<:DSwhiteno:1416237223979782306> Failed to login:', error);
+    console.error('<:IMG_9904:1443371148543791218> Failed to login:', error);
     process.exit(1);
   }
 }

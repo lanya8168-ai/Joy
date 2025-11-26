@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .order('card_id', { ascending: true });
 
   if (!allCards || allCards.length === 0) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> No cards available yet!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> No cards available yet!' });
     return;
   }
 

@@ -7,7 +7,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> You need Administrator permission to use this command!', ephemeral: true });
+    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> You need Administrator permission to use this command!', ephemeral: true });
     return;
   }
 
@@ -17,11 +17,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     // This message tells the user that commands have been refreshed
     // The actual reload happens on the next bot restart due to Discord's caching
     await interaction.editReply({
-      content: '<:DSwhitecheck:1416237178694139934> Commands refreshed! The bot will reload commands on next restart.\n\nTo fully update commands, restart the bot with `/dev restart` or restart the workflow.'
+      content: '<:IMG_9902:1443367697286172874> Commands refreshed! The bot will reload commands on next restart.\n\nTo fully update commands, restart the bot with `/dev restart` or restart the workflow.'
     });
   } catch (error) {
     await interaction.editReply({
-      content: '<:DSwhiteno:1416237223979782306> Error refreshing commands. Check bot logs.'
+      content: '<:IMG_9904:1443371148543791218> Error refreshing commands. Check bot logs.'
     });
   }
 }

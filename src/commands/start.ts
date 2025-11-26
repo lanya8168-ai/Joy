@@ -35,7 +35,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .insert([{ user_id: userId, coins: 100 }]);
 
   if (error) {
-    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Error creating your account. Please try again!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error creating your account. Please try again!' });
     return;
   }
 
