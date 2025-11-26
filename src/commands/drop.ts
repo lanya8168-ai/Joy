@@ -103,9 +103,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       name: interaction.user.username, 
       iconURL: interaction.user.avatarURL() || undefined 
     })
-    .setTitle('🤿 You dove and found..')
+    .setTitle('<a:5lifesaver:1435457784576610374> You dove and found..')
     .setDescription(description)
-    .setFooter({ text: '🏖️ Card dropped' })
+    .setFooter({ text: '<:2_shell:1436124721413357770> Card dropped' })
     .setTimestamp();
 
   if (selectedCard.image_url) {
