@@ -3,10 +3,13 @@ import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 
 const PACKS = [
-  { id: '1', name: 'Sandy Shells', cost: 200, cards: 1 },
-  { id: '2', name: 'Tide Pool', cost: 400, cards: 2 },
-  { id: '3', name: 'Coral Reef', cost: 1000, cards: 5 },
-  { id: '4', name: 'Deep Dive', cost: 2000, cards: 10 }
+  { id: '1', name: 'Sandy Shells', cost: 500, cards: 1 },
+  { id: '2', name: 'Tide Pool', cost: 1000, cards: 2 },
+  { id: '3', name: 'Coral Reef', cost: 3000, cards: 5 },
+  { id: '4', name: 'Deep Dive', cost: 5000, cards: 10 },
+  { id: '5', name: 'Legendary Treasure', cost: 35000, cards: 3, rarity: 5 },
+  { id: '6', name: 'Idol Pack (5 cards)', cost: 8000, cards: 5, idolPack: true },
+  { id: '7', name: 'Idol Pack (10 cards)', cost: 15000, cards: 10, idolPack: true }
 ];
 
 export const data = new SlashCommandBuilder()
@@ -25,11 +28,18 @@ export const data = new SlashCommandBuilder()
           .setDescription('Pack type to buy')
           .setRequired(true)
           .addChoices(
-            { name: 'Sandy Shells - 200 coins (1 card)', value: '1' },
-            { name: 'Tide Pool - 400 coins (2 cards)', value: '2' },
-            { name: 'Coral Reef - 1000 coins (5 cards)', value: '3' },
-            { name: 'Deep Dive - 2000 coins (10 cards)', value: '4' }
-          )));
+            { name: 'Sandy Shells - 500 coins (1 card)', value: '1' },
+            { name: 'Tide Pool - 1000 coins (2 cards)', value: '2' },
+            { name: 'Coral Reef - 3000 coins (5 cards)', value: '3' },
+            { name: 'Deep Dive - 5000 coins (10 cards)', value: '4' },
+            { name: 'Legendary Treasure - 35000 coins (3 legendary)', value: '5' },
+            { name: 'Idol Pack 5 - 8000 coins (5 cards)', value: '6' },
+            { name: 'Idol Pack 10 - 15000 coins (10 cards)', value: '7' }
+          )
+      .addStringOption(option =>
+        option.setName('idol')
+          .setDescription('Idol name for idol packs')
+          .setRequired(false)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const subcommand = interaction.options.getSubcommand();
@@ -133,10 +143,36 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .update({ coins: newBalance })
     .eq('user_id', userId);
 
-  // Give cards
+  // Give cards - filter based on pack type
+  let availableCards = allCards;
+  
+  if ((pack as any).rarity === 5) {
+    // Legendary pack - only legendary cards
+    availableCards = allCards.filter((card: any) => card.rarity === 5);
+    if (availableCards.length === 0) {
+      await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
+      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Not enough legendary cards available!' });
+      return;
+    }
+  } else if ((pack as any).idolPack) {
+    // Idol-specific pack
+    const idolName = interaction.options.getString('idol');
+    if (!idolName) {
+      await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
+      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please specify an idol name for idol packs!' });
+      return;
+    }
+    availableCards = allCards.filter((card: any) => card.name.toLowerCase().includes(idolName.toLowerCase()));
+    if (availableCards.length === 0) {
+      await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
+      await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> No cards found for idol "${idolName}"!` });
+      return;
+    }
+  }
+
   const cardsList = [];
   for (let i = 0; i < pack.cards; i++) {
-    const randomCard = allCards[Math.floor(Math.random() * allCards.length)];
+    const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
     cardsList.push(randomCard);
 
     const { data: existingItem } = await supabase

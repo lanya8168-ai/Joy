@@ -11,7 +11,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
-  const reward = Math.floor(Math.random() * 20) + 10;
+  const reward = Math.floor(Math.random() * 100) + 50;
 
   const { data, error } = await supabase.rpc('claim_surf_reward', {
     p_user_id: userId,
