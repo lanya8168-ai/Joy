@@ -12,6 +12,7 @@ export const data = new SlashCommandBuilder()
   .setDescription('Claim your daily coin reward!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
   const userId = interaction.user.id;
 
   const dailyReward = Math.floor(Math.random() * (MAX_COINS - MIN_COINS + 1)) + MIN_COINS;

@@ -37,6 +37,7 @@ export const data = new SlashCommandBuilder()
           .setRequired(true)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
   const subcommand = interaction.options.getSubcommand();
 
   if (subcommand === 'list') {

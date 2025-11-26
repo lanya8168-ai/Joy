@@ -6,6 +6,7 @@ export const data = new SlashCommandBuilder()
   .setDescription('Start your K-pop card collecting journey!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
   const userId = interaction.user.id;
 
   const { data: existingUser } = await supabase

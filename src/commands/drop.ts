@@ -9,6 +9,7 @@ export const data = new SlashCommandBuilder()
   .setDescription('Open a FREE card pack! (2 minute cooldown)');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
   const userId = interaction.user.id;
 
   const { data: user } = await supabase

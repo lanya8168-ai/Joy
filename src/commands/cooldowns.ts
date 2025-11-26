@@ -7,6 +7,7 @@ export const data = new SlashCommandBuilder()
   .setDescription('Check all your command cooldowns');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
   const userId = interaction.user.id;
 
   const { data: user } = await supabase

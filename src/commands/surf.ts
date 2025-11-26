@@ -9,6 +9,7 @@ export const data = new SlashCommandBuilder()
   .setDescription('Surf for coins!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  await interaction.deferReply();
   const userId = interaction.user.id;
   const reward = Math.floor(Math.random() * 20) + 10;
 
