@@ -66,10 +66,24 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Select 4 random cards
+  // Select 4 random cards with higher rarity 5 chance
   const selectedCards = [];
   for (let i = 0; i < 4; i++) {
-    const rarity = getRandomRarity();
+    // Boost rarity 5 chance to 30% for weekly rewards
+    const random = Math.random() * 100;
+    let rarity: number;
+    if (random < 30) {
+      rarity = 5; // 30% chance for legendary
+    } else if (random < 45) {
+      rarity = 4; // 15% chance for epic
+    } else if (random < 60) {
+      rarity = 3; // 15% chance for rare
+    } else if (random < 85) {
+      rarity = 2; // 25% chance for uncommon
+    } else {
+      rarity = 1; // 15% chance for common
+    }
+    
     const cardsOfRarity = allCards.filter(c => c.rarity === rarity);
     const card = cardsOfRarity.length > 0
       ? cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)]

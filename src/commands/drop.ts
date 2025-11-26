@@ -105,7 +105,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     })
     .setTitle('<a:5lifesaver:1435457784576610374> You dove and found..')
     .setDescription(description)
-    .setFooter({ text: '<:2_shell:1436124721413357770> Card dropped' })
+    .setFooter({ text: 'Card dropped' })
     .setTimestamp();
 
   if (selectedCard.image_url) {
