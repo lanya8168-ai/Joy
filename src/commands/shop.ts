@@ -80,7 +80,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
         inline: false
       },
       {
-        name: '<a:hj_redstar:1363127624318320861> Your Balance',
+        name: '<:2_shell:1436124721413357770> Your Balance',
         value: `${user.coins} coins`,
         inline: false
       },
