@@ -8,8 +8,8 @@ const PACKS = [
   { id: '3', name: 'Coral Reef', cost: 3000, cards: 5 },
   { id: '4', name: 'Deep Dive', cost: 5000, cards: 10 },
   { id: '5', name: 'Legendary Treasure', cost: 35000, cards: 3, rarity: 5 },
-  { id: '6', name: 'Idol Pack (5 cards)', cost: 8000, cards: 5, idolPack: true },
-  { id: '7', name: 'Idol Pack (10 cards)', cost: 15000, cards: 10, idolPack: true }
+  { id: '6', name: 'Beach Vibes (5 cards)', cost: 8000, cards: 5, groupPack: true },
+  { id: '7', name: 'Tropical Paradise (10 cards)', cost: 15000, cards: 10, groupPack: true }
 ];
 
 export const data = new SlashCommandBuilder()
@@ -33,12 +33,12 @@ export const data = new SlashCommandBuilder()
             { name: 'Coral Reef - 3000 coins (5 cards)', value: '3' },
             { name: 'Deep Dive - 5000 coins (10 cards)', value: '4' },
             { name: 'Legendary Treasure - 35000 coins (3 legendary)', value: '5' },
-            { name: 'Idol Pack 5 - 8000 coins (5 cards)', value: '6' },
-            { name: 'Idol Pack 10 - 15000 coins (10 cards)', value: '7' }
+            { name: 'Beach Vibes - 8000 coins (5 cards)', value: '6' },
+            { name: 'Tropical Paradise - 15000 coins (10 cards)', value: '7' }
           ))
       .addStringOption(option =>
-        option.setName('idol')
-          .setDescription('Idol name for idol packs')
+        option.setName('group_or_idol')
+          .setDescription('Group or idol name for Beach Vibes/Tropical Paradise')
           .setRequired(false)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -154,18 +154,21 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
       await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Not enough legendary cards available!' });
       return;
     }
-  } else if ((pack as any).idolPack) {
-    // Idol-specific pack
-    const idolName = interaction.options.getString('idol');
-    if (!idolName) {
+  } else if ((pack as any).groupPack) {
+    // Group or idol-specific pack
+    const groupOrIdol = interaction.options.getString('group_or_idol');
+    if (!groupOrIdol) {
       await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please specify an idol name for idol packs!' });
+      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please specify a group or idol name!' });
       return;
     }
-    availableCards = allCards.filter((card: any) => card.name.toLowerCase().includes(idolName.toLowerCase()));
+    availableCards = allCards.filter((card: any) => 
+      card.name.toLowerCase().includes(groupOrIdol.toLowerCase()) || 
+      card.group.toLowerCase().includes(groupOrIdol.toLowerCase())
+    );
     if (availableCards.length === 0) {
       await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> No cards found for idol "${idolName}"!` });
+      await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> No cards found for "${groupOrIdol}"!` });
       return;
     }
   }
