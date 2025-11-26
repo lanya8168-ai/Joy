@@ -171,6 +171,18 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
       await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> No cards found for "${groupOrIdol}"!` });
       return;
     }
+    
+    // Check if group/idol has too many legendary cards
+    const legendaryCount = availableCards.filter((card: any) => card.rarity === 5).length;
+    const legendaryPercentage = (legendaryCount / availableCards.length) * 100;
+    
+    if (legendaryPercentage >= 50) {
+      await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
+      await interaction.editReply({ 
+        content: `<:DSwhiteno:1416237223979782306> "${groupOrIdol}" has too many legendary cards! Use the **Legendary Treasure** pack instead to collect these cards.` 
+      });
+      return;
+    }
   }
 
   const cardsList = [];
