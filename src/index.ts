@@ -94,6 +94,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.customId.startsWith('staffgift_')) {
       await handleStaffGiftButton(interaction);
     }
+    // Handle collect pagination buttons
+    if (interaction.customId.startsWith('collect_')) {
+      await handleCollectButton(interaction);
+    }
     return;
   }
 
@@ -447,6 +451,145 @@ async function handleStaffGiftButton(interaction: any) {
     }
   } catch (error) {
     console.error('Error handling staff gift button:', error);
+    await interaction.followUp({ content: '❌ An error occurred!', ephemeral: true });
+  }
+}
+
+async function handleCollectButton(interaction: any) {
+  const { supabase } = await import('./database/supabase.js');
+  const { getRarityEmoji } = await import('./utils/cards.js');
+  const { mergeCardImages } = await import('./utils/imageUtils.js');
+  const { EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = await import('discord.js');
+
+  try {
+    const action = interaction.customId.split('_')[1]; // 'next' or 'prev'
+    const userId = interaction.customId.split('_')[2];
+    const idolFilter = interaction.customId.split('_')[3] === 'all' ? null : interaction.customId.split('_')[3];
+    const groupFilter = interaction.customId.split('_')[4] === 'all' ? null : interaction.customId.split('_')[4];
+    const eraFilter = interaction.customId.split('_')[5] === 'all' ? null : interaction.customId.split('_')[5];
+    const rarityFilter = interaction.customId.split('_')[6] === 'all' ? null : parseInt(interaction.customId.split('_')[6]);
+
+    await interaction.deferUpdate();
+
+    // Get all cards based on filters
+    let query = supabase.from('cards').select('*');
+    
+    if (idolFilter) {
+      query = query.ilike('name', `%${idolFilter}%`);
+    }
+    if (groupFilter) {
+      query = query.ilike('group', `%${groupFilter}%`);
+    }
+    if (eraFilter) {
+      query = query.ilike('era', `%${eraFilter}%`);
+    }
+    if (rarityFilter) {
+      query = query.eq('rarity', rarityFilter);
+    }
+
+    const { data: allCards } = await query;
+
+    if (!allCards || allCards.length === 0) {
+      await interaction.editReply({ content: '❌ No cards match your filters!' });
+      return;
+    }
+
+    // Get user's inventory
+    const { data: userInventory } = await supabase
+      .from('inventory')
+      .select('card_id')
+      .eq('user_id', userId);
+
+    const userCardIds = new Set(userInventory?.map(item => item.card_id) || []);
+
+    const totalPages = Math.ceil(allCards.length / 5);
+    const currentPageText = interaction.message.embeds[0]?.footer?.text || 'Page 1 / 1';
+    const currentPage = parseInt(currentPageText.split(' ')[1]);
+    let newPage = currentPage;
+
+    if (action === 'next') {
+      newPage = Math.min(currentPage + 1, totalPages);
+    } else if (action === 'prev') {
+      newPage = Math.max(currentPage - 1, 1);
+    }
+
+    const startIndex = (newPage - 1) * 5;
+    const endIndex = startIndex + 5;
+    const pageCards = allCards.slice(startIndex, endIndex);
+
+    const cardList = pageCards
+      .map((card: any) => {
+        const hasCard = userCardIds.has(card.card_id);
+        const checkMark = hasCard ? '<:aa_whitecheckmart:1382679947230969917>' : '<:DSwhiteno:1416237223979782306>';
+        const rarityEmoji = getRarityEmoji(card.rarity);
+        const eraText = card.era ? ` • ${card.era}` : '';
+        return `${checkMark} **${card.name}** (${card.group}) ${rarityEmoji}${eraText} • \`${card.cardcode}\``;
+      })
+      .join('\n');
+
+    let attachment = null;
+    try {
+      const imageUrls = pageCards
+        .filter((card: any) => card.image_url)
+        .map((card: any) => card.image_url);
+
+      if (imageUrls.length > 0) {
+        const mergedImageBuffer = await mergeCardImages(imageUrls);
+        attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'collect_cards.png' });
+      }
+    } catch (error) {
+      console.error('Error merging images:', error);
+    }
+
+    const filterText = [
+      idolFilter && `Idol: ${idolFilter}`,
+      groupFilter && `Group: ${groupFilter}`,
+      eraFilter && `Era: ${eraFilter}`,
+      rarityFilter && `Rarity: ${rarityFilter}★`
+    ].filter(Boolean).join(' • ') || 'No filters';
+
+    const embed = new EmbedBuilder()
+      .setColor(0x87ceeb)
+      .setTitle('<:1_flower:1436124715797315687> Card Collection')
+      .setDescription(cardList || 'No cards on this page')
+      .addFields(
+        { name: 'Filters', value: filterText, inline: false },
+        { name: 'Progress', value: `${userCardIds.size} cards collected`, inline: true },
+        { name: 'Total Available', value: `${allCards.length} cards`, inline: true }
+      )
+      .setFooter({ text: `Page ${newPage} / ${totalPages}` })
+      .setTimestamp();
+
+    if (attachment) {
+      embed.setImage('attachment://collect_cards.png');
+    }
+
+    const row = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(`collect_prev_${userId}_${idolFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${rarityFilter || 'all'}`)
+          .setLabel('← Previous')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(newPage === 1),
+        new ButtonBuilder()
+          .setCustomId(`collect_page`)
+          .setLabel(`${newPage} / ${totalPages}`)
+          .setStyle(ButtonStyle.Primary)
+          .setDisabled(true),
+        new ButtonBuilder()
+          .setCustomId(`collect_next_${userId}_${idolFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${rarityFilter || 'all'}`)
+          .setLabel('Next →')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(newPage === totalPages)
+      );
+
+    if (attachment) {
+      await interaction.editReply({ embeds: [embed], files: [attachment], components: [row] });
+    } else {
+      await interaction.editReply({ embeds: [embed], components: [row] });
+    }
+  } catch (error) {
+    console.error('Error handling collect button:', error);
     await interaction.followUp({ content: '❌ An error occurred!', ephemeral: true });
   }
 }

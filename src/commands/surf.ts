@@ -51,7 +51,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setTitle('<a:5ball:1435457849072550023> Surfing Complete!')
     .setDescription(`You found **${result.reward} coins** while surfing!`)
     .addFields(
-      { name: '<:06_sparks:1430048824344449156> Reward', value: `${result.reward} coins`, inline: true },
+      { name: '<a:hj_redstar:1363127624318320861> Reward', value: `${result.reward} coins`, inline: true },
       { name: '<:2_shell:1436124721413357770> New Balance', value: `${result.new_balance} coins`, inline: true }
     )
     .setTimestamp();

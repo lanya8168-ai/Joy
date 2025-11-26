@@ -75,7 +75,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
         inline: false
       },
       {
-        name: '<:06_whitestar:1430048829700313100> How to Buy',
+        name: '<a:hj_bowpurple:1363505358869495878> How to Buy',
         value: 'Use `/shop buy` and select the pack you want!',
         inline: false
       }
@@ -187,7 +187,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`)
     .addFields(
       {
-        name: '<:fullstar:1387609456824680528> Cards Received',
+        name: '<a:hj_redstar:1363127624318320861> Cards Received',
         value: cardsInfo || 'No cards',
         inline: false
       },
