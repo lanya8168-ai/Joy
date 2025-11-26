@@ -86,6 +86,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.customId.startsWith('inv_')) {
       await handleInventoryButton(interaction);
     }
+    // Handle gift confirmation buttons
+    if (interaction.customId.startsWith('gift_')) {
+      await handleGiftButton(interaction);
+    }
+    // Handle staff gift confirmation buttons
+    if (interaction.customId.startsWith('staffgift_')) {
+      await handleStaffGiftButton(interaction);
+    }
     return;
   }
 
@@ -252,6 +260,193 @@ async function handleInventoryButton(interaction: any) {
     }
   } catch (error) {
     console.error('Error handling inventory button:', error);
+    await interaction.followUp({ content: '❌ An error occurred!', ephemeral: true });
+  }
+}
+
+async function handleGiftButton(interaction: any) {
+  const { supabase } = await import('./database/supabase.js');
+  const { EmbedBuilder } = await import('discord.js');
+
+  try {
+    const action = interaction.customId.split('_')[1]; // 'confirm' or 'cancel'
+
+    if (action === 'cancel') {
+      await interaction.update({ content: '❌ Gift cancelled!', components: [] });
+      return;
+    }
+
+    if (action === 'confirm') {
+      await interaction.deferUpdate();
+
+      const senderUserId = interaction.customId.split('_')[2];
+      const receiverUserId = interaction.customId.split('_')[3];
+
+      // Only allow sender to confirm
+      if (interaction.user.id !== senderUserId) {
+        await interaction.followUp({ content: '❌ Only the sender can confirm this gift!', ephemeral: true });
+        return;
+      }
+
+      // Extract card codes from the embed description
+      const embed = interaction.message.embeds[0];
+      const description = embed.description;
+      const lines = description.split('\n').slice(1); // Skip the "Send to..." line
+      
+      for (const line of lines) {
+        const match = line.match(/`([^`]+)`/);
+        if (match) {
+          const cardcode = match[1].toUpperCase();
+
+          // Find the card
+          const { data: card } = await supabase
+            .from('cards')
+            .select('*')
+            .eq('cardcode', cardcode)
+            .single();
+
+          if (!card) continue;
+
+          // Check sender has the card
+          const { data: senderInventory } = await supabase
+            .from('inventory')
+            .select('*')
+            .eq('user_id', senderUserId)
+            .eq('card_id', card.card_id)
+            .single();
+
+          if (!senderInventory || senderInventory.quantity < 1) continue;
+
+          // Update sender inventory
+          const newSenderQuantity = senderInventory.quantity - 1;
+          if (newSenderQuantity > 0) {
+            await supabase
+              .from('inventory')
+              .update({ quantity: newSenderQuantity })
+              .eq('id', senderInventory.id);
+          } else {
+            await supabase
+              .from('inventory')
+              .delete()
+              .eq('id', senderInventory.id);
+          }
+
+          // Update receiver inventory
+          const { data: receiverInventory } = await supabase
+            .from('inventory')
+            .select('*')
+            .eq('user_id', receiverUserId)
+            .eq('card_id', card.card_id)
+            .single();
+
+          if (receiverInventory) {
+            await supabase
+              .from('inventory')
+              .update({ quantity: receiverInventory.quantity + 1 })
+              .eq('id', receiverInventory.id);
+          } else {
+            await supabase
+              .from('inventory')
+              .insert({
+                user_id: receiverUserId,
+                card_id: card.card_id,
+                quantity: 1
+              });
+          }
+        }
+      }
+
+      const resultEmbed = new EmbedBuilder()
+        .setColor(0x00ff00)
+        .setTitle('✅ Gift Sent!')
+        .setDescription('🎁 Your gift has been delivered!')
+        .setTimestamp();
+
+      await interaction.editReply({ embeds: [resultEmbed], components: [] });
+    }
+  } catch (error) {
+    console.error('Error handling gift button:', error);
+    await interaction.followUp({ content: '❌ An error occurred!', ephemeral: true });
+  }
+}
+
+async function handleStaffGiftButton(interaction: any) {
+  const { supabase } = await import('./database/supabase.js');
+  const { EmbedBuilder, PermissionFlagsBits } = await import('discord.js');
+
+  try {
+    const action = interaction.customId.split('_')[1]; // 'confirm' or 'cancel'
+
+    if (action === 'cancel') {
+      await interaction.update({ content: '❌ Staff gift cancelled!', components: [] });
+      return;
+    }
+
+    if (action === 'confirm') {
+      await interaction.deferUpdate();
+
+      // Check if sender is admin
+      if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+        await interaction.followUp({ content: '❌ This command is staff only!', ephemeral: true });
+        return;
+      }
+
+      const receiverUserId = interaction.customId.split('_')[3];
+
+      // Extract card codes from the embed description
+      const embed = interaction.message.embeds[0];
+      const description = embed.description;
+      const lines = description.split('\n').slice(1); // Skip the "Send to..." line
+      
+      for (const line of lines) {
+        const match = line.match(/`([^`]+)`/);
+        if (match) {
+          const cardcode = match[1].toUpperCase();
+
+          // Find the card
+          const { data: card } = await supabase
+            .from('cards')
+            .select('*')
+            .eq('cardcode', cardcode)
+            .single();
+
+          if (!card) continue;
+
+          // Update receiver inventory
+          const { data: receiverInventory } = await supabase
+            .from('inventory')
+            .select('*')
+            .eq('user_id', receiverUserId)
+            .eq('card_id', card.card_id)
+            .single();
+
+          if (receiverInventory) {
+            await supabase
+              .from('inventory')
+              .update({ quantity: receiverInventory.quantity + 1 })
+              .eq('id', receiverInventory.id);
+          } else {
+            await supabase
+              .from('inventory')
+              .insert({
+                user_id: receiverUserId,
+                card_id: card.card_id,
+                quantity: 1
+              });
+          }
+        }
+      }
+
+      const resultEmbed = new EmbedBuilder()
+        .setColor(0xff00ff)
+        .setTitle('✅ Staff Gift Sent!')
+        .setDescription('🎁 Your staff gift has been delivered!')
+        .setTimestamp();
+
+      await interaction.editReply({ embeds: [resultEmbed], components: [] });
+    }
+  } catch (error) {
+    console.error('Error handling staff gift button:', error);
     await interaction.followUp({ content: '❌ An error occurred!', ephemeral: true });
   }
 }
