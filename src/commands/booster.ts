@@ -105,7 +105,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
     .setTitle('<a:5blu_bubbles:1436124726010318870> Booster Reward Claimed!')
-    .setDescription(`<a:hj_redstar:1363127624318320861> You received **10,000 coins** and **15 cards**!`)
+    .setDescription(`<:fullstar:1387609456824680528> You received **10,000 coins** and **15 cards**!`)
     .addFields(
       {
         name: '<:1_flower:1436124715797315687> Cards Received',

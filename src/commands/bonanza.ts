@@ -59,7 +59,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setColor(0xffd700)
       .setTitle('<a:5octo:1435458063740960778> Bonanza Claimed!')
-      .setDescription(`<a:hj_redstar:1363127624318320861> You received **25,000 coins**!\n\n*No legendary cards available yet.*`)
+      .setDescription(`<:fullstar:1387609456824680528> You received **25,000 coins**!\n\n*No legendary cards available yet.*`)
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -100,7 +100,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0xffcc00)
     .setTitle('<a:5octo:1435458063740960778> Bonanza Claimed!')
-    .setDescription(`<a:hj_redstar:1363127624318320861> You received **25,000 coins** and **20 legendary cards**!`)
+    .setDescription(`<:fullstar:1387609456824680528> You received **25,000 coins** and **20 legendary cards**!`)
     .addFields(
       {
         name: '<:2_shell:1436124721413357770> New Balance',
