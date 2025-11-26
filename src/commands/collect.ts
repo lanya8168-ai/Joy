@@ -131,8 +131,8 @@ async function showCollectPage(
     .setDescription(cardList || 'No cards on this page')
     .addFields(
       { name: 'Filters', value: filterText, inline: false },
-      { name: 'Progress', value: `${userCardIds.size} cards collected`, inline: true },
-      { name: 'Total Available', value: `${allCards.length} cards`, inline: true }
+      { name: '<:DSwhitecheck:1416237178694139934> Progress', value: `${userCardIds.size} cards collected`, inline: true },
+      { name: '<:DSwhiteno:1416237223979782306> Missing', value: `${allCards.length - userCardIds.size} cards`, inline: true }
     )
     .setFooter({ text: `Page ${page} / ${totalPages}` })
     .setTimestamp();
