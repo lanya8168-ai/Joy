@@ -86,10 +86,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
   }
 
-  const cardsInfo = selectedCards
-    .map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``)
-    .join('\n');
-
   let attachment = null;
   try {
     const imageUrls = selectedCards.filter((card: any) => card.image_url).map((card: any) => card.image_url);
@@ -106,11 +102,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setTitle('<a:5octo:1435458063740960778> Bonanza Claimed!')
     .setDescription(`<a:hj_redstar:1363127624318320861> You received **25,000 coins** and **20 legendary cards**!`)
     .addFields(
-      {
-        name: '<a:hj_white_butterfly:1362859754279665895> Legendary Cards',
-        value: cardsInfo,
-        inline: false
-      },
       {
         name: '<:2_shell:1436124721413357770> New Balance',
         value: `${newBalance} coins`,
