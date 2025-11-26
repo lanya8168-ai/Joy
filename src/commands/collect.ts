@@ -162,8 +162,8 @@ async function showCollectPage(
     );
 
   if (attachment) {
-    await interaction.editReply({ embeds: [embed], files: [attachment], components: [row] });
+    await interaction.editReply({ embeds: [embed], files: [attachment], components: [row as any] });
   } else {
-    await interaction.editReply({ embeds: [embed], components: [row] });
+    await interaction.editReply({ embeds: [embed], components: [row as any] });
   }
 }
