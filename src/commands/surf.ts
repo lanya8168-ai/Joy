@@ -20,7 +20,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.reply({ content: '❌ Error surfing. Please try again!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error surfing. Please try again!', ephemeral: true });
     return;
   }
 
@@ -28,7 +28,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+      await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
       return;
     }
 
@@ -43,17 +43,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    await interaction.reply({ content: '❌ Error surfing. Please try again!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error surfing. Please try again!', ephemeral: true });
     return;
   }
 
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
-    .setTitle('⚽ Surfing Complete!')
+    .setTitle('<a:5ball:1435457849072550023> Surfing Complete!')
     .setDescription(`You found **${result.reward} coins** while surfing!`)
     .addFields(
-      { name: '🌟 Reward', value: `${result.reward} coins`, inline: true },
-      { name: '🐚 New Balance', value: `${result.new_balance} coins`, inline: true }
+      { name: '<a:hj_redstar:1363127624318320861> Reward', value: `${result.reward} coins`, inline: true },
+      { name: '<:2_shell:1436124721413357770> New Balance', value: `${result.new_balance} coins`, inline: true }
     )
     .setTimestamp();
 

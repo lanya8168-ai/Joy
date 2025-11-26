@@ -13,7 +13,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.reply({ content: '❌ You need Administrator permission to use this command!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> You need Administrator permission to use this command!', ephemeral: true });
     return;
   }
 
@@ -26,7 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!card) {
-    await interaction.reply({ content: '❌ Card not found!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Card not found!', ephemeral: true });
     return;
   }
 
@@ -36,7 +36,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('card_id', cardId);
 
   if (error) {
-    await interaction.reply({ content: '❌ Error deleting card.', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error deleting card.', ephemeral: true });
     return;
   }
 

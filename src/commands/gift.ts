@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!sender) {
-    await interaction.editReply({ content: '❌ Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -43,13 +43,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!receiver) {
-    await interaction.editReply({ content: `❌ ${receiverUser.username} needs to use \`/start\` first!` });
+    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> ${receiverUser.username} needs to use \`/start\` first!` });
     return;
   }
 
   // Prevent self-gifting
   if (senderUserId === receiverUserId) {
-    await interaction.editReply({ content: '❌ You can\'t gift to yourself!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> You can\'t gift to yourself!' });
     return;
   }
 
@@ -88,7 +88,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   if (cardsToGift.length === 0) {
-    let errorMsg = '❌ No valid cards to gift!';
+    let errorMsg = '<:DSwhiteno:1416237223979782306> No valid cards to gift!';
     if (failedCards.length > 0) {
       errorMsg += `\n${failedCards.join('\n')}`;
     }
@@ -130,11 +130,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addComponents(
       new ButtonBuilder()
         .setCustomId(`gift_confirm_${senderUserId}_${receiverUserId}`)
-        .setLabel('✅ Send Gift')
+        .setLabel('<:DSwhitecheck:1416237178694139934> Send Gift')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId(`gift_cancel_${senderUserId}`)
-        .setLabel('❌ Cancel')
+        .setLabel('<:DSwhiteno:1416237223979782306> Cancel')
         .setStyle(ButtonStyle.Danger)
     );
 

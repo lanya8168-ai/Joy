@@ -33,7 +33,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (error || !card) {
-    await interaction.editReply({ content: `❌ Card with code **${cardcode}** not found!` });
+    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> Card with code **${cardcode}** not found!` });
     return;
   }
 

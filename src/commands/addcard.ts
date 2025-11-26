@@ -46,7 +46,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '❌ You need Administrator permission to use this command!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> You need Administrator permission to use this command!' });
     return;
   }
 
@@ -73,20 +73,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Database error:', error);
-    await interaction.editReply({ content: `❌ Error adding card to database: ${error.message}` });
+    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> Error adding card to database: ${error.message}` });
     return;
   }
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('✅ Card Added!')
+    .setTitle('<:DSwhitecheck:1416237178694139934> Card Added!')
     .setDescription(`Successfully added **${name}** from ${group}`)
     .addFields(
       { name: 'Card ID', value: `${data[0].card_id}`, inline: true },
       { name: 'Card Code', value: `${cardcode}`, inline: true },
       { name: 'Rarity', value: `${rarity}`, inline: true },
       { name: 'Group', value: group, inline: true },
-      { name: 'Droppable', value: droppable ? '✅ Yes' : '❌ No', inline: true }
+      { name: 'Droppable', value: droppable ? '<:DSwhitecheck:1416237178694139934> Yes' : '<:DSwhiteno:1416237223979782306> No', inline: true }
     )
     .setTimestamp();
 

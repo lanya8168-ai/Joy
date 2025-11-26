@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.reply({ content: '❌ Error claiming daily reward. Please try again!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error claiming daily reward. Please try again!', ephemeral: true });
     return;
   }
 
@@ -32,7 +32,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result || !result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+      await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
       return;
     }
 
@@ -47,7 +47,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    await interaction.reply({ content: '❌ Error claiming daily reward. Please try again!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error claiming daily reward. Please try again!', ephemeral: true });
     return;
   }
 
@@ -62,7 +62,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
       .setTitle('Daily Reward Claimed!')
-      .setDescription(`🐚 You received **${result.reward} coins**!\n\n*No legendary cards available yet.*`)
+      .setDescription(`<:2_shell:1436124721413357770> You received **${result.reward} coins**!\n\n*No legendary cards available yet.*`)
       .setTimestamp();
 
     await interaction.reply({ embeds: [embed] });
@@ -99,8 +99,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('🌸 Daily Reward Claimed!')
-    .setDescription(`🐚 You received **${dailyReward} coins**!\n\n🐚 You also received **${cardInfo}**`)
+    .setTitle('<:1_petal:1436124714526445761> Daily Reward Claimed!')
+    .setDescription(`<:2_shell:1436124721413357770> You received **${dailyReward} coins**!\n\n<:2_shell:1436124721413357770> You also received **${cardInfo}**`)
     .setTimestamp();
 
   if (selectedCard.image_url) {

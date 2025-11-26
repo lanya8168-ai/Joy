@@ -22,7 +22,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.editReply({ content: '❌ Error claiming weekly reward. Please try again!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -30,7 +30,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result || !result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.editReply({ content: '❌ Please use `/start` first to create your account!' });
+      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
       return;
     }
 
@@ -45,7 +45,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    await interaction.editReply({ content: '❌ Error claiming weekly reward. Please try again!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -58,7 +58,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!allCards || allCards.length === 0) {
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle('✅ Weekly Reward Claimed!')
+      .setTitle('<:DSwhitecheck:1416237178694139934> Weekly Reward Claimed!')
       .setDescription(`You received **${result.reward} coins**!\n\n*No cards available yet.*`)
       .setTimestamp();
 
@@ -138,7 +138,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('💫 Weekly Reward Claimed!')
+    .setTitle('<a:5blu_bubbles:1436124726010318870> Weekly Reward Claimed!')
     .setDescription(description)
     .setTimestamp();
 

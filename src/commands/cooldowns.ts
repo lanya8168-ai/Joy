@@ -17,7 +17,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
     return;
   }
 
@@ -32,7 +32,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addFields(
       { name: '📅 Daily Reward', value: formatCooldown(dailyCooldown), inline: true },
       { name: '📆 Weekly Reward', value: formatCooldown(weeklyCooldown), inline: true },
-      { name: '🏄 Surf', value: formatCooldown(surfCooldown), inline: true },
+      { name: '<a:5surfboard:1433597347031683114> Surf', value: formatCooldown(surfCooldown), inline: true },
       { name: '🎣 Drop', value: formatCooldown(dropCooldown), inline: true }
     )
     .setFooter({ text: 'All times are approximate' })

@@ -51,7 +51,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
     return;
   }
 
@@ -61,21 +61,21 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('🌸 Card Pack Shop')
-    .setDescription('Buy packs with your shells! 🐚')
+    .setTitle('<:1_petal:1436124714526445761> Card Pack Shop')
+    .setDescription('Buy packs with your shells! <:2_shell:1436124721413357770>')
     .addFields(
       {
-        name: '🌺 Available Packs',
+        name: '<:1_flower:1436124715797315687> Available Packs',
         value: packList,
         inline: false
       },
       {
-        name: '🐚 Your Balance',
+        name: '<:2_shell:1436124721413357770> Your Balance',
         value: `${user.coins} coins`,
         inline: false
       },
       {
-        name: '🎀 How to Buy',
+        name: '<a:hj_bowpurple:1363505358869495878> How to Buy',
         value: 'Use `/shop buy` and select the pack you want!',
         inline: false
       }
@@ -93,7 +93,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const pack = PACKS.find(p => p.id === packId);
   if (!pack) {
-    await interaction.editReply({ content: '❌ Invalid pack!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Invalid pack!' });
     return;
   }
 
@@ -104,13 +104,13 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '❌ Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
     return;
   }
 
   if (user.coins < pack.cost) {
     await interaction.editReply({ 
-      content: `❌ You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
+      content: `<:DSwhiteno:1416237223979782306> You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
     });
     return;
   }
@@ -121,7 +121,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   if (!allCards || allCards.length === 0) {
     await interaction.editReply({ 
-      content: '❌ No cards available yet! Ask an admin to add cards.' 
+      content: '<:DSwhiteno:1416237223979782306> No cards available yet! Ask an admin to add cards.' 
     });
     return;
   }
@@ -183,16 +183,16 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle(`🎀 ${pack.name} Purchased!`)
+    .setTitle(`<a:hj_bowpurple:1363505358869495878> ${pack.name} Purchased!`)
     .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`)
     .addFields(
       {
-        name: '🌟 Cards Received',
+        name: '<a:hj_redstar:1363127624318320861> Cards Received',
         value: cardsInfo || 'No cards',
         inline: false
       },
       {
-        name: '🐚 New Balance',
+        name: '<:2_shell:1436124721413357770> New Balance',
         value: `${newBalance} coins`,
         inline: true
       }

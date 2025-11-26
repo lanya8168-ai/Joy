@@ -59,7 +59,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const { data: allCards } = await query;
 
   if (!allCards || allCards.length === 0) {
-    await interaction.editReply({ content: '❌ No cards match your filters!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> No cards match your filters!' });
     return;
   }
 
@@ -97,7 +97,7 @@ async function showCollectPage(
   const cardList = pageCards
     .map((card: any, index: number) => {
       const hasCard = userCardIds.has(card.card_id);
-      const checkMark = hasCard ? '✅' : '❌';
+      const checkMark = hasCard ? '<:DSwhitecheck:1416237178694139934>' : '<:DSwhiteno:1416237223979782306>';
       const rarityEmoji = getRarityEmoji(card.rarity);
       const eraText = card.era ? ` • ${card.era}` : '';
       return `${checkMark} **${card.name}** (${card.group}) ${rarityEmoji}${eraText} • \`${card.cardcode}\``;
@@ -127,7 +127,7 @@ async function showCollectPage(
 
   const embed = new EmbedBuilder()
     .setColor(0x87ceeb)
-    .setTitle('🌺 Card Collection')
+    .setTitle('<:1_flower:1436124715797315687> Card Collection')
     .setDescription(cardList || 'No cards on this page')
     .addFields(
       { name: 'Filters', value: filterText, inline: false },

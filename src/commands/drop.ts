@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '❌ Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
     return;
   }
 
@@ -46,7 +46,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!allCards || allCards.length === 0) {
     await interaction.reply({ 
-      content: '❌ No droppable cards available yet! Ask an admin to add cards using `/addcard`.', 
+      content: '<:DSwhiteno:1416237223979782306> No droppable cards available yet! Ask an admin to add cards using `/addcard`.', 
       ephemeral: true 
     });
     return;
@@ -91,7 +91,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Drop error updating last_drop:', error);
-    await interaction.reply({ content: `❌ Error processing drop: ${error.message}`, ephemeral: true });
+    await interaction.reply({ content: `<:DSwhiteno:1416237223979782306> Error processing drop: ${error.message}`, ephemeral: true });
     return;
   }
 
@@ -104,7 +104,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       name: interaction.user.username, 
       iconURL: interaction.user.avatarURL() || undefined 
     })
-    .setTitle('🛟 You dove and found..')
+    .setTitle('<a:5lifesaver:1435457784576610374> You dove and found..')
     .setDescription(description)
     .setFooter({ text: 'Card dropped' })
     .setTimestamp();

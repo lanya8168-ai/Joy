@@ -30,7 +30,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!sender) {
-    await interaction.editReply({ content: '❌ Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -42,19 +42,19 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!receiver) {
-    await interaction.editReply({ content: `❌ ${receiverUser.username} needs to use \`/start\` first!` });
+    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> ${receiverUser.username} needs to use \`/start\` first!` });
     return;
   }
 
   // Prevent self-payment
   if (senderUserId === receiverUserId) {
-    await interaction.editReply({ content: '❌ You can\'t pay yourself!' });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> You can\'t pay yourself!' });
     return;
   }
 
   // Check sender has enough coins
   if (sender.coins < amount) {
-    await interaction.editReply({ content: `❌ You only have **${sender.coins}** coins, but tried to pay **${amount}**!` });
+    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> You only have **${sender.coins}** coins, but tried to pay **${amount}**!` });
     return;
   }
 
