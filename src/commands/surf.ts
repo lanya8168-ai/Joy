@@ -49,11 +49,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
-    .setTitle('<a:5ball:1435457849072550023> Surfing Complete!')
+    .setTitle('<a:hj_bowpurple:1363505358869495878> Surfing Complete!')
     .setDescription(`You found **${result.reward} coins** while surfing!`)
     .addFields(
       { name: '<a:hj_redstar:1363127624318320861> Reward', value: `${result.reward} coins`, inline: true },
-      { name: '<:2_shell:1436124721413357770> New Balance', value: `${result.new_balance} coins`, inline: true }
+      { name: '<a:hj_redstar:1363127624318320861> New Balance', value: `${result.new_balance} coins`, inline: true }
     )
     .setTimestamp();
 
