@@ -71,7 +71,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('<a:hj_redstar:1363127624318320861> Card Pack Shop')
+    .setTitle('<:2_shell:1436124721413357770> Card Pack Shop')
     .setDescription('Buy packs with your shells! <:2_shell:1436124721413357770>')
     .addFields(
       {
@@ -234,7 +234,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle(`<a:hj_redstar:1363127624318320861> ${pack.name} Purchased!`)
+    .setTitle(`<a:5ball:1435457849072550023> ${pack.name} Purchased!`)
     .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`)
     .addFields(
       {
