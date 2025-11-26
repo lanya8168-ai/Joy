@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -31,9 +31,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     
     if (minutesPassed < COOLDOWN_MINUTES) {
       const secondsRemaining = Math.ceil((COOLDOWN_MINUTES - minutesPassed) * 60);
-      await interaction.reply({ 
-        content: `⏳ You can use /drop again in **${secondsRemaining}** seconds!`, 
-        ephemeral: true 
+      await interaction.editReply({ 
+        content: `⏳ You can use /drop again in **${secondsRemaining}** seconds!` 
       });
       return;
     }
@@ -45,9 +44,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('droppable', true);
 
   if (!allCards || allCards.length === 0) {
-    await interaction.reply({ 
-      content: '<:DSwhiteno:1416237223979782306> No droppable cards available yet! Ask an admin to add cards using `/addcard`.', 
-      ephemeral: true 
+    await interaction.editReply({ 
+      content: '<:DSwhiteno:1416237223979782306> No droppable cards available yet! Ask an admin to add cards using `/addcard`.' 
     });
     return;
   }
@@ -91,7 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Drop error updating last_drop:', error);
-    await interaction.reply({ content: `<:DSwhiteno:1416237223979782306> Error processing drop: ${error.message}`, ephemeral: true });
+    await interaction.editReply({ content: `<:DSwhiteno:1416237223979782306> Error processing drop: ${error.message}` });
     return;
   }
 
@@ -113,5 +111,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     embed.setImage(selectedCard.image_url);
   }
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }

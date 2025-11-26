@@ -26,7 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       )
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
     return;
   }
 
@@ -35,7 +35,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .insert([{ user_id: userId, coins: 100 }]);
 
   if (error) {
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error creating your account. Please try again!', ephemeral: true });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Error creating your account. Please try again!' });
     return;
   }
 
@@ -51,5 +51,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     )
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }

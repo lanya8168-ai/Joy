@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error claiming daily reward. Please try again!', ephemeral: true });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Error claiming daily reward. Please try again!' });
     return;
   }
 
@@ -32,7 +32,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result || !result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!', ephemeral: true });
+      await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Please use `/start` first to create your account!' });
       return;
     }
 
@@ -43,11 +43,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`)
         .setTimestamp();
 
-      await interaction.reply({ embeds: [embed], ephemeral: true });
+      await interaction.editReply({ embeds: [embed] });
       return;
     }
 
-    await interaction.reply({ content: '<:DSwhiteno:1416237223979782306> Error claiming daily reward. Please try again!', ephemeral: true });
+    await interaction.editReply({ content: '<:DSwhiteno:1416237223979782306> Error claiming daily reward. Please try again!' });
     return;
   }
 
@@ -65,7 +65,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setDescription(`<:2_shell:1436124721413357770> You received **${result.reward} coins**!\n\n*No legendary cards available yet.*`)
       .setTimestamp();
 
-    await interaction.reply({ embeds: [embed] });
+    await interaction.editReply({ embeds: [embed] });
     return;
   }
 
@@ -107,5 +107,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     embed.setImage(selectedCard.image_url);
   }
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }
