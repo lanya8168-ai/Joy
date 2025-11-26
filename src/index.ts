@@ -520,7 +520,7 @@ async function handleCollectButton(interaction: any) {
     const cardList = pageCards
       .map((card: any) => {
         const hasCard = userCardIds.has(card.card_id);
-        const checkMark = hasCard ? '<:aa_whitecheckmart:1382679947230969917>' : '<:DSwhiteno:1416237223979782306>';
+        const checkMark = hasCard ? '✅' : '❌';
         const rarityEmoji = getRarityEmoji(card.rarity);
         const eraText = card.era ? ` • ${card.era}` : '';
         return `${checkMark} **${card.name}** (${card.group}) ${rarityEmoji}${eraText} • \`${card.cardcode}\``;
@@ -550,7 +550,7 @@ async function handleCollectButton(interaction: any) {
 
     const embed = new EmbedBuilder()
       .setColor(0x87ceeb)
-      .setTitle('<:1_flower:1436124715797315687> Card Collection')
+      .setTitle('🌺 Card Collection')
       .setDescription(cardList || 'No cards on this page')
       .addFields(
         { name: 'Filters', value: filterText, inline: false },

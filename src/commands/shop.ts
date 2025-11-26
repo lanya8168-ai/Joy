@@ -61,21 +61,21 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('<:1_petal:1436124714526445761> Card Pack Shop')
-    .setDescription('Buy packs with your shells! <:2_shell:1436124721413357770>')
+    .setTitle('🌸 Card Pack Shop')
+    .setDescription('Buy packs with your shells! 🐚')
     .addFields(
       {
-        name: '<:1_flower:1436124715797315687> Available Packs',
+        name: '🌺 Available Packs',
         value: packList,
         inline: false
       },
       {
-        name: '<:2_shell:1436124721413357770> Your Balance',
+        name: '🐚 Your Balance',
         value: `${user.coins} coins`,
         inline: false
       },
       {
-        name: '<a:hj_bowpurple:1363505358869495878> How to Buy',
+        name: '🎀 How to Buy',
         value: 'Use `/shop buy` and select the pack you want!',
         inline: false
       }
@@ -183,16 +183,16 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle(`<a:hj_bowpurple:1363505358869495878> ${pack.name} Purchased!`)
+    .setTitle(`🎀 ${pack.name} Purchased!`)
     .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`)
     .addFields(
       {
-        name: '<a:hj_redstar:1363127624318320861> Cards Received',
+        name: '🌟 Cards Received',
         value: cardsInfo || 'No cards',
         inline: false
       },
       {
-        name: '<:2_shell:1436124721413357770> New Balance',
+        name: '🐚 New Balance',
         value: `${newBalance} coins`,
         inline: true
       }

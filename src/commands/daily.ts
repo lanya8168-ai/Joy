@@ -98,8 +98,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('<:1_petal:1436124714526445761> Daily Reward Claimed!')
-    .setDescription(`<:2_shell:1436124721413357770> You received **${dailyReward} coins**!\n\n<:2_shell:1436124721413357770> You also received **${cardInfo}**`)
+    .setTitle('🌸 Daily Reward Claimed!')
+    .setDescription(`🐚 You received **${dailyReward} coins**!\n\n🐚 You also received **${cardInfo}**`)
     .setTimestamp();
 
   if (selectedCard.image_url) {

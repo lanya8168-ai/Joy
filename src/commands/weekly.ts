@@ -138,7 +138,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('<a:5blu_bubbles:1436124726010318870> Weekly Reward Claimed!')
+    .setTitle('💫 Weekly Reward Claimed!')
     .setDescription(description)
     .setTimestamp();
 

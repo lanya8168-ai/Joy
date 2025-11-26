@@ -103,7 +103,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       name: interaction.user.username, 
       iconURL: interaction.user.avatarURL() || undefined 
     })
-    .setTitle('<a:5lifesaver:1435457784576610374> You dove and found..')
+    .setTitle('🛟 You dove and found..')
     .setDescription(description)
     .setFooter({ text: 'Card dropped' })
     .setTimestamp();
