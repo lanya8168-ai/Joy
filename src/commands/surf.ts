@@ -3,6 +3,7 @@ import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 
 const SURF_COOLDOWN_HOURS = 1;
+const BOOSTER_USER_ID = '1403958587843149937';
 
 export const data = new SlashCommandBuilder()
   .setName('surf')
@@ -13,10 +14,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
   const reward = Math.floor(Math.random() * 1500) + 1500;
 
+  const cooldownHours = userId === BOOSTER_USER_ID ? 0 : SURF_COOLDOWN_HOURS;
   const { data, error } = await supabase.rpc('claim_surf_reward', {
     p_user_id: userId,
     p_reward: reward,
-    p_cooldown_hours: SURF_COOLDOWN_HOURS
+    p_cooldown_hours: cooldownHours
   });
 
   if (error || !data) {
