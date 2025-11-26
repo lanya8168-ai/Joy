@@ -85,7 +85,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
         inline: false
       },
       {
-        name: '<a:hj_bowpurple:1363505358869495878> How to Buy',
+        name: '<a:hj_white_butterfly:1362859754279665895> How to Buy',
         value: 'Use `/shop buy` and select the pack you want!',
         inline: false
       }
@@ -238,7 +238,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`)
     .addFields(
       {
-        name: '<a:hj_bowpurple:1363505358869495878> Cards Received',
+        name: '<a:hj_white_butterfly:1362859754279665895> Cards Received',
         value: cardsInfo || 'No cards',
         inline: false
       },

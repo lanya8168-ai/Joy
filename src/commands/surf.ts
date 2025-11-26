@@ -49,7 +49,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
-    .setTitle('<a:hj_bowpurple:1363505358869495878> Surfing Complete!')
+    .setTitle('<a:5surfboard:1433597347031683114> Surfing Complete!')
     .setDescription(`You found **${result.reward} coins** while surfing!`)
     .addFields(
       { name: '<a:hj_redstar:1363127624318320861> Reward', value: `${result.reward} coins`, inline: true },
