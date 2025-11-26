@@ -70,7 +70,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
         inline: false
       },
       {
-        name: '<:2_shell:1436124721413357770> Your Balance',
+        name: '<:06_sparks:1430048824344449156> Your Balance',
         value: `${user.coins} coins`,
         inline: false
       },
