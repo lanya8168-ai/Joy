@@ -96,13 +96,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   
   if (groupFilter) {
     filteredInventory = filteredInventory.filter((item: any) => 
-      item.cards.group.toLowerCase() === groupFilter.toLowerCase()
+      item.cards.group.toLowerCase().includes(groupFilter.toLowerCase())
     );
   }
 
   if (idolFilter) {
     filteredInventory = filteredInventory.filter((item: any) =>
-      item.cards.name.toLowerCase() === idolFilter.toLowerCase()
+      item.cards.name.toLowerCase().includes(idolFilter.toLowerCase())
     );
   }
 
