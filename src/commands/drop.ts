@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { getRandomRarity, getRarityColor, getRarityEmoji } from '../utils/cards.js';
+import { DEV_USER_ID } from '../utils/constants.js';
 
 const COOLDOWN_MINUTES = 2;
 
@@ -23,8 +24,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Check cooldown (skip for whitelisted user)
-  if (userId !== '1403958587843149937' && user.last_drop) {
+  // Check cooldown (skip for dev user)
+  if (userId !== DEV_USER_ID && user.last_drop) {
     const lastDropTime = new Date(user.last_drop).getTime();
     const nowTime = Date.now();
     const minutesPassed = (nowTime - lastDropTime) / (1000 * 60);

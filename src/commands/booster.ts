@@ -3,10 +3,9 @@ import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 import { AttachmentBuilder } from 'discord.js';
+import { DEV_USER_ID, BOOSTER_ROLE_ID } from '../utils/constants.js';
 
 const BOOSTER_COOLDOWN_HOURS = 6;
-const BOOSTER_USER_ID = '1403958587843149937';
-const BOOSTER_ROLE_ID = '1442680565479510077';
 
 export const data = new SlashCommandBuilder()
   .setName('booster')
@@ -16,9 +15,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
 
-  // Check if user is booster
+  // Check if user is booster or dev
   const member = interaction.member as any;
-  if (userId !== BOOSTER_USER_ID && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
+  if (userId !== DEV_USER_ID && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
     await interaction.editReply({ 
       content: '<:IMG_9904:1443371148543791218> This command is only available to boosters!' 
     });
@@ -36,8 +35,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Check cooldown (skip for special user)
-  if (userId !== BOOSTER_USER_ID && user.last_booster && new Date(user.last_booster).getTime() > Date.now() - BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
+  // Check cooldown (skip for dev user)
+  if (userId !== DEV_USER_ID && user.last_booster && new Date(user.last_booster).getTime() > Date.now() - BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
     const cooldownMs = new Date(user.last_booster).getTime() + (BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
     const embed = new EmbedBuilder()
       .setColor(0xff0000)

@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from '
 import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 import { getRarityEmoji } from '../utils/cards.js';
+import { DEV_USER_ID } from '../utils/constants.js';
 
 const MIN_COINS = 50;
 const MAX_COINS = 100;
@@ -17,10 +18,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const dailyReward = Math.floor(Math.random() * (MAX_COINS - MIN_COINS + 1)) + MIN_COINS;
 
+  const cooldownHours = userId === DEV_USER_ID ? 0 : DAILY_COOLDOWN_HOURS;
+
   const { data, error } = await supabase.rpc('claim_daily_reward', {
     p_user_id: userId,
     p_reward: dailyReward,
-    p_cooldown_hours: DAILY_COOLDOWN_HOURS
+    p_cooldown_hours: cooldownHours
   });
 
   if (error || !data) {
