@@ -3,11 +3,11 @@ import { supabase } from '../database/supabase.js';
 
 export const data = new SlashCommandBuilder()
   .setName('addcard')
-  .setDescription('Add a new K-pop card or edit existing by cardcode (Admin only)')
+  .setDescription('Add or edit a K-pop card by cardcode (Admin only)')
   .addStringOption(option =>
     option.setName('cardcode')
-      .setDescription('Card code/ID (e.g., BP001) - leave empty to add new card')
-      .setRequired(false))
+      .setDescription('Card code/ID (e.g., BP001) - use this to add or edit')
+      .setRequired(true))
   .addStringOption(option =>
     option.setName('name')
       .setDescription('Card name (e.g., member name)')
@@ -50,7 +50,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const cardcodeInput = interaction.options.getString('cardcode');
+  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
   const name = interaction.options.getString('name');
   const group = interaction.options.getString('group');
   const rarity = interaction.options.getInteger('rarity');
@@ -58,19 +58,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const droppable = interaction.options.getBoolean('droppable');
   const imageUrl = interaction.options.getString('image_url');
 
-  // EDIT MODE: cardcode provided
-  if (cardcodeInput) {
-    const { data: existingCard } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('cardcode', cardcodeInput.toUpperCase())
-      .single();
+  // Check if card exists with this cardcode
+  const { data: existingCard } = await supabase
+    .from('cards')
+    .select('*')
+    .eq('cardcode', cardcode)
+    .single();
 
-    if (!existingCard) {
-      await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Card with code **${cardcodeInput}** not found!` });
-      return;
-    }
-
+  // EDIT MODE: card exists
+  if (existingCard) {
     const updates: any = {};
     if (name) updates.name = name;
     if (group) updates.group = group;
@@ -98,7 +94,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setColor(0xffaa00)
       .setTitle('<:IMG_9902:1443367697286172874> Card Updated!')
-      .setDescription(`Successfully updated card **${cardcodeInput}**`)
+      .setDescription(`Successfully updated card **${cardcode}**`)
       .addFields({ name: 'Card ID', value: `${existingCard.card_id}`, inline: true })
       .setTimestamp();
 
@@ -113,20 +109,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // ADD MODE: no cardcode provided
+  // ADD MODE: card doesn't exist, create new one
   if (!name || !group || !rarity) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> To add a new card, please provide: name, group, and rarity!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> To add a new card with code **' + cardcode + '**, please provide: name, group, and rarity!' });
     return;
   }
-
-  const newCardcode = interaction.options.getString('cardcode') || `NEW${Date.now()}`;
 
   const { data, error } = await supabase
     .from('cards')
     .insert([{
       name: name,
       group: group,
-      cardcode: newCardcode.toUpperCase(),
+      cardcode: cardcode,
       era: era,
       rarity: rarity,
       droppable: droppable ?? true,
@@ -146,7 +140,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(`Successfully added **${name}** from ${group}`)
     .addFields(
       { name: 'Card ID', value: `${data[0].card_id}`, inline: true },
-      { name: 'Card Code', value: `${data[0].cardcode}`, inline: true },
+      { name: 'Card Code', value: cardcode, inline: true },
       { name: 'Rarity', value: `${rarity}`, inline: true },
       { name: 'Group', value: group, inline: true },
       { name: 'Droppable', value: droppable ?? true ? '<:IMG_9902:1443367697286172874> Yes' : '<:IMG_9904:1443371148543791218> No', inline: true }
