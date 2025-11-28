@@ -3,10 +3,10 @@ import { supabase } from '../database/supabase.js';
 
 export const data = new SlashCommandBuilder()
   .setName('editcard')
-  .setDescription('Edit a card in the database (Admin only)')
-  .addIntegerOption(option =>
-    option.setName('card_id')
-      .setDescription('The ID of the card to edit')
+  .setDescription('Edit a card by cardcode (Admin only)')
+  .addStringOption(option =>
+    option.setName('cardcode')
+      .setDescription('Card code/ID to edit (e.g., NWSK#101)')
       .setRequired(true))
   .addStringOption(option =>
     option.setName('name')
@@ -17,8 +17,8 @@ export const data = new SlashCommandBuilder()
       .setDescription('New group name')
       .setRequired(false))
   .addStringOption(option =>
-    option.setName('cardcode')
-      .setDescription('New card code/ID')
+    option.setName('new_cardcode')
+      .setDescription('New card code (to rename the code itself)')
       .setRequired(false))
   .addStringOption(option =>
     option.setName('era')
@@ -54,10 +54,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const cardId = interaction.options.getInteger('card_id', true);
+  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
   const name = interaction.options.getString('name');
   const group = interaction.options.getString('group');
-  const cardcode = interaction.options.getString('cardcode');
+  const newCardcode = interaction.options.getString('new_cardcode');
   const era = interaction.options.getString('era');
   const rarity = interaction.options.getInteger('rarity');
   const droppable = interaction.options.getBoolean('droppable');
@@ -66,18 +66,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const { data: existingCard } = await supabase
     .from('cards')
     .select('*')
-    .eq('card_id', cardId)
+    .eq('cardcode', cardcode)
     .single();
 
   if (!existingCard) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Card not found!' });
+    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Card with code **${cardcode}** not found!` });
     return;
   }
 
   const updates: any = {};
   if (name) updates.name = name;
   if (group) updates.group = group;
-  if (cardcode) updates.cardcode = cardcode;
+  if (newCardcode) updates.cardcode = newCardcode.toUpperCase();
   if (era) updates.era = era;
   if (rarity) updates.rarity = rarity;
   if (droppable !== null) updates.droppable = droppable;
@@ -91,7 +91,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const { error } = await supabase
     .from('cards')
     .update(updates)
-    .eq('card_id', cardId);
+    .eq('card_id', existingCard.card_id);
 
   if (error) {
     console.error('Database error:', error);
@@ -107,8 +107,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (group) {
     fields.push({ name: 'Group', value: `${existingCard.group} → ${group}`, inline: false });
   }
-  if (cardcode) {
-    fields.push({ name: 'Card Code', value: `${existingCard.cardcode} → ${cardcode}`, inline: false });
+  if (newCardcode) {
+    fields.push({ name: 'Card Code', value: `${existingCard.cardcode} → ${newCardcode.toUpperCase()}`, inline: false });
   }
   if (era) {
     fields.push({ name: 'Era', value: `${existingCard.era || 'None'} → ${era}`, inline: false });
@@ -126,7 +126,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
     .setTitle('✏️ Card Updated!')
-    .setDescription(`Successfully updated card ID **${cardId}** (${existingCard.name})`)
+    .setDescription(`Successfully updated card **${cardcode}**`)
     .addFields(...fields)
     .setTimestamp();
 
