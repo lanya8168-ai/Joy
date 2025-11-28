@@ -98,6 +98,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.customId.startsWith('collect_')) {
       await handleCollectButton(interaction);
     }
+    // Handle cardid pagination buttons
+    if (interaction.customId.startsWith('cardid_')) {
+      await handleCardIDButton(interaction);
+    }
     return;
   }
 
@@ -646,6 +650,89 @@ function startHealthCheckServer() {
     console.log(`🏥 Health check server running on port ${PORT}`);
     console.log(`   Access at: http://localhost:${PORT}/health`);
   });
+}
+
+async function handleCardIDButton(interaction: any) {
+  const { supabase } = await import('./database/supabase.js');
+  const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = await import('discord.js');
+
+  try {
+    const action = interaction.customId.split('_')[1]; // 'next' or 'prev'
+    const userId = interaction.customId.split('_')[2];
+
+    if (action === 'page') return; // Just a display button
+
+    // Only allow user to interact with cardid
+    if (interaction.user.id !== userId) {
+      await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> This is not for you!', ephemeral: true });
+      return;
+    }
+
+    await interaction.deferUpdate();
+
+    const { data: allCards } = await supabase
+      .from('cards')
+      .select('*')
+      .order('card_id', { ascending: true });
+
+    if (!allCards || allCards.length === 0) {
+      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> No cards available!' });
+      return;
+    }
+
+    const CARDS_PER_PAGE = 5;
+    const totalPages = Math.ceil(allCards.length / CARDS_PER_PAGE);
+    const currentPageText = interaction.message.embeds[0]?.footer?.text || 'Page 1 / 1';
+    const currentPage = parseInt(currentPageText.split(' ')[1]);
+    let newPage = currentPage;
+
+    if (action === 'next') {
+      newPage = Math.min(currentPage + 1, totalPages);
+    } else if (action === 'prev') {
+      newPage = Math.max(currentPage - 1, 1);
+    }
+
+    const startIndex = (newPage - 1) * CARDS_PER_PAGE;
+    const endIndex = startIndex + CARDS_PER_PAGE;
+    const pageCards = allCards.slice(startIndex, endIndex);
+
+    const cardList = pageCards
+      .map((card: any) => {
+        return `**ID: ${card.card_id}** • ${card.name} (${card.group}) • \`${card.cardcode}\` • Rarity: ${card.rarity}`;
+      })
+      .join('\n');
+
+    const embed = new EmbedBuilder()
+      .setColor(0x00d4ff)
+      .setTitle('🎴 All Card IDs')
+      .setDescription(cardList)
+      .setFooter({ text: `Page ${newPage} / ${totalPages}` })
+      .setTimestamp();
+
+    const row = new ActionRowBuilder()
+      .addComponents(
+        new ButtonBuilder()
+          .setCustomId(`cardid_prev_${userId}`)
+          .setLabel('← Previous')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(newPage === 1),
+        new ButtonBuilder()
+          .setCustomId(`cardid_page`)
+          .setLabel(`${newPage} / ${totalPages}`)
+          .setStyle(ButtonStyle.Primary)
+          .setDisabled(true),
+        new ButtonBuilder()
+          .setCustomId(`cardid_next_${userId}`)
+          .setLabel('Next →')
+          .setStyle(ButtonStyle.Secondary)
+          .setDisabled(newPage === totalPages)
+      );
+
+    await interaction.editReply({ embeds: [embed], components: [row] });
+  } catch (error) {
+    console.error('Error handling cardid button:', error);
+    await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> An error occurred!', ephemeral: true });
+  }
 }
 
 async function main() {
