@@ -112,12 +112,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (!interaction.isChatInputCommand()) return;
 
-  const { DEV_USER_ID } = await import('./utils/constants.js');
+  const { DEV_USER_ID, LOCKDOWN_WHITELIST } = await import('./utils/constants.js');
   const globalState = (global as any).botState;
   const userId = interaction.user.id;
 
-  // Check lockdown mode (allow dev user and lockdown command)
-  if (globalState.lockdownMode && userId !== DEV_USER_ID && interaction.commandName !== 'lockdown') {
+  // Check lockdown mode (allow whitelisted users and lockdown command)
+  if (globalState.lockdownMode && !LOCKDOWN_WHITELIST.includes(userId) && interaction.commandName !== 'lockdown') {
     await interaction.reply({ 
       content: '🔒 **Lockdown Active**: All commands are currently disabled.',
       ephemeral: true 
