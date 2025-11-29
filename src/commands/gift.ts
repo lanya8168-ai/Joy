@@ -130,11 +130,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addComponents(
       new ButtonBuilder()
         .setCustomId(`gift_confirm_${senderUserId}_${receiverUserId}`)
-        .setLabel('<:IMG_9902:1443367697286172874> Confirm')
+        .setLabel('<:DSwhitecheck:1416237178694139934> Confirm')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId(`gift_cancel_${senderUserId}`)
-        .setLabel('<:IMG_9904:1443371148543791218> Cancel')
+        .setLabel('<:DSwhiteno:1416237223979782306> Cancel')
         .setStyle(ButtonStyle.Danger)
     );
 
