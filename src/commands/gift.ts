@@ -130,7 +130,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addComponents(
       new ButtonBuilder()
         .setCustomId(`gift_confirm_${senderUserId}_${receiverUserId}`)
-        .setLabel('<:hj_whitebow:1363510922869735514> Send Gift')
+        .setLabel('<:IMG_9902:1443367697286172874> Confirm')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId(`gift_cancel_${senderUserId}`)
