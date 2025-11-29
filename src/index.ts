@@ -12,6 +12,11 @@ interface Command {
   execute: (interaction: any) => Promise<void>;
 }
 
+// Global bot state for lockdown mode
+(global as any).botState = {
+  lockdownMode: false
+};
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -106,6 +111,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (!interaction.isChatInputCommand()) return;
+
+  const { DEV_USER_ID } = await import('./utils/constants.js');
+  const globalState = (global as any).botState;
+  const userId = interaction.user.id;
+
+  // Check lockdown mode (allow dev user and lockdown command)
+  if (globalState.lockdownMode && userId !== DEV_USER_ID && interaction.commandName !== 'lockdown') {
+    await interaction.reply({ 
+      content: '🔒 **Lockdown Active**: All commands are currently disabled.',
+      ephemeral: true 
+    });
+    return;
+  }
 
   const command = commands.get(interaction.commandName);
 
