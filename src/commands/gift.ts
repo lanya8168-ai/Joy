@@ -130,11 +130,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addComponents(
       new ButtonBuilder()
         .setCustomId(`gift_confirm_${senderUserId}_${receiverUserId}`)
-        .setLabel('<:DSwhitecheck:1416237178694139934> Confirm')
+        .setLabel('Yes')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId(`gift_cancel_${senderUserId}`)
-        .setLabel('<:DSwhiteno:1416237223979782306> Cancel')
+        .setLabel('No')
         .setStyle(ButtonStyle.Danger)
     );
 
