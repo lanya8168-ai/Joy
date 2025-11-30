@@ -125,14 +125,18 @@ async function showCollectPage(
     rarityFilter && `Rarity: ${rarityFilter}★`
   ].filter(Boolean).join(' • ') || 'No filters';
 
+  // Count owned and missing in filtered results
+  const ownedInFiltered = allCards.filter((card: any) => userCardIds.has(card.card_id)).length;
+  const missingInFiltered = allCards.length - ownedInFiltered;
+
   const embed = new EmbedBuilder()
     .setColor(0x87ceeb)
     .setTitle('<:1_flower:1436124715797315687> Card Collection')
     .setDescription(cardList || 'No cards on this page')
     .addFields(
       { name: 'Filters', value: filterText, inline: false },
-      { name: '<:IMG_9902:1443367697286172874> Progress', value: `${userCardIds.size} cards collected`, inline: true },
-      { name: '<:IMG_9904:1443371148543791218> Missing', value: `${allCards.length - userCardIds.size} cards`, inline: true }
+      { name: '<:IMG_9902:1443367697286172874> Progress', value: `${ownedInFiltered} cards collected`, inline: true },
+      { name: '<:IMG_9904:1443371148543791218> Missing', value: `${missingInFiltered} cards`, inline: true }
     )
     .setFooter({ text: `Page ${page} / ${totalPages}` })
     .setTimestamp();
