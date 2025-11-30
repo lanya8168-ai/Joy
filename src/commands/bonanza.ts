@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, Attachm
 import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
-import { DEV_USER_ID, BOOSTER_ROLE_ID } from '../utils/constants.js';
+import { BOOSTER_ROLE_ID, isAdminUser } from '../utils/constants.js';
 
 const BONANZA_COOLDOWN_HOURS = 6;
 
@@ -14,9 +14,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
 
-  // Check if user is booster or dev
+  // Check if user is booster or admin
   const member = interaction.member as any;
-  if (userId !== DEV_USER_ID && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
+  if (!isAdminUser(userId) && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
     await interaction.editReply({ 
       content: '<:IMG_9904:1443371148543791218> This command is only available to boosters!' 
     });
@@ -34,8 +34,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Check cooldown (skip for dev user)
-  if (userId !== DEV_USER_ID && user.last_bonanza && new Date(user.last_bonanza).getTime() > Date.now() - BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000) {
+  // Check cooldown (skip for admin users)
+  if (!isAdminUser(userId) && user.last_bonanza && new Date(user.last_bonanza).getTime() > Date.now() - BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000) {
     const cooldownMs = new Date(user.last_bonanza).getTime() + (BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
     const embed = new EmbedBuilder()
       .setColor(0xff0000)
@@ -116,6 +116,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         inline: true
       }
     )
+    .setFooter({ text: `User ID: ${userId}` })
     .setTimestamp();
 
   if (attachment) {
