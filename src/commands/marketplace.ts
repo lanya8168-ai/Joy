@@ -63,7 +63,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.', ephemeral: true });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.' });
     return;
   }
 
@@ -71,14 +71,13 @@ async function handleList(interaction: ChatInputCommandInteraction) {
 
   if (!result.success) {
     if (result.error === 'insufficient_cards') {
-      await interaction.reply({ 
-        content: `<:IMG_9904:1443371148543791218> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`, 
-        ephemeral: true 
+      await interaction.editReply({ 
+        content: `<:IMG_9904:1443371148543791218> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`
       });
       return;
     }
 
-    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.', ephemeral: true });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.' });
     return;
   }
 
@@ -93,7 +92,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
     )
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }
 
 async function handleBrowse(interaction: ChatInputCommandInteraction) {
@@ -115,7 +114,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .limit(10);
 
   if (!listings || listings.length === 0) {
-    await interaction.reply({ content: '🛒 The marketplace is empty! No cards are currently for sale.', ephemeral: true });
+    await interaction.editReply({ content: '🛒 The marketplace is empty! No cards are currently for sale.' });
     return;
   }
 
@@ -134,7 +133,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .setFooter({ text: 'Use /mp buy <listing_id> to purchase' })
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }
 
 async function handleBuy(interaction: ChatInputCommandInteraction) {
@@ -157,7 +156,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!listing) {
-    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Listing not found!', ephemeral: true });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Listing not found!' });
     return;
   }
 
@@ -167,7 +166,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Error purchasing card.', ephemeral: true });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error purchasing card.' });
     return;
   }
 
@@ -175,29 +174,28 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   if (!result.success) {
     if (result.error === 'listing_not_found') {
-      await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Listing not found or already sold!', ephemeral: true });
+      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Listing not found or already sold!' });
       return;
     }
 
     if (result.error === 'cannot_buy_own_listing') {
-      await interaction.reply({ content: '<:IMG_9904:1443371148543791218> You cannot buy your own listing!', ephemeral: true });
+      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You cannot buy your own listing!' });
       return;
     }
 
     if (result.error === 'buyer_not_found') {
-      await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!', ephemeral: true });
+      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
       return;
     }
 
     if (result.error === 'insufficient_funds') {
-      await interaction.reply({ 
-        content: `<:IMG_9904:1443371148543791218> You need ${result.required} coins! You have ${result.available} coins.`, 
-        ephemeral: true 
+      await interaction.editReply({ 
+        content: `<:IMG_9904:1443371148543791218> You need ${result.required} coins! You have ${result.available} coins.`
       });
       return;
     }
 
-    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Error purchasing card.', ephemeral: true });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error purchasing card.' });
     return;
   }
 
@@ -214,5 +212,5 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     )
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }
