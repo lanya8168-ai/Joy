@@ -25,6 +25,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
+  const userId = interaction.user.id;
 
   const { data: card, error } = await supabase
     .from('cards')
@@ -37,6 +38,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  // Check if user owns this card
+  const { data: inventoryItem } = await supabase
+    .from('inventory')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('card_id', card.card_id)
+    .single();
+
   const rarityEmoji = getRarityEmoji(card.rarity);
   const description = `**${card.name}** (${card.group}) ${rarityEmoji}\n${card.era || 'N/A'} • \`${card.cardcode}\``;
 
@@ -46,6 +55,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(description)
     .setFooter({ text: `Rarity: ${card.rarity}/5 • Droppable: ${card.droppable ? 'Yes' : 'No'}` })
     .setTimestamp();
+
+  if (inventoryItem && inventoryItem.quantity > 0) {
+    embed.addFields({ name: '📦 Owned Copies', value: `${inventoryItem.quantity}`, inline: true });
+  }
 
   if (card.image_url) {
     embed.setImage(card.image_url);
