@@ -60,16 +60,16 @@ function generateListingCode(): string {
 
 async function handleList(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
-  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
+  const cardcode = interaction.options.getString('cardcode', true);
   const price = interaction.options.getInteger('price', true);
   const quantity = interaction.options.getInteger('quantity') || 1;
 
   // Get card by cardcode
-  const { data: card } = await supabase
+  const { data: allCards } = await supabase
     .from('cards')
-    .select('card_id')
-    .ilike('cardcode', cardcode)
-    .single();
+    .select('card_id');
+
+  const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
   if (!card) {
     await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Card not found! Check the card code.' });

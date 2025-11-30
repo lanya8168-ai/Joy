@@ -50,7 +50,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
+  const cardcode = interaction.options.getString('cardcode', true);
   const name = interaction.options.getString('name');
   const group = interaction.options.getString('group');
   const rarity = interaction.options.getInteger('rarity');
@@ -59,11 +59,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const imageUrl = interaction.options.getString('image_url');
 
   // Check if card exists with this cardcode
-  const { data: existingCard } = await supabase
+  const { data: allCards } = await supabase
     .from('cards')
-    .select('*')
-    .ilike('cardcode', cardcode)
-    .single();
+    .select('*');
+
+  const existingCard = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
   // EDIT MODE: card exists
   if (existingCard) {

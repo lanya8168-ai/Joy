@@ -54,17 +54,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   // Parse card codes
-  const cardcodes = cardsInput.split(',').map(c => c.trim().toUpperCase());
+  const cardcodes = cardsInput.split(',').map(c => c.trim());
   const cardsToGift = [];
   const failedCards = [];
 
+  // Fetch all cards once
+  const { data: allCards } = await supabase
+    .from('cards')
+    .select('*');
+
   // Fetch all cards and validate
   for (const cardcode of cardcodes) {
-    const { data: card } = await supabase
-      .from('cards')
-      .select('*')
-      .ilike('cardcode', cardcode)
-      .single();
+    const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
     if (!card) {
       failedCards.push(`${cardcode} (not found)`);

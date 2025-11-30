@@ -24,16 +24,16 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
-  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
+  const cardcode = interaction.options.getString('cardcode', true);
   const userId = interaction.user.id;
 
-  const { data: card, error } = await supabase
+  const { data: allCards } = await supabase
     .from('cards')
-    .select('*')
-    .ilike('cardcode', cardcode)
-    .single();
+    .select('*');
 
-  if (error || !card) {
+  const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
+
+  if (!card) {
     await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Card with code **${cardcode}** not found!` });
     return;
   }

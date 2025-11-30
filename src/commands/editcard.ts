@@ -54,7 +54,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
+  const cardcode = interaction.options.getString('cardcode', true);
   const name = interaction.options.getString('name');
   const group = interaction.options.getString('group');
   const newCardcode = interaction.options.getString('new_cardcode');
@@ -63,11 +63,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const droppable = interaction.options.getBoolean('droppable');
   const imageUrl = interaction.options.getString('image_url');
 
-  const { data: existingCard } = await supabase
+  const { data: allCards } = await supabase
     .from('cards')
-    .select('*')
-    .ilike('cardcode', cardcode)
-    .single();
+    .select('*');
+
+  const existingCard = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
   if (!existingCard) {
     await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Card with code **${cardcode}** not found!` });
