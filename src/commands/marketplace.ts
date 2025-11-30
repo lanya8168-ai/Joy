@@ -76,44 +76,56 @@ async function handleList(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Generate unique listing code
-  const listingCode = generateListingCode();
+  // Create separate listings for each quantity with unique codes
+  const listingCodes: string[] = [];
+  let hasError = false;
 
-  const { data, error } = await supabase.rpc('list_card_on_marketplace', {
-    p_user_id: userId,
-    p_card_id: card.card_id,
-    p_price: price,
-    p_quantity: quantity,
-    p_code: listingCode
-  });
+  for (let i = 0; i < quantity; i++) {
+    const listingCode = generateListingCode();
 
-  if (error || !data) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.' });
-    return;
-  }
+    const { data, error } = await supabase.rpc('list_card_on_marketplace', {
+      p_user_id: userId,
+      p_card_id: card.card_id,
+      p_price: price,
+      p_quantity: 1,
+      p_code: listingCode
+    });
 
-  const result = data as any;
-
-  if (!result.success) {
-    if (result.error === 'insufficient_cards') {
-      await interaction.editReply({ 
-        content: `<:IMG_9904:1443371148543791218> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`
-      });
-      return;
+    if (error || !data) {
+      hasError = true;
+      break;
     }
 
+    const result = data as any;
+
+    if (!result.success) {
+      if (result.error === 'insufficient_cards') {
+        await interaction.editReply({ 
+          content: `<:IMG_9904:1443371148543791218> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`
+        });
+        return;
+      }
+      hasError = true;
+      break;
+    }
+
+    listingCodes.push(listingCode);
+  }
+
+  if (hasError) {
     await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.' });
     return;
   }
 
+  const codesDisplay = listingCodes.map(code => `\`${code}\``).join(', ');
   const embed = new EmbedBuilder()
     .setColor(0x00d4ff)
     .setTitle('<:IMG_9902:1443367697286172874> Card Listed!')
     .setDescription(`Your card has been listed on the marketplace!`)
     .addFields(
-      { name: 'Listing Code', value: `\`${listingCode}\``, inline: true },
-      { name: 'Price', value: `${result.price} coins`, inline: true },
-      { name: 'Quantity', value: `${result.quantity}`, inline: true }
+      { name: 'Listing Codes', value: codesDisplay, inline: false },
+      { name: 'Price Per Card', value: `${price} coins`, inline: true },
+      { name: 'Total Quantity', value: `${quantity}`, inline: true }
     )
     .setTimestamp();
 
