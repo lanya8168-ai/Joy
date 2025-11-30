@@ -144,13 +144,23 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const listingText = listings
-    .map((listing: any) => {
+  const listingText = await Promise.all(listings
+    .map(async (listing: any) => {
       const card = listing.cards;
       const eraText = card.era ? ` - ${card.era}` : '';
-      return `**\`${listing.code}\`** | ${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText}) • \`${card.cardcode}\` | ${listing.price} coins | x${listing.quantity}`;
+      
+      // Try to get seller username
+      let sellerName = listing.seller_id;
+      try {
+        const seller = await interaction.client.users.fetch(listing.seller_id);
+        sellerName = seller.username;
+      } catch (e) {
+        // If fetch fails, use ID
+      }
+      
+      return `**\`${listing.code}\`** | ${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText}) • \`${card.cardcode}\` | ${listing.price} coins | x${listing.quantity} | *from @${sellerName}*`;
     })
-    .join('\n');
+  ).then(lines => lines.join('\n'));
 
   const embed = new EmbedBuilder()
     .setColor(0x00d4ff)
@@ -241,4 +251,26 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });
+
+  // Send DM to seller
+  try {
+    const seller = await interaction.client.users.fetch(listing.seller_id);
+    const buyerName = interaction.user.username;
+    
+    const sellerEmbed = new EmbedBuilder()
+      .setColor(0x00d4ff)
+      .setTitle('<:IMG_9902:1443367697286172874> Card Sold!')
+      .setDescription(`Your card was purchased!`)
+      .addFields(
+        { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, inline: true },
+        { name: 'Quantity', value: `x${result.quantity}`, inline: true },
+        { name: 'Buyer', value: `@${buyerName}`, inline: true },
+        { name: 'Price', value: `${result.price} coins`, inline: true }
+      )
+      .setTimestamp();
+    
+    await seller.send({ embeds: [sellerEmbed] });
+  } catch (e) {
+    // Silent fail if DM fails
+  }
 }
