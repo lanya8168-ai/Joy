@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS marketplace (
   card_id INTEGER REFERENCES cards(card_id) ON DELETE CASCADE,
   price INTEGER NOT NULL,
   quantity INTEGER DEFAULT 1,
+  code TEXT UNIQUE NOT NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
 

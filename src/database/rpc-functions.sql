@@ -184,7 +184,7 @@ END;
 $$;
 
 -- RPC function to list a card on marketplace atomically
-CREATE OR REPLACE FUNCTION list_card_on_marketplace(p_user_id TEXT, p_card_id INTEGER, p_price INTEGER, p_quantity INTEGER)
+CREATE OR REPLACE FUNCTION list_card_on_marketplace(p_user_id TEXT, p_card_id INTEGER, p_price INTEGER, p_quantity INTEGER, p_code TEXT)
 RETURNS JSON
 LANGUAGE plpgsql
 AS $$
@@ -212,8 +212,8 @@ BEGIN
     WHERE id = v_inventory.id;
   END IF;
   
-  INSERT INTO marketplace (seller_id, card_id, price, quantity)
-  VALUES (p_user_id, p_card_id, p_price, p_quantity)
+  INSERT INTO marketplace (seller_id, card_id, price, quantity, code)
+  VALUES (p_user_id, p_card_id, p_price, p_quantity, p_code)
   RETURNING listing_id INTO v_new_listing_id;
   
   RETURN json_build_object(
@@ -221,7 +221,8 @@ BEGIN
     'listing_id', v_new_listing_id,
     'card_id', p_card_id,
     'price', p_price,
-    'quantity', p_quantity
+    'quantity', p_quantity,
+    'code', p_code
   );
 END;
 $$;
