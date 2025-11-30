@@ -68,7 +68,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   const { data: card } = await supabase
     .from('cards')
     .select('card_id')
-    .eq('cardcode', cardcode)
+    .ilike('cardcode', cardcode)
     .single();
 
   if (!card) {

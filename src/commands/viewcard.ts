@@ -30,7 +30,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const { data: card, error } = await supabase
     .from('cards')
     .select('*')
-    .eq('cardcode', cardcode)
+    .ilike('cardcode', cardcode)
     .single();
 
   if (error || !card) {

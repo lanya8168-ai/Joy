@@ -62,7 +62,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const { data: existingCard } = await supabase
     .from('cards')
     .select('*')
-    .eq('cardcode', cardcode)
+    .ilike('cardcode', cardcode)
     .single();
 
   // EDIT MODE: card exists
