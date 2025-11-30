@@ -56,7 +56,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!legendaryCards || legendaryCards.length === 0) {
     const embed = new EmbedBuilder()
-      .setColor(0xffd700)
+      .setColor(0x00d4ff)
       .setTitle('<a:5octo:1435458063740960778> Bonanza Claimed!')
       .setDescription(`<:fullstar:1387609456824680528> You received **25,000 coins**!\n\n*No legendary cards available yet.*`)
       .setTimestamp();

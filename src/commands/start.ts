@@ -47,7 +47,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       { name: '<:2_shell:1436124721413357770> Starting Coins', value: '100', inline: true },
       { name: '<:06_whitestar:1430048829700313100> Cards', value: '0', inline: true },
       { name: '\u200B', value: '\u200B' },
-      { name: '<:06_whitestar:1430048829700313100> Commands', value: '<:1_petal:1436124714526445761> `/daily` - Daily coins\n<a:5blu_bubbles:1436124726010318870> `/weekly` - Weekly coins\n<a:5ball:1435457849072550023> `/surf` - Surf for coins\n<a:5lifesaver:1435457784576610374> `/drop` - Dive for cards\n<:06_whitestar:1430048829700313100> `/inventory` - View your collection\n<a:hj_bowpurple:1363505358869495878> `/shop` - Buy card packs\n<a:hj_white_butterfly:1362859754279665895> `/mp` - Marketplace' }
+      { name: '<:06_whitestar:1430048829700313100> Commands', value: '<:1_petal:1436124714526445761> `/daily` - Daily coins\n<a:5blu_bubbles:1436124726010318870> `/weekly` - Weekly coins\n<a:5ball:1435457849072550023> `/surf` - Surf for coins\n<a:5lifesaver:1435457784576610374> `/drop` - Dive for cards\n<:06_whitestar:1430048829700313100> `/inventory` - View your collection\n<:2_shell:1436124721413357770> `/shop` - Buy card packs\n<:06_whitestar:1430048829700313100> `/mp` - Marketplace' }
     )
     .setTimestamp();
 

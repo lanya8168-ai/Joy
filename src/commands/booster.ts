@@ -102,7 +102,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0xffd700)
+    .setColor(0x00d4ff)
     .setTitle('<a:5blu_bubbles:1436124726010318870> Booster Reward Claimed!')
     .setDescription(`<:fullstar:1387609456824680528> You received **10,000 coins** and **15 cards**!`)
     .addFields(

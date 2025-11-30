@@ -112,11 +112,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addComponents(
       new ButtonBuilder()
         .setCustomId(`staffgift_confirm_${senderUserId}_${receiverUserId}`)
-        .setLabel('<:IMG_9902:1443367697286172874> Send Gift')
+        .setLabel('Yes')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
         .setCustomId(`staffgift_cancel_${senderUserId}`)
-        .setLabel('<:IMG_9904:1443371148543791218> Cancel')
+        .setLabel('No')
         .setStyle(ButtonStyle.Danger)
     );
 

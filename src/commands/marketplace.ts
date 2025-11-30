@@ -83,7 +83,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x00ff00)
+    .setColor(0x00d4ff)
     .setTitle('<:IMG_9902:1443367697286172874> Card Listed!')
     .setDescription(`Your card has been listed on the marketplace!`)
     .addFields(
@@ -128,7 +128,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .join('\n');
 
   const embed = new EmbedBuilder()
-    .setColor(0xffd700)
+    .setColor(0x00d4ff)
     .setTitle('🏖️ Beach Marketplace')
     .setDescription(listingText)
     .setFooter({ text: 'Use /mp buy <listing_id> to purchase' })
@@ -204,7 +204,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   const card = listing.cards as any;
   const eraText = card.era ? ` - ${card.era}` : '';
   const embed = new EmbedBuilder()
-    .setColor(0x00ff00)
+    .setColor(0x00d4ff)
     .setTitle('<:IMG_9902:1443367697286172874> Purchase Complete!')
     .setDescription(`You bought ${card.name}!`)
     .addFields(
