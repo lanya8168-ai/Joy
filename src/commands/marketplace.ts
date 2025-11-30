@@ -9,9 +9,9 @@ export const data = new SlashCommandBuilder()
     subcommand
       .setName('list')
       .setDescription('List a card for sale')
-      .addIntegerOption(option =>
-        option.setName('card_id')
-          .setDescription('The ID of the card to sell')
+      .addStringOption(option =>
+        option.setName('cardcode')
+          .setDescription('Card code (e.g., BP001)')
           .setRequired(true))
       .addIntegerOption(option =>
         option.setName('price')
@@ -31,9 +31,9 @@ export const data = new SlashCommandBuilder()
     subcommand
       .setName('buy')
       .setDescription('Buy a card from the marketplace')
-      .addIntegerOption(option =>
-        option.setName('listing_id')
-          .setDescription('The listing ID to purchase')
+      .addStringOption(option =>
+        option.setName('code')
+          .setDescription('The listing code to purchase (e.g., 691.BCA)')
           .setRequired(true)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -49,17 +49,42 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 }
 
+function generateListingCode(): string {
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let code = '';
+  for (let i = 0; i < 3; i++) code += chars.charAt(Math.floor(Math.random() * 36));
+  code += '.';
+  for (let i = 0; i < 3; i++) code += chars.charAt(Math.floor(Math.random() * 36));
+  return code;
+}
+
 async function handleList(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
-  const cardId = interaction.options.getInteger('card_id', true);
+  const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
   const price = interaction.options.getInteger('price', true);
   const quantity = interaction.options.getInteger('quantity') || 1;
 
+  // Get card by cardcode
+  const { data: card } = await supabase
+    .from('cards')
+    .select('card_id')
+    .eq('cardcode', cardcode)
+    .single();
+
+  if (!card) {
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Card not found! Check the card code.' });
+    return;
+  }
+
+  // Generate unique listing code
+  const listingCode = generateListingCode();
+
   const { data, error } = await supabase.rpc('list_card_on_marketplace', {
     p_user_id: userId,
-    p_card_id: cardId,
+    p_card_id: card.card_id,
     p_price: price,
-    p_quantity: quantity
+    p_quantity: quantity,
+    p_code: listingCode
   });
 
   if (error || !data) {
@@ -86,7 +111,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
     .setTitle('<:IMG_9902:1443367697286172874> Card Listed!')
     .setDescription(`Your card has been listed on the marketplace!`)
     .addFields(
-      { name: 'Listing ID', value: `${result.listing_id}`, inline: true },
+      { name: 'Listing Code', value: `\`${listingCode}\``, inline: true },
       { name: 'Price', value: `${result.price} coins`, inline: true },
       { name: 'Quantity', value: `${result.quantity}`, inline: true }
     )
@@ -99,7 +124,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
   const { data: listings } = await supabase
     .from('marketplace')
     .select(`
-      listing_id,
+      code,
       price,
       quantity,
       seller_id,
@@ -108,7 +133,8 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
         name,
         group,
         era,
-        rarity
+        rarity,
+        cardcode
       )
     `)
     .limit(10);
@@ -122,7 +148,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .map((listing: any) => {
       const card = listing.cards;
       const eraText = card.era ? ` - ${card.era}` : '';
-      return `**ID ${listing.listing_id}** | ${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText}) | ${listing.price} coins | x${listing.quantity}`;
+      return `**\`${listing.code}\`** | ${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText}) • \`${card.cardcode}\` | ${listing.price} coins | x${listing.quantity}`;
     })
     .join('\n');
 
@@ -130,7 +156,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .setColor(0x00d4ff)
     .setTitle('🏖️ Beach Marketplace')
     .setDescription(listingText)
-    .setFooter({ text: 'Use /mp buy <listing_id> to purchase' })
+    .setFooter({ text: 'Use /mp buy <code> to purchase' })
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });
@@ -138,11 +164,13 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
 
 async function handleBuy(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
-  const listingId = interaction.options.getInteger('listing_id', true);
+  const code = interaction.options.getString('code', true).toUpperCase();
 
   const { data: listing } = await supabase
     .from('marketplace')
     .select(`
+      listing_id,
+      code,
       *,
       cards (
         card_id,
@@ -152,17 +180,17 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
         rarity
       )
     `)
-    .eq('listing_id', listingId)
+    .eq('code', code)
     .single();
 
   if (!listing) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Listing not found!' });
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Listing not found! Check the code.' });
     return;
   }
 
   const { data, error } = await supabase.rpc('purchase_marketplace_listing', {
     p_buyer_id: userId,
-    p_listing_id: listingId
+    p_listing_id: listing.listing_id
   });
 
   if (error || !data) {
