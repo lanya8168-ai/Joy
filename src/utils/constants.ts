@@ -10,3 +10,6 @@ export const LOCKDOWN_WHITELIST = ADMIN_USERS;
 
 // Role IDs
 export const BOOSTER_ROLE_ID = '1442680565479510077';
+
+// Helper function to check if user is admin (no cooldown)
+export const isAdminUser = (userId: string): boolean => ADMIN_USERS.includes(userId);

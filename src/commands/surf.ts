@@ -1,7 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
-import { DEV_USER_ID } from '../utils/constants.js';
+import { isAdminUser } from '../utils/constants.js';
 
 const SURF_COOLDOWN_HOURS = 1;
 
@@ -14,7 +14,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
   const reward = Math.floor(Math.random() * 1500) + 1500;
 
-  const cooldownHours = userId === DEV_USER_ID ? 0 : SURF_COOLDOWN_HOURS;
+  const cooldownHours = isAdminUser(userId) ? 0 : SURF_COOLDOWN_HOURS;
   const { data, error } = await supabase.rpc('claim_surf_reward', {
     p_user_id: userId,
     p_reward: reward,

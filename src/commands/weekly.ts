@@ -3,7 +3,7 @@ import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 import { getRandomRarity, getRarityEmoji } from '../utils/cards.js';
-import { DEV_USER_ID } from '../utils/constants.js';
+import { isAdminUser } from '../utils/constants.js';
 
 const WEEKLY_REWARD = 1500;
 const WEEKLY_COOLDOWN_HOURS = 168;
@@ -16,7 +16,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
 
-  const cooldownHours = userId === DEV_USER_ID ? 0 : WEEKLY_COOLDOWN_HOURS;
+  const cooldownHours = isAdminUser(userId) ? 0 : WEEKLY_COOLDOWN_HOURS;
 
   const { data, error } = await supabase.rpc('claim_weekly_reward', {
     p_user_id: userId,
