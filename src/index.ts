@@ -164,12 +164,7 @@ async function handleInventoryButton(interaction: any) {
     const userId = parts[2];
     const rarityFilter = parts[3] === 'all' ? null : parseInt(parts[3]);
     const groupFilter = parts[4] === 'all' ? null : parts[4];
-
-    // Only allow user to interact with their own inventory
-    if (interaction.user.id !== userId) {
-      await interaction.followUp({ content: '<:IMG_9904:1443371148543791218> This is not your inventory!', ephemeral: true });
-      return;
-    }
+    const eraFilter = parts[5] === 'all' ? null : parts[5];
 
     // Get user and inventory
     const { data: user } = await supabase
@@ -207,6 +202,11 @@ async function handleInventoryButton(interaction: any) {
     if (groupFilter) {
       filteredInventory = filteredInventory.filter((item: any) => 
         item.cards.group.toLowerCase() === groupFilter.toLowerCase()
+      );
+    }
+    if (eraFilter) {
+      filteredInventory = filteredInventory.filter((item: any) =>
+        item.cards.era && item.cards.era.toLowerCase().includes(eraFilter.toLowerCase())
       );
     }
 
@@ -263,7 +263,7 @@ async function handleInventoryButton(interaction: any) {
     const row = new ActionRowBuilder()
       .addComponents(
         new ButtonBuilder()
-          .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}`)
+          .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}`)
           .setLabel('← Previous')
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(newPage === 1),
@@ -273,7 +273,7 @@ async function handleInventoryButton(interaction: any) {
           .setStyle(ButtonStyle.Primary)
           .setDisabled(true),
         new ButtonBuilder()
-          .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}`)
+          .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}`)
           .setLabel('Next →')
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(newPage === totalPages)

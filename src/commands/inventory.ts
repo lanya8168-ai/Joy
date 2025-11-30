@@ -33,6 +33,10 @@ export const data = new SlashCommandBuilder()
   .addStringOption(option =>
     option.setName('idol')
       .setDescription('Filter by idol/member name')
+      .setRequired(false))
+  .addStringOption(option =>
+    option.setName('era')
+      .setDescription('Filter by era')
       .setRequired(false));
 
 const CARDS_PER_PAGE = 3;
@@ -45,6 +49,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const rarityFilter = interaction.options.getInteger('rarity');
   const groupFilter = interaction.options.getString('group');
   const idolFilter = interaction.options.getString('idol');
+  const eraFilter = interaction.options.getString('era');
 
   const { data: user } = await supabase
     .from('users')
@@ -106,6 +111,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     );
   }
 
+  if (eraFilter) {
+    filteredInventory = filteredInventory.filter((item: any) =>
+      item.cards.era && item.cards.era.toLowerCase().includes(eraFilter.toLowerCase())
+    );
+  }
+
   if (filteredInventory.length === 0) {
     const embed = new EmbedBuilder()
       .setColor(0x808080)
@@ -148,10 +159,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error('Error merging images:', error);
   }
 
+  const isOwnInventory = userId === interaction.user.id;
+  const title = isOwnInventory ? '🏖️ Your K-pop Card Collection' : `🏖️ ${targetUser?.username}'s K-pop Card Collection`;
+
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
-    .setTitle('🏖️ Your K-pop Card Collection')
+    .setTitle(title)
     .setDescription(cardList)
+    .setFooter({ text: `${filteredInventory.length} cards total` })
     .setTimestamp();
 
   if (attachment) {
@@ -162,7 +177,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const row = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
       new ButtonBuilder()
-        .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}`)
+        .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}`)
         .setLabel('← Previous')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(validPage === 1),
@@ -172,7 +187,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .setStyle(ButtonStyle.Primary)
         .setDisabled(true),
       new ButtonBuilder()
-        .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}`)
+        .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}`)
         .setLabel('Next →')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(validPage === totalPages)
