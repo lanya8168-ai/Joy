@@ -11,6 +11,9 @@ export interface User {
   last_daily: string | null;
   last_weekly: string | null;
   last_surf: string | null;
+  last_drop: string | null;
+  last_booster: string | null;
+  last_bonanza: string | null;
   created_at: string;
 }
 

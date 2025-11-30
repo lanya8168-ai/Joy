@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
   last_weekly TIMESTAMP,
   last_surf TIMESTAMP,
   last_drop TIMESTAMP,
+  last_booster TIMESTAMP,
+  last_bonanza TIMESTAMP,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
