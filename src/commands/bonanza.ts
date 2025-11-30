@@ -47,9 +47,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Give 25,000 coins
+  // Give 25,000 coins using atomic update
   const newBalance = user.coins + 25000;
-  await supabase.from('users').update({ coins: newBalance, last_bonanza: new Date().toISOString() }).eq('user_id', userId);
+  const { data: updateResult, error: updateError } = await supabase
+    .from('users')
+    .update({ coins: newBalance, last_bonanza: new Date().toISOString() })
+    .eq('user_id', userId)
+    .select();
+
+  if (updateError || !updateResult) {
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error updating coins. Please try again!' });
+    return;
+  }
 
   // Get legendary cards only
   const { data: legendaryCards } = await supabase.from('cards').select('*').eq('rarity', 5);
