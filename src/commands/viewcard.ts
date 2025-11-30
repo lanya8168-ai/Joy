@@ -47,7 +47,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   const rarityEmoji = getRarityEmoji(card.rarity);
-  const description = `**${card.name}** (${card.group}) ${rarityEmoji}\n${card.era || 'N/A'} • \`${card.cardcode}\``;
+  let description = `**${card.name}** (${card.group}) ${rarityEmoji}\n${card.era || 'N/A'} • \`${card.cardcode}\``;
+  
+  if (inventoryItem && inventoryItem.quantity > 0) {
+    description += ` • 📦 **${inventoryItem.quantity}**`;
+  }
 
   const embed = new EmbedBuilder()
     .setColor(getRarityColor(card.rarity))
@@ -55,10 +59,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(description)
     .setFooter({ text: `Rarity: ${card.rarity}/5 • Droppable: ${card.droppable ? 'Yes' : 'No'}` })
     .setTimestamp();
-
-  if (inventoryItem && inventoryItem.quantity > 0) {
-    embed.addFields({ name: '📦 Owned Copies', value: `${inventoryItem.quantity}`, inline: true });
-  }
 
   if (card.image_url) {
     embed.setImage(card.image_url);
