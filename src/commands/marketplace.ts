@@ -67,7 +67,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   // Get card by cardcode
   const { data: allCards } = await supabase
     .from('cards')
-    .select('card_id');
+    .select('*');
 
   const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
