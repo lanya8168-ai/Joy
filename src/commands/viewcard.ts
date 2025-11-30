@@ -50,7 +50,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   let description = `**${card.name}** (${card.group}) ${rarityEmoji}\n${card.era || 'N/A'} • \`${card.cardcode}\``;
   
   if (inventoryItem && inventoryItem.quantity > 0) {
-    description += ` • 📦 **${inventoryItem.quantity}**`;
+    description += ` • copies: **${inventoryItem.quantity}**`;
   }
 
   const embed = new EmbedBuilder()
