@@ -33,10 +33,10 @@ export function scheduleReminder(
       const embed = new EmbedBuilder()
         .setColor(0x00ff00)
         .setTitle('⏰ Cooldown Ready!')
-        .setDescription(`<@${userId}> Your **/${commandName}** command is ready to use again!`)
+        .setDescription(`Your **/${commandName}** command is ready to use again!`)
         .setTimestamp();
 
-      await channel.send({ embeds: [embed] });
+      await channel.send({ content: `<@${userId}>`, embeds: [embed] });
       activeReminders.delete(reminderId);
     } catch (error) {
       console.error('Error sending reminder:', error);
