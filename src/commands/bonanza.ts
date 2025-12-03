@@ -3,6 +3,7 @@ import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 import { BOOSTER_ROLE_ID, isAdminUser } from '../utils/constants.js';
+import { scheduleReminder } from '../utils/reminders.js';
 
 const BONANZA_COOLDOWN_HOURS = 6;
 
@@ -115,6 +116,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     )
     .setFooter({ text: `User ID: ${userId}` })
     .setTimestamp();
+
+  // Schedule reminder for next bonanza
+  const client = interaction.client;
+  scheduleReminder(client, userId, interaction.channelId, 'bonanza', BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000);
 
   if (attachment) {
     embed.setImage('attachment://bonanza_cards.png');

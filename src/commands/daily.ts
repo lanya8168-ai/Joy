@@ -3,6 +3,7 @@ import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 import { getRarityEmoji } from '../utils/cards.js';
 import { isAdminUser } from '../utils/constants.js';
+import { scheduleReminder } from '../utils/reminders.js';
 
 const MIN_COINS = 50;
 const MAX_COINS = 100;
@@ -132,6 +133,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (selectedCard.image_url) {
     embed.setImage(selectedCard.image_url);
   }
+
+  // Schedule reminder for next daily
+  const client = interaction.client;
+  scheduleReminder(client, userId, interaction.channelId, 'daily', 24 * 60 * 60 * 1000);
 
   await interaction.editReply({ embeds: [embed] });
 }

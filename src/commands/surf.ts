@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from '
 import { supabase } from '../database/supabase.js';
 import { formatCooldown } from '../utils/cooldowns.js';
 import { isAdminUser } from '../utils/constants.js';
+import { scheduleReminder } from '../utils/reminders.js';
 
 const SURF_COOLDOWN_HOURS = 1;
 
@@ -64,6 +65,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       }
     )
     .setTimestamp();
+
+  // Schedule reminder for next surf
+  const client = interaction.client;
+  scheduleReminder(client, userId, interaction.channelId, 'surf', SURF_COOLDOWN_HOURS * 60 * 60 * 1000);
 
   await interaction.editReply({ embeds: [embed] });
 }

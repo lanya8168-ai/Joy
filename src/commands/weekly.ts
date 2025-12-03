@@ -4,6 +4,7 @@ import { formatCooldown } from '../utils/cooldowns.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 import { getRandomRarity, getRarityEmoji } from '../utils/cards.js';
 import { isAdminUser } from '../utils/constants.js';
+import { scheduleReminder } from '../utils/reminders.js';
 
 const WEEKLY_REWARD = 1500;
 const WEEKLY_COOLDOWN_HOURS = 168;
@@ -152,6 +153,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       }
     )
     .setTimestamp();
+
+  // Schedule reminder for next weekly
+  const client = interaction.client;
+  scheduleReminder(client, userId, interaction.channelId, 'weekly', WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
 
   if (attachment) {
     embed.setImage('attachment://weekly_cards.png');
