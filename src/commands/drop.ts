@@ -29,11 +29,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const lastDropTime = new Date(user.last_drop).getTime();
     const nowTime = Date.now();
     const minutesPassed = (nowTime - lastDropTime) / (1000 * 60);
-    
+
     if (minutesPassed < COOLDOWN_MINUTES) {
       const secondsRemaining = Math.ceil((COOLDOWN_MINUTES - minutesPassed) * 60);
-      await interaction.editReply({ 
-        content: `⏳ You can use /drop again in **${secondsRemaining}** seconds!` 
+      await interaction.editReply({
+        content: `⏳ You can use /drop again in **${secondsRemaining}** seconds!`
       });
       return;
     }
@@ -45,15 +45,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('droppable', true);
 
   if (!allCards || allCards.length === 0) {
-    await interaction.editReply({ 
-      content: '<:IMG_9904:1443371148543791218> No droppable cards available yet! Ask an admin to add cards using `/addcard`.' 
+    await interaction.editReply({
+      content: '<:IMG_9904:1443371148543791218> No droppable cards available yet! Ask an admin to add cards using `/addcard`.'
     });
     return;
   }
 
   const rarity = getRandomRarity();
   const cardsOfRarity = allCards.filter(c => c.rarity === rarity);
-  const selectedCard = cardsOfRarity.length > 0 
+  const selectedCard = cardsOfRarity.length > 0
     ? cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)]
     : allCards[Math.floor(Math.random() * allCards.length)];
 
@@ -97,14 +97,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const rarityEmoji = getRarityEmoji(selectedCard.rarity);
   const description = `**${selectedCard.name}** (${selectedCard.group}) ${rarityEmoji}\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
 
+  const nextAvailable = new Date(Date.now() + COOLDOWN_MINUTES * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(getRarityColor(selectedCard.rarity))
-    .setAuthor({ 
-      name: interaction.user.username, 
-      iconURL: interaction.user.avatarURL() || undefined 
+    .setAuthor({
+      name: interaction.user.username,
+      iconURL: interaction.user.avatarURL() || undefined
     })
     .setTitle('<a:5lifesaver:1435457784576610374> You dove and found..')
     .setDescription(description)
+    .addFields(
+      { name: '⏰ Next Available', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, inline: true }
+    )
     .setFooter({ text: 'Card dropped' })
     .setTimestamp();
 

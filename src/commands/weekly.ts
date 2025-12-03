@@ -86,7 +86,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     } else {
       rarity = 1; // 2% chance for common
     }
-    
+
     const cardsOfRarity = allCards.filter(c => c.rarity === rarity);
     const card = cardsOfRarity.length > 0
       ? cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)]
@@ -139,10 +139,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error('Error merging images:', error);
   }
 
+  const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
     .setTitle('<a:5blu_bubbles:1436124726010318870> Weekly Reward Claimed!')
     .setDescription(description)
+    .addFields(
+      {
+        name: '⏰ Next Available',
+        value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
+        inline: true
+      }
+    )
     .setTimestamp();
 
   if (attachment) {

@@ -49,13 +49,19 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
     .setTitle('<a:5lifesaver:1435457784576610374> Surfing Complete!')
     .setDescription(`You found **${result.reward} coins** while surfing!`)
     .addFields(
       { name: '<a:5ball:1435457849072550023> Reward', value: `${result.reward} coins`, inline: true },
-      { name: '<:2_shell:1436124721413357770> New Balance', value: `${result.new_balance} coins`, inline: true }
+      { name: '<:2_shell:1436124721413357770> New Balance', value: `${result.new_balance} coins`, inline: true },
+      {
+        name: '⏰ Next Available',
+        value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
+        inline: true
+      }
     )
     .setTimestamp();
 

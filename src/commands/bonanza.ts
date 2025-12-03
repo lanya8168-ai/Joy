@@ -51,8 +51,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const newBalance = user.coins + 25000;
   await supabase.from('users').update({ coins: newBalance, last_bonanza: new Date().toISOString() }).eq('user_id', userId);
 
-  // Get legendary cards only
-  const { data: legendaryCards } = await supabase.from('cards').select('*').eq('rarity', 5);
+  // Get legendary cards only (droppable)
+  const { data: legendaryCards } = await supabase.from('cards').select('*').eq('rarity', 5).eq('droppable', true);
 
   if (!legendaryCards || legendaryCards.length === 0) {
     const embed = new EmbedBuilder()
@@ -96,6 +96,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error('Error merging images:', error);
   }
 
+  const nextAvailable = new Date(Date.now() + 6 * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0xffcc00)
     .setTitle('<a:5octo:1435458063740960778> Bonanza Claimed!')
@@ -104,6 +105,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       {
         name: '<:2_shell:1436124721413357770> New Balance',
         value: `${newBalance} coins`,
+        inline: true
+      },
+      {
+        name: '⏰ Next Available',
+        value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
         inline: true
       }
     )

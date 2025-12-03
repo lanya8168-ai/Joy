@@ -100,10 +100,33 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const rarityEmoji = getRarityEmoji(selectedCard.rarity);
   const cardInfo = `**${selectedCard.name}** (${selectedCard.group}) ${rarityEmoji}\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
 
+  const coinsEarned = result.reward;
+  const newBalance = result.balance;
+  const randomLegendary = selectedCard;
+
+  const nextAvailable = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
-    .setColor(0xffd700)
+    .setColor(0xffcc00)
     .setTitle('<:1_petal:1436124714526445761> Daily Reward Claimed!')
-    .setDescription(`<:2_shell:1436124721413357770> You received **${dailyReward} coins**!\n\n<:2_shell:1436124721413357770> You also received **${cardInfo}**`)
+    .setDescription(`<:2_shell:1436124721413357770> You received **${coinsEarned} coins** and a **legendary card**!`)
+    .addFields(
+      {
+        name: '<a:5blu_bubbles:1436124726010318870> Card Received',
+        value: `${getRarityEmoji(randomLegendary.rarity)} **${randomLegendary.name}** (${randomLegendary.group}) • ${randomLegendary.era || 'N/A'} • \`${randomLegendary.cardcode}\``,
+        inline: false
+      },
+      {
+        name: '<:2_shell:1436124721413357770> New Balance',
+        value: `${newBalance} coins`,
+        inline: true
+      },
+      {
+        name: '⏰ Next Available',
+        value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
+        inline: true
+      }
+    )
+    .setFooter({ text: `User ID: ${userId}` })
     .setTimestamp();
 
   if (selectedCard.image_url) {

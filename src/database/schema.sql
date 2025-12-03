@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
   last_drop TIMESTAMP,
   last_booster TIMESTAMP,
   last_bonanza TIMESTAMP,
+  bio TEXT DEFAULT '',
+  favorite_card_id INTEGER,
+  profile_color TEXT DEFAULT '#ff69b4',
   created_at TIMESTAMP DEFAULT NOW()
 );
 
