@@ -125,10 +125,16 @@ async function handleBio(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  await supabase
+  const { error } = await supabase
     .from('users')
     .update({ bio: bioText })
     .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error updating bio:', error);
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Failed to update bio. Please try again!' });
+    return;
+  }
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
@@ -161,10 +167,16 @@ async function handleColor(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  await supabase
+  const { error } = await supabase
     .from('users')
     .update({ profile_color: hexColor })
     .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error updating profile color:', error);
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Failed to update profile color. Please try again!' });
+    return;
+  }
 
   const color = parseInt(hexColor.replace('#', ''), 16);
 
@@ -217,10 +229,16 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  await supabase
+  const { error } = await supabase
     .from('users')
     .update({ favorite_card_id: card.card_id })
     .eq('user_id', userId);
+
+  if (error) {
+    console.error('Error updating favorite card:', error);
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Failed to update favorite card. Please try again!' });
+    return;
+  }
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
