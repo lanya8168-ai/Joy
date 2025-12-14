@@ -173,11 +173,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     embed.setImage('attachment://inventory_cards.png');
   }
 
-  // Create pagination buttons
+  // Create pagination buttons - include idolFilter in customId
   const row = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
       new ButtonBuilder()
-        .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}`)
+        .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${idolFilter || 'all'}`)
         .setLabel('← Previous')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(validPage === 1),
@@ -187,7 +187,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .setStyle(ButtonStyle.Primary)
         .setDisabled(true),
       new ButtonBuilder()
-        .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}`)
+        .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${idolFilter || 'all'}`)
         .setLabel('Next →')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(validPage === totalPages)

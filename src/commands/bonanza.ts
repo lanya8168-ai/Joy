@@ -50,7 +50,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Give 25,000 coins
   const newBalance = user.coins + 25000;
-  await supabase.from('users').update({ coins: newBalance, last_bonanza: new Date().toISOString() }).eq('user_id', userId);
+  const { error: updateError } = await supabase.from('users').update({ coins: newBalance, last_bonanza: new Date().toISOString() }).eq('user_id', userId);
+  
+  if (updateError) {
+    console.error('Error updating coins:', updateError);
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error claiming bonanza. Please try again!' });
+    return;
+  }
 
   // Get legendary cards only (droppable)
   const { data: legendaryCards } = await supabase.from('cards').select('*').eq('rarity', 5).eq('droppable', true);
@@ -66,23 +72,33 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Give 20 legendary cards
+  // Give 20 legendary cards - batch for performance
   const selectedCards = [];
+  const cardCounts = new Map<number, number>();
+  
   for (let i = 0; i < 20; i++) {
     const randomCard = legendaryCards[Math.floor(Math.random() * legendaryCards.length)];
     selectedCards.push(randomCard);
+    cardCounts.set(randomCard.card_id, (cardCounts.get(randomCard.card_id) || 0) + 1);
+  }
 
-    const { data: existingItem } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('card_id', randomCard.card_id)
-      .single();
+  // Get existing inventory items for all selected cards
+  const cardIds = Array.from(cardCounts.keys());
+  const { data: existingItems } = await supabase
+    .from('inventory')
+    .select('*')
+    .eq('user_id', userId)
+    .in('card_id', cardIds);
 
-    if (existingItem) {
-      await supabase.from('inventory').update({ quantity: existingItem.quantity + 1 }).eq('id', existingItem.id);
+  const existingMap = new Map((existingItems || []).map(item => [item.card_id, item]));
+
+  // Batch updates and inserts
+  for (const [cardId, count] of cardCounts) {
+    const existing = existingMap.get(cardId);
+    if (existing) {
+      await supabase.from('inventory').update({ quantity: existing.quantity + count }).eq('id', existing.id);
     } else {
-      await supabase.from('inventory').insert({ user_id: userId, card_id: randomCard.card_id, quantity: 1 });
+      await supabase.from('inventory').insert({ user_id: userId, card_id: cardId, quantity: count });
     }
   }
 

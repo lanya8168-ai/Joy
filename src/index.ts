@@ -165,6 +165,7 @@ async function handleInventoryButton(interaction: any) {
     const rarityFilter = parts[3] === 'all' ? null : parseInt(parts[3]);
     const groupFilter = parts[4] === 'all' ? null : parts[4];
     const eraFilter = parts[5] === 'all' ? null : parts[5];
+    const idolFilter = parts[6] === 'all' ? null : parts[6];
 
     // Get user and inventory
     const { data: user } = await supabase
@@ -207,6 +208,11 @@ async function handleInventoryButton(interaction: any) {
     if (eraFilter) {
       filteredInventory = filteredInventory.filter((item: any) =>
         item.cards.era && item.cards.era.toLowerCase().includes(eraFilter.toLowerCase())
+      );
+    }
+    if (idolFilter) {
+      filteredInventory = filteredInventory.filter((item: any) =>
+        item.cards.name.toLowerCase().includes(idolFilter.toLowerCase())
       );
     }
 
@@ -259,11 +265,11 @@ async function handleInventoryButton(interaction: any) {
       embed.setImage('attachment://inventory_cards.png');
     }
 
-    // Create pagination buttons
+    // Create pagination buttons - include idolFilter
     const row = new ActionRowBuilder()
       .addComponents(
         new ButtonBuilder()
-          .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}`)
+          .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${idolFilter || 'all'}`)
           .setLabel('← Previous')
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(newPage === 1),
@@ -273,7 +279,7 @@ async function handleInventoryButton(interaction: any) {
           .setStyle(ButtonStyle.Primary)
           .setDisabled(true),
         new ButtonBuilder()
-          .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}`)
+          .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${idolFilter || 'all'}`)
           .setLabel('Next →')
           .setStyle(ButtonStyle.Secondary)
           .setDisabled(newPage === totalPages)

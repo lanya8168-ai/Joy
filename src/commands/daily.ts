@@ -35,12 +35,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const result = data as any;
 
   if (!result || !result.success) {
-    if (result.error === 'user_not_found') {
+    if (result && result.error === 'user_not_found') {
       await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
       return;
     }
 
-    if (result.error === 'on_cooldown') {
+    if (result && result.error === 'on_cooldown') {
       const embed = new EmbedBuilder()
         .setColor(0xff0000)
         .setTitle('⏰ Daily Reward On Cooldown')
@@ -55,6 +55,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  const coinsReward = result.reward ?? dailyReward;
+  const userBalance = result.balance ?? 0;
+
   // Get a random legendary card
   const { data: legendaryCards } = await supabase
     .from('cards')
@@ -66,7 +69,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
       .setTitle('Daily Reward Claimed!')
-      .setDescription(`<:2_shell:1436124721413357770> You received **${result.reward} coins**!\n\n*No legendary cards available yet.*`)
+      .setDescription(`<:2_shell:1436124721413357770> You received **${coinsReward} coins**!\n\n*No legendary cards available yet.*`)
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -101,8 +104,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const rarityEmoji = getRarityEmoji(selectedCard.rarity);
   const cardInfo = `**${selectedCard.name}** (${selectedCard.group}) ${rarityEmoji}\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
 
-  const coinsEarned = result.reward;
-  const newBalance = result.balance;
+  const coinsEarned = coinsReward;
+  const newBalance = userBalance;
   const randomLegendary = selectedCard;
 
   const nextAvailable = new Date(Date.now() + 24 * 60 * 60 * 1000);
