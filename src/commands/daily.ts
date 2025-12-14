@@ -56,7 +56,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const coinsReward = result.reward ?? dailyReward;
-  const userBalance = result.balance ?? 0;
+  
+  // Fetch current balance from database to ensure accuracy
+  const { data: currentUser } = await supabase
+    .from('users')
+    .select('coins')
+    .eq('user_id', userId)
+    .single();
+  
+  const userBalance = currentUser?.coins ?? result.balance ?? 0;
 
   // Get a random legendary card
   const { data: legendaryCards } = await supabase

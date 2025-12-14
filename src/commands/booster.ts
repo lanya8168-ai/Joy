@@ -35,9 +35,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Check cooldown (skip for admin users)
-  if (!isAdminUser(userId) && user.last_booster && new Date(user.last_booster).getTime() > Date.now() - BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
-    const cooldownMs = new Date(user.last_booster).getTime() + (BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
+  // Check cooldown (skip for admin users) - handle missing column gracefully
+  const lastBooster = user.last_booster;
+  if (!isAdminUser(userId) && lastBooster && new Date(lastBooster).getTime() > Date.now() - BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
+    const cooldownMs = new Date(lastBooster).getTime() + (BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
     const embed = new EmbedBuilder()
       .setColor(0xff0000)
       .setTitle('⏰ Booster Reward On Cooldown')
@@ -48,9 +49,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Give 10,000 coins
+  // Give 10,000 coins - try with last_booster, fallback without it
   const newBalance = user.coins + 10000;
-  const { error: updateError } = await supabase.from('users').update({ coins: newBalance, last_booster: new Date().toISOString() }).eq('user_id', userId);
+  let updateError = null;
+  
+  // Try updating with last_booster column first
+  const { error: error1 } = await supabase.from('users').update({ coins: newBalance, last_booster: new Date().toISOString() }).eq('user_id', userId);
+  
+  if (error1 && error1.code === 'PGRST204') {
+    // Column doesn't exist, update only coins
+    const { error: error2 } = await supabase.from('users').update({ coins: newBalance }).eq('user_id', userId);
+    updateError = error2;
+  } else {
+    updateError = error1;
+  }
   
   if (updateError) {
     console.error('Error updating coins:', updateError);
