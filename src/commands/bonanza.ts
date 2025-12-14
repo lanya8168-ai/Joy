@@ -70,8 +70,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Get legendary cards only (droppable)
-  const { data: legendaryCards } = await supabase.from('cards').select('*').eq('rarity', 5).eq('droppable', true);
+  // Get legendary cards only (droppable) - explicitly filter
+  const { data: allLegendaryCards } = await supabase.from('cards').select('*').eq('rarity', 5);
+  
+  // Filter to only include droppable cards (handles null/undefined/false cases)
+  const legendaryCards = (allLegendaryCards || []).filter((card: any) => card.droppable === true);
 
   if (!legendaryCards || legendaryCards.length === 0) {
     const embed = new EmbedBuilder()
