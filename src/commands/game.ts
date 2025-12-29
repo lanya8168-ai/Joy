@@ -61,7 +61,10 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
   const collector = channel.createMessageCollector({ filter, time: 30000 });
   
   collector.on('collect', async (m: any) => {
-    if (m.content.toLowerCase() === targetName.toLowerCase()) {
+    const guess = m.content.trim().toLowerCase();
+    const answer = targetName.toLowerCase();
+    
+    if (guess === answer) {
       // Add reward
       const { data: user } = await supabase.from('users').select('coins').eq('user_id', interaction.user.id).single();
       if (user) {
