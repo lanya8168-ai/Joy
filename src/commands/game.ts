@@ -64,9 +64,14 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     const guess = m.content.trim().toLowerCase();
     const answer = targetName.trim().toLowerCase();
     
-    console.log(`User ${m.author.username} guessed: "${guess}" (Expected: "${answer}")`);
+    // Improved matching: exact, includes, closely related, or group/idol name matching
+    const isCorrect = guess === answer || 
+                     guess.includes(answer) || 
+                     (answer.length > 3 && answer.includes(guess)) ||
+                     (answer.split(' ').some(part => part.length > 2 && guess.includes(part.toLowerCase()))) ||
+                     (guess.length > 2 && answer.includes(guess));
 
-    if (guess === answer || guess.includes(answer) || (answer.length > 3 && answer.includes(guess))) {
+    if (isCorrect) {
       // Stop collector first to prevent double reward
       collector.stop('correct');
       

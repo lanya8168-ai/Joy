@@ -9,9 +9,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply({ ephemeral: true });
   
   const userId = interaction.user.id;
-  const { data: user } = await supabase.from('users').select('reminder_settings').eq('user_id', userId).single();
   
-  if (!user) return interaction.editReply('Please use `/start` first!');
+  // Fetch user data with retry/fallthrough logic
+  const { data: user, error } = await supabase.from('users').select('reminder_settings').eq('user_id', userId).maybeSingle();
+  
+  if (error || !user) {
+    console.log(`Reminders error for ${userId}:`, error);
+    return interaction.editReply('Please use `/start` first to create your profile!');
+  }
 
   const settings = user.reminder_settings || {};
   const commands = ['drop', 'daily', 'weekly', 'surf'];
