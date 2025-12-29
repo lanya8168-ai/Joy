@@ -22,7 +22,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return interaction.editReply('Please use `/start` first to create your profile!');
   }
 
-  const settings = user.reminder_settings || {};
+  const settings = (user as any).reminder_settings || {};
   const commands = ['drop', 'daily', 'weekly', 'surf'];
 
   const getEmbed = () => {
