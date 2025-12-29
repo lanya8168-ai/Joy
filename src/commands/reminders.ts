@@ -29,7 +29,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   };
 
   const getButtons = () => {
-    const rows = [];
+    const rows: ActionRowBuilder<ButtonBuilder>[] = [];
     let currentRow = new ActionRowBuilder<ButtonBuilder>();
     
     commands.forEach((cmd, index) => {

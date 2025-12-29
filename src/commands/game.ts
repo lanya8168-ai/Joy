@@ -66,7 +66,7 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     
     console.log(`User ${m.author.username} guessed: "${guess}" (Expected: "${answer}")`);
 
-    if (guess === answer || guess.includes(answer) || answer.includes(guess)) {
+    if (guess === answer || guess.includes(answer) || (answer.length > 3 && answer.includes(guess))) {
       // Stop collector first to prevent double reward
       collector.stop('correct');
       
