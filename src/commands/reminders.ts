@@ -10,11 +10,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   
   const userId = interaction.user.id;
   
-  // Fetch user data with retry/fallthrough logic
-  const { data: user, error } = await supabase.from('users').select('reminder_settings').eq('user_id', userId).maybeSingle();
+  // Fetch user data
+  const { data: user, error } = await supabase.from('users').select('*').eq('user_id', userId).maybeSingle();
   
-  if (error || !user) {
-    console.log(`Reminders error for ${userId}:`, error);
+  if (error) {
+    console.error(`Database error for ${userId}:`, error);
+    return interaction.editReply('There was an error accessing the database. Please try again later.');
+  }
+
+  if (!user) {
     return interaction.editReply('Please use `/start` first to create your profile!');
   }
 
