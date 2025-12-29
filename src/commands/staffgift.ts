@@ -58,9 +58,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Build confirmation embed
   const confirmCards = cardsToGift
-    .map((card) => {
+    .map(({ card, amount }) => {
       const rarityEmoji = getRarityEmoji(card.rarity);
-      return `${card.name} (${card.group}) ${rarityEmoji} • \`${card.cardcode}\``;
+      return `${card.name} (${card.group}) ${rarityEmoji} • \`${card.cardcode}\` x${amount}`;
     })
     .join('\n');
 

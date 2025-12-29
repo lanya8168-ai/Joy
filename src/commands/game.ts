@@ -1,5 +1,5 @@
 
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, TextChannel } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
 export const data = new SlashCommandBuilder()
@@ -37,16 +37,19 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.editReply({ embeds: [embed] });
   
   const filter = (m: any) => m.author.id === interaction.user.id;
-  const collector = interaction.channel?.createMessageCollector({ filter, time: 30000 });
+  const channel = interaction.channel;
+  if (!channel || !(channel instanceof TextChannel)) return;
+
+  const collector = channel.createMessageCollector({ filter, time: 30000 });
   
-  collector?.on('collect', async (m) => {
+  collector.on('collect', async (m: any) => {
     if (m.content.toLowerCase() === targetName.toLowerCase()) {
       await m.reply(`✅ Correct! It's **${randomCard.name}** from **${randomCard.group}**!`);
       collector.stop('correct');
     }
   });
   
-  collector?.on('end', (collected, reason) => {
+  collector.on('end', (collected: any, reason: string) => {
     if (reason !== 'correct') {
       interaction.followUp(`⏰ Time's up! The answer was **${randomCard.name}** (${randomCard.group}).`);
     }
