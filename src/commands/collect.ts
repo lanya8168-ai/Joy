@@ -26,6 +26,10 @@ export const data = new SlashCommandBuilder()
       .setRequired(false)
       .setMinValue(1)
       .setMaxValue(5))
+  .addBooleanOption(option =>
+    option.setName('missing')
+      .setDescription('Only show cards you are missing')
+      .setRequired(false))
   .addUserOption(option =>
     option.setName('user')
       .setDescription('Check another user\'s collection')
@@ -39,6 +43,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const groupFilter = interaction.options.getString('group');
   const eraFilter = interaction.options.getString('era');
   const rarityFilter = interaction.options.getInteger('rarity');
+  const missingFilter = interaction.options.getBoolean('missing');
 
   // Get all cards
   let query = supabase.from('cards').select('*');
@@ -71,11 +76,21 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const userCardIds = new Set(userInventory?.map(item => item.card_id) || []);
 
+  let displayCards = allCards;
+  if (missingFilter) {
+    displayCards = allCards.filter(card => !userCardIds.has(card.card_id));
+  }
+
+  if (displayCards.length === 0) {
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You have collected all cards matching these filters!' });
+    return;
+  }
+
   // Paginate
-  const totalPages = Math.ceil(allCards.length / CARDS_PER_PAGE);
+  const totalPages = Math.ceil(displayCards.length / CARDS_PER_PAGE);
   const page = 1;
 
-  await showCollectPage(interaction, allCards, userCardIds, page, totalPages, userId, idolFilter, groupFilter, eraFilter, rarityFilter);
+  await showCollectPage(interaction, displayCards, userCardIds, page, totalPages, userId, idolFilter, groupFilter, eraFilter, rarityFilter);
 }
 
 async function showCollectPage(

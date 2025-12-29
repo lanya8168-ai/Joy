@@ -100,20 +100,23 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
   
   if (groupFilter) {
+    const groups = groupFilter.split(',').map(s => s.trim().toLowerCase());
     filteredInventory = filteredInventory.filter((item: any) => 
-      item.cards.group.toLowerCase().includes(groupFilter.toLowerCase())
+      groups.some(g => item.cards.group.toLowerCase().includes(g))
     );
   }
 
   if (idolFilter) {
+    const idols = idolFilter.split(',').map(s => s.trim().toLowerCase());
     filteredInventory = filteredInventory.filter((item: any) =>
-      item.cards.name.toLowerCase().includes(idolFilter.toLowerCase())
+      idols.some(i => item.cards.name.toLowerCase().includes(i))
     );
   }
 
   if (eraFilter) {
+    const eras = eraFilter.split(',').map(s => s.trim().toLowerCase());
     filteredInventory = filteredInventory.filter((item: any) =>
-      item.cards.era && item.cards.era.toLowerCase().includes(eraFilter.toLowerCase())
+      item.cards.era && eras.some(e => item.cards.era.toLowerCase().includes(e))
     );
   }
 

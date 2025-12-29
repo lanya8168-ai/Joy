@@ -1,5 +1,6 @@
 
 import { Client, TextChannel, EmbedBuilder } from 'discord.js';
+import { supabase } from '../database/supabase.js';
 
 interface Reminder {
   userId: string;
@@ -10,13 +11,22 @@ interface Reminder {
 
 const activeReminders = new Map<string, NodeJS.Timeout>();
 
-export function scheduleReminder(
+export async function scheduleReminder(
   client: Client,
   userId: string,
   channelId: string,
   commandName: string,
   cooldownMs: number
 ) {
+  // Check if user has reminders enabled
+  const { data: user } = await supabase
+    .from('users')
+    .select('reminders_enabled')
+    .eq('user_id', userId)
+    .single();
+
+  if (user && user.reminders_enabled === false) return;
+
   const reminderId = `${userId}-${commandName}`;
   
   // Cancel existing reminder if any

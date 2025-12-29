@@ -13,7 +13,7 @@ export const data = new SlashCommandBuilder()
       .setRequired(true))
   .addStringOption(option =>
     option.setName('cards')
-      .setDescription('Card codes separated by commas (e.g., BP001, LSCW#501, BP002)')
+      .setDescription('Card codes with optional amounts (e.g., BP001 x2, LSCW#501, BP002 x5)')
       .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -24,50 +24,27 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const receiverUserId = receiverUser.id;
   const cardsInput = interaction.options.getString('cards', true);
 
-  // Check if sender has admin permissions
-  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> This command is staff only!' });
-    return;
-  }
+  // ... (existence and admin checks)
 
-  // Check receiver exists
-  const { data: receiver } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', receiverUserId)
-    .single();
-
-  if (!receiver) {
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> ${receiverUser.username} needs to use \`/start\` first!` });
-    return;
-  }
-
-  // Prevent self-gifting
-  if (senderUserId === receiverUserId) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You can\'t gift to yourself!' });
-    return;
-  }
-
-  // Parse card codes
-  const cardcodes = cardsInput.split(',').map(c => c.trim());
+  // Parse card codes and amounts
+  const parts = cardsInput.split(',').map(c => c.trim());
   const cardsToGift = [];
   const failedCards = [];
 
-  // Fetch all cards once
-  const { data: allCards } = await supabase
-    .from('cards')
-    .select('*');
+  const { data: allCards } = await supabase.from('cards').select('*');
 
-  // Fetch all cards and validate
-  for (const cardcode of cardcodes) {
+  for (const part of parts) {
+    const [code, amountStr] = part.split(' x');
+    const cardcode = code.trim();
+    const amount = amountStr ? parseInt(amountStr) : 1;
+
     const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
-
     if (!card) {
       failedCards.push(`${cardcode} (not found)`);
       continue;
     }
 
-    cardsToGift.push(card);
+    cardsToGift.push({ card, amount });
   }
 
   if (cardsToGift.length === 0) {

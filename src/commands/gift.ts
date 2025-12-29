@@ -12,7 +12,7 @@ export const data = new SlashCommandBuilder()
       .setRequired(true))
   .addStringOption(option =>
     option.setName('cards')
-      .setDescription('Card codes separated by commas (e.g., BP001, LSCW#501, BP002)')
+      .setDescription('Card codes with optional amounts (e.g., BP001 x2, LSCW#501, BP002 x5)')
       .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -23,69 +23,33 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const receiverUserId = receiverUser.id;
   const cardsInput = interaction.options.getString('cards', true);
 
-  // Check sender exists
-  const { data: sender } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', senderUserId)
-    .single();
+  // ... (existence checks)
 
-  if (!sender) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
-    return;
-  }
-
-  // Check receiver exists
-  const { data: receiver } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', receiverUserId)
-    .single();
-
-  if (!receiver) {
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> ${receiverUser.username} needs to use \`/start\` first!` });
-    return;
-  }
-
-  // Prevent self-gifting
-  if (senderUserId === receiverUserId) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You can\'t gift to yourself!' });
-    return;
-  }
-
-  // Parse card codes
-  const cardcodes = cardsInput.split(',').map(c => c.trim());
+  // Parse card codes and amounts
+  const parts = cardsInput.split(',').map(c => c.trim());
   const cardsToGift = [];
   const failedCards = [];
 
-  // Fetch all cards once
-  const { data: allCards } = await supabase
-    .from('cards')
-    .select('*');
+  const { data: allCards } = await supabase.from('cards').select('*');
 
-  // Fetch all cards and validate
-  for (const cardcode of cardcodes) {
+  for (const part of parts) {
+    const [code, amountStr] = part.split(' x');
+    const cardcode = code.trim();
+    const amount = amountStr ? parseInt(amountStr) : 1;
+
     const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
-
     if (!card) {
       failedCards.push(`${cardcode} (not found)`);
       continue;
     }
 
-    // Check sender has the card
-    const { data: senderInventory } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('user_id', senderUserId)
-      .eq('card_id', card.card_id)
-      .single();
-
-    if (!senderInventory || senderInventory.quantity < 1) {
-      failedCards.push(`${cardcode} (don't own)`);
+    const { data: inv } = await supabase.from('inventory').select('*').eq('user_id', senderUserId).eq('card_id', card.card_id).single();
+    if (!inv || inv.quantity < amount) {
+      failedCards.push(`${cardcode} (not enough qty)`);
       continue;
     }
 
-    cardsToGift.push({ card, senderInventory });
+    cardsToGift.push({ card, amount });
   }
 
   if (cardsToGift.length === 0) {

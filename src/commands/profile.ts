@@ -37,6 +37,14 @@ export const data = new SlashCommandBuilder()
       .addStringOption(option =>
         option.setName('cardcode')
           .setDescription('Card code (e.g., BP001)')
+          .setRequired(true)))
+  .addSubcommand(subcommand =>
+    subcommand
+      .setName('reminders')
+      .setDescription('Enable or disable command reminders')
+      .addBooleanOption(option =>
+        option.setName('enabled')
+          .setDescription('Whether reminders should be sent')
           .setRequired(true)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -51,7 +59,25 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     await handleColor(interaction);
   } else if (subcommand === 'favoritecard') {
     await handleFavoriteCard(interaction);
+  } else if (subcommand === 'reminders') {
+    await handleReminders(interaction);
   }
+}
+
+async function handleReminders(interaction: ChatInputCommandInteraction) {
+  const userId = interaction.user.id;
+  const enabled = interaction.options.getBoolean('enabled', true);
+
+  const { error } = await supabase
+    .from('users')
+    .update({ reminders_enabled: enabled })
+    .eq('user_id', userId);
+
+  if (error) {
+    return interaction.editReply('Failed to update reminders setting.');
+  }
+
+  await interaction.editReply(`✅ Reminders have been **${enabled ? 'enabled' : 'disabled'}**.`);
 }
 
 async function handleView(interaction: ChatInputCommandInteraction) {
