@@ -126,6 +126,7 @@ async function handleView(interaction: ChatInputCommandInteraction) {
     .addFields(
       { name: '<:2_shell:1436124721413357770> Coins', value: `${user.coins}`, inline: true },
       { name: '<:06_whitestar:1430048829700313100> Total Cards', value: `${totalCards}`, inline: true },
+      { name: '⏰ Reminders', value: user.reminders_enabled !== false ? '✅ Enabled' : '❌ Disabled', inline: true },
       { name: '\u200B', value: '\u200B', inline: false },
       { name: '<:1_flower:1436124715797315687> Bio', value: user.bio || '*No bio set*', inline: false },
       { name: '<a:5blu_bubbles:1436124726010318870> Favorite Card', value: favoriteCardText, inline: false }
