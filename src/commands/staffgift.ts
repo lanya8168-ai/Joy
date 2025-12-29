@@ -74,11 +74,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   let attachment = null;
   try {
     const imageUrls = cardsToGift
-      .map((card: any) => card.image_url)
+      .map((item: any) => item.card.image_url)
       .filter((url: string) => url);
 
     if (imageUrls.length > 0) {
-      const mergedImageBuffer = await mergeCardImages(imageUrls);
+      const mergedImageBuffer = await mergeCardImages(imageUrls.slice(0, 5));
       attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'staffgift_preview.png' });
       confirmEmbed.setImage('attachment://staffgift_preview.png');
     }
@@ -89,7 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const row = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
       new ButtonBuilder()
-        .setCustomId(`staffgift_confirm_${senderUserId}_${receiverUserId}`)
+        .setCustomId(`staffgift_confirm_${senderUserId}_${receiverUserId}_${cardsToGift.map(c => `${c.card.card_id}:${c.amount}`).join(',')}`)
         .setLabel('Yes')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()

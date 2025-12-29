@@ -83,7 +83,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .filter((url: string) => url);
 
     if (imageUrls.length > 0) {
-      const mergedImageBuffer = await mergeCardImages(imageUrls);
+      const mergedImageBuffer = await mergeCardImages(imageUrls.slice(0, 5)); // Limit to 5 for preview
       attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'gift_preview.png' });
       confirmEmbed.setImage('attachment://gift_preview.png');
     }
@@ -94,7 +94,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const row = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
       new ButtonBuilder()
-        .setCustomId(`gift_confirm_${senderUserId}_${receiverUserId}`)
+        .setCustomId(`gift_confirm_${senderUserId}_${receiverUserId}_${cardsToGift.map(c => `${c.card.card_id}:${c.amount}`).join(',')}`)
         .setLabel('Yes')
         .setStyle(ButtonStyle.Success),
       new ButtonBuilder()
