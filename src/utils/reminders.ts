@@ -18,14 +18,17 @@ export async function scheduleReminder(
   commandName: string,
   cooldownMs: number
 ) {
-  // Check if user has reminders enabled
+  // Check user settings
   const { data: user } = await supabase
     .from('users')
-    .select('reminders_enabled')
+    .select('reminder_settings')
     .eq('user_id', userId)
     .single();
 
-  if (user && user.reminders_enabled === false) return;
+  if (user) {
+    const settings = user.reminder_settings || {};
+    if (settings[commandName] === false) return; // Disabled for this specific command
+  }
 
   const reminderId = `${userId}-${commandName}`;
   

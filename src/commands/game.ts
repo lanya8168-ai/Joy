@@ -64,7 +64,9 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     const guess = m.content.trim().toLowerCase();
     const answer = targetName.trim().toLowerCase();
     
-    if (guess === answer) {
+    console.log(`User ${m.author.username} guessed: "${guess}" (Expected: "${answer}")`);
+
+    if (guess === answer || guess.includes(answer) || answer.includes(guess)) {
       // Stop collector first to prevent double reward
       collector.stop('correct');
       

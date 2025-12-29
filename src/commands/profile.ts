@@ -37,14 +37,6 @@ export const data = new SlashCommandBuilder()
       .addStringOption(option =>
         option.setName('cardcode')
           .setDescription('Card code (e.g., BP001)')
-          .setRequired(true)))
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName('reminders')
-      .setDescription('Enable or disable command reminders')
-      .addBooleanOption(option =>
-        option.setName('enabled')
-          .setDescription('Whether reminders should be sent')
           .setRequired(true)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -59,25 +51,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     await handleColor(interaction);
   } else if (subcommand === 'favoritecard') {
     await handleFavoriteCard(interaction);
-  } else if (subcommand === 'reminders') {
-    await handleReminders(interaction);
   }
-}
-
-async function handleReminders(interaction: ChatInputCommandInteraction) {
-  const userId = interaction.user.id;
-  const enabled = interaction.options.getBoolean('enabled', true);
-
-  const { error } = await supabase
-    .from('users')
-    .update({ reminders_enabled: enabled })
-    .eq('user_id', userId);
-
-  if (error) {
-    return interaction.editReply('Failed to update reminders setting.');
-  }
-
-  await interaction.editReply(`✅ Reminders have been **${enabled ? 'enabled' : 'disabled'}**.`);
 }
 
 async function handleView(interaction: ChatInputCommandInteraction) {
@@ -126,7 +100,6 @@ async function handleView(interaction: ChatInputCommandInteraction) {
     .addFields(
       { name: '<:2_shell:1436124721413357770> Coins', value: `${user.coins}`, inline: true },
       { name: '<:06_whitestar:1430048829700313100> Total Cards', value: `${totalCards}`, inline: true },
-      { name: '⏰ Reminders', value: user.reminders_enabled !== false ? '✅ Enabled' : '❌ Disabled', inline: true },
       { name: '\u200B', value: '\u200B', inline: false },
       { name: '<:1_flower:1436124715797315687> Bio', value: user.bio || '*No bio set*', inline: false },
       { name: '<a:5blu_bubbles:1436124726010318870> Favorite Card', value: favoriteCardText, inline: false }
