@@ -62,17 +62,19 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
   
   collector.on('collect', async (m: any) => {
     const guess = m.content.trim().toLowerCase();
-    const answer = targetName.toLowerCase();
+    const answer = targetName.trim().toLowerCase();
     
     if (guess === answer) {
+      // Stop collector first to prevent double reward
+      collector.stop('correct');
+      
       // Add reward
       const { data: user } = await supabase.from('users').select('coins').eq('user_id', interaction.user.id).single();
       if (user) {
-        await supabase.from('users').update({ coins: user.coins + reward }).eq('user_id', interaction.user.id);
+        await supabase.from('users').update({ coins: (user.coins || 0) + (reward || 0) }).eq('user_id', interaction.user.id);
       }
       
       await m.reply(`✅ Correct! It's **${targetName}**! You earned <:2_shell:1436124721413357770> **${reward}** coins!`);
-      collector.stop('correct');
     }
   });
   
