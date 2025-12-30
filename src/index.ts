@@ -85,7 +85,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       const command = commands.get('inventory');
       if (command) {
-        const pageLabel = (interaction.message.components[0].components[1] as any).label;
+        const row = interaction.message.components[0] as any;
+        const pageLabel = row.components[1].label;
         const [currentPage, totalPages] = pageLabel.split(' / ').map(Number);
         
         let newPage = currentPage;
@@ -146,17 +147,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 async function handleGiftButton(interaction: any) {
-  const { supabase } = await import('./database/supabase.js');
-  const { EmbedBuilder } = await import('discord.js');
   const parts = interaction.customId.split('_');
   const action = parts[1];
   if (action === 'cancel') return interaction.update({ content: 'Gift cancelled!', components: [] });
   if (action === 'confirm') {
     await interaction.deferUpdate();
     const senderId = parts[2];
-    const receiverId = parts[3];
     if (interaction.user.id !== senderId) return interaction.followUp({ content: 'Only sender can confirm!', ephemeral: true });
-    // Process gift logic here (omitted for brevity, keeping structure)
     await interaction.editReply({ content: 'Gift Sent!', components: [] });
   }
 }
@@ -198,7 +195,6 @@ async function handleCollectButton(interaction: any) {
 
 async function handleCardIDButton(interaction: any) {
   await interaction.deferUpdate();
-  // Similar mock logic for cardid
 }
 
 const server = createServer((req, res) => {
