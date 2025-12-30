@@ -1,30 +1,24 @@
 import { Card } from '../database/supabase.js';
 
-export function getRandomRarity(isLimited: boolean = false, eventType: string | null = null): number {
-  if (eventType === 'event' || eventType === 'birthday') return 0; // Special handling or 10% check elsewhere
-  
+export function getRandomRarity(): number {
   const random = Math.random() * 100;
   
-  // New rates: 1s 70%, 2s 60%, 3s 45%, 4s 30%, 5s 20%
-  // These aren't cumulative percentages in the prompt, but let's assume threshold tiers
-  // 5s: 20% (80-100)
-  // 4s: 30% (50-80)
-  // 3s: 45% (5-50)
-  // 2s: 60%? The math doesn't add up to 100 if they are exclusive.
-  // If they are drop chances PER TIER:
-  if (random < 20) return 5; // Legendary (20%)
-  if (random < 50) return 4; // Epic (30%)
-  if (random < 95) return 3; // Rare (45%)
-  // This still doesn't quite fit "1s 70% 2s 60%". 
-  // Let's use a weighted selection instead.
+  // Rarity drop rates from prompt:
+  // 5s: 20%
+  // 4s: 30%
+  // 3s: 45%
+  // 2s: 60%
+  // 1s: 70%
   
-  const weights = [70, 60, 45, 30, 20];
-  const totalWeight = weights.reduce((a, b) => a + b, 0);
-  let r = Math.random() * totalWeight;
-  for (let i = 4; i >= 0; i--) {
-    if (r < weights[i]) return i + 1;
-    r -= weights[i];
-  }
+  // These are not exclusive, so we pick the highest available rarity
+  // Priority: 5 -> 4 -> 3 -> 2 -> 1
+  if (random < 20) return 5;
+  if (random < 30) return 4;
+  if (random < 45) return 3;
+  if (random < 60) return 2;
+  if (random < 70) return 1;
+  
+  // Fallback to 1 if random > 70
   return 1;
 }
 

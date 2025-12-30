@@ -133,6 +133,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
+  // Alphabetical sorting (Group -> Name)
+  filteredInventory.sort((a: any, b: any) => {
+    const groupA = a.cards.group.toLowerCase();
+    const groupB = b.cards.group.toLowerCase();
+    if (groupA < groupB) return -1;
+    if (groupA > groupB) return 1;
+    
+    const nameA = a.cards.name.toLowerCase();
+    const nameB = b.cards.name.toLowerCase();
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    return 0;
+  });
+
   // Calculate pagination
   const totalPages = Math.ceil(filteredInventory.length / CARDS_PER_PAGE);
   const validPage = Math.max(1, Math.min(page, totalPages));

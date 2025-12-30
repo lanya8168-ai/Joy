@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
+import { getRandomRarity } from '../utils/cards.js';
 
 const PACKS = [
   { id: '1', name: 'Sandy Shells', cost: 500, cards: 1 },
@@ -145,57 +146,76 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .eq('user_id', userId);
 
   // Give cards - filter based on pack type
-  let availableCards = allCards;
-  
-  if ((pack as any).rarity === 5) {
-    // Legendary pack - only legendary cards
-    availableCards = allCards.filter((card: any) => card.rarity === 5);
-    if (availableCards.length === 0) {
-      await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Not enough legendary cards available!' });
-      return;
-    }
-  } else if ((pack as any).groupPack) {
-    // Group or idol-specific pack
-    const groupOrIdol = interaction.options.getString('group_or_idol');
-    if (!groupOrIdol) {
-      await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please specify a group or idol name!' });
-      return;
-    }
-    availableCards = allCards.filter((card: any) => 
-      card.name.toLowerCase().includes(groupOrIdol.toLowerCase()) || 
-      card.group.toLowerCase().includes(groupOrIdol.toLowerCase())
-    );
-    if (availableCards.length === 0) {
-      await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> No cards found for "${groupOrIdol}"!` });
-      return;
-    }
-    
-    // Check if group/idol has too many legendary cards
-    const legendaryCount = availableCards.filter((card: any) => card.rarity === 5).length;
-    const legendaryPercentage = (legendaryCount / availableCards.length) * 100;
-    
-    if (legendaryPercentage >= 50) {
-      await supabase.from('users').update({ coins: user.coins }).eq('user_id', userId);
-      await interaction.editReply({ 
-        content: `<:IMG_9904:1443371148543791218> "${groupOrIdol}" has too many legendary cards! Use the **Legendary Treasure** pack instead to collect these cards.` 
-      });
-      return;
-    }
-  }
-
   const cardsList = [];
   for (let i = 0; i < pack.cards; i++) {
-    const randomCard = availableCards[Math.floor(Math.random() * availableCards.length)];
-    cardsList.push(randomCard);
+    let selectedCard;
+
+    // Check for event/birthday (10%)
+    if (Math.random() < 0.10) {
+      let eventQuery = supabase.from('cards').select('*').eq('droppable', true).not('event_type', 'is', null);
+      
+      if ((pack as any).groupPack) {
+        const groupOrIdol = interaction.options.getString('group_or_idol');
+        if (groupOrIdol) {
+          // Note: Since we can't easily filter by text in query across all fields perfectly here without complex stuff
+          // we'll fetch and filter in JS for simplicity or just use the existing logic
+        }
+      }
+      
+      const { data: eventCards } = await eventQuery;
+      if (eventCards && eventCards.length > 0) {
+        let filteredEvents = eventCards;
+        if ((pack as any).groupPack) {
+          const groupOrIdol = interaction.options.getString('group_or_idol');
+          if (groupOrIdol) {
+             filteredEvents = eventCards.filter((c: any) => 
+               c.name.toLowerCase().includes(groupOrIdol.toLowerCase()) || 
+               c.group.toLowerCase().includes(groupOrIdol.toLowerCase())
+             );
+          }
+        }
+        if (filteredEvents.length > 0) {
+          selectedCard = filteredEvents[Math.floor(Math.random() * filteredEvents.length)];
+        }
+      }
+    }
+
+    if (!selectedCard) {
+      if ((pack as any).rarity === 5) {
+        const legendaryCards = allCards.filter((card: any) => card.rarity === 5);
+        selectedCard = legendaryCards[Math.floor(Math.random() * legendaryCards.length)];
+      } else {
+        const rarity = getRandomRarity();
+        let possibleCards = allCards.filter((c: any) => c.rarity === rarity && !c.is_limited && !c.event_type);
+        
+        if ((pack as any).groupPack) {
+          const groupOrIdol = interaction.options.getString('group_or_idol');
+          if (groupOrIdol) {
+            possibleCards = possibleCards.filter((c: any) => 
+              c.name.toLowerCase().includes(groupOrIdol.toLowerCase()) || 
+              c.group.toLowerCase().includes(groupOrIdol.toLowerCase())
+            );
+          }
+        }
+
+        if (possibleCards.length > 0) {
+          selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+        } else {
+          // Fallback to any card in this rarity if specific pack filters returned nothing
+          let fallback = allCards.filter((c: any) => c.rarity === rarity && !c.is_limited && !c.event_type);
+          if (fallback.length === 0) fallback = allCards.filter(c => !c.is_limited && !c.event_type);
+          selectedCard = fallback[Math.floor(Math.random() * fallback.length)];
+        }
+      }
+    }
+
+    cardsList.push(selectedCard);
 
     const { data: existingItem } = await supabase
       .from('inventory')
       .select('*')
       .eq('user_id', userId)
-      .eq('card_id', randomCard.card_id)
+      .eq('card_id', selectedCard.card_id)
       .single();
 
     if (existingItem) {
@@ -208,7 +228,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
         .from('inventory')
         .insert({
           user_id: userId,
-          card_id: randomCard.card_id,
+          card_id: selectedCard.card_id,
           quantity: 1
         });
     }

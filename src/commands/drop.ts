@@ -42,7 +42,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Check for event/birthday drop (10% chance)
   let selectedCard;
-  if (Math.random() < 0.1) {
+  if (Math.random() < 0.10) {
     const { data: eventCards } = await supabase
       .from('cards')
       .select('*')
