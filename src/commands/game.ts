@@ -58,6 +58,8 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
   const channel = interaction.channel;
   if (!channel || !(channel instanceof TextChannel)) return;
 
+  console.log(`[GAME DEBUG] Starting game in channel ${channel.id} for user ${interaction.user.id}. Target: ${targetName}`);
+
   const collector = channel.createMessageCollector({ filter, time: 30000 });
   
   collector.on('collect', async (m: any) => {
@@ -68,6 +70,8 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     const isCorrect = guess === answer || 
                      (guess.length >= 3 && answer === guess) ||
                      (answer.length > 3 && (guess === answer || answer.split(' ').some(part => part.toLowerCase() === guess)));
+
+    console.log(`[GAME DEBUG] Channel: ${m.channel.id}, User: ${m.author.username} (${m.author.id}), Guess: "${guess}", Answer: "${answer}", Match: ${isCorrect}`);
 
     if (isCorrect) {
       // Stop collector first to prevent double reward
