@@ -64,12 +64,10 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     const guess = m.content.trim().toLowerCase();
     const answer = targetName.trim().toLowerCase();
     
-    // Improved matching: exact, includes, closely related, or group/idol name matching
+    // Strict matching: requires significant overlap and minimum length
     const isCorrect = guess === answer || 
-                     guess.includes(answer) || 
-                     (answer.length > 3 && answer.includes(guess)) ||
-                     (answer.split(' ').some(part => part.length > 2 && guess.includes(part.toLowerCase()))) ||
-                     (guess.length > 2 && answer.includes(guess));
+                     (guess.length >= 3 && answer === guess) ||
+                     (answer.length > 3 && (guess === answer || answer.split(' ').some(part => part.toLowerCase() === guess)));
 
     if (isCorrect) {
       // Stop collector first to prevent double reward

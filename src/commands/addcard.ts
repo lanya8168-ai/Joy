@@ -35,6 +35,18 @@ export const data = new SlashCommandBuilder()
     option.setName('droppable')
       .setDescription('Can this card be dropped? (default: true)')
       .setRequired(false))
+  .addBooleanOption(option =>
+    option.setName('is_limited')
+      .setDescription('Is this a limited edition card?')
+      .setRequired(false))
+  .addStringOption(option =>
+    option.setName('event_type')
+      .setDescription('Set event type (event, birthday)')
+      .setRequired(false)
+      .addChoices(
+        { name: 'Event', value: 'event' },
+        { name: 'Birthday', value: 'birthday' }
+      ))
   .addStringOption(option =>
     option.setName('image_url')
       .setDescription('Image URL for the card')
@@ -56,14 +68,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const rarity = interaction.options.getInteger('rarity');
   const era = interaction.options.getString('era');
   const droppable = interaction.options.getBoolean('droppable');
+  const isLimited = interaction.options.getBoolean('is_limited');
+  const eventType = interaction.options.getString('event_type');
   const imageUrl = interaction.options.getString('image_url');
 
   // Check if card exists with this cardcode
-  const { data: allCards } = await supabase
+  const { data: existingCard } = await supabase
     .from('cards')
-    .select('*');
-
-  const existingCard = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
+    .select('*')
+    .eq('cardcode', cardcode.toUpperCase())
+    .maybeSingle();
 
   // EDIT MODE: card exists
   if (existingCard) {
@@ -73,6 +87,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (rarity) updates.rarity = rarity;
     if (era) updates.era = era;
     if (droppable !== null) updates.droppable = droppable;
+    if (isLimited !== null) updates.is_limited = isLimited;
+    if (eventType !== null) updates.event_type = eventType;
     if (imageUrl) updates.image_url = imageUrl;
 
     if (Object.keys(updates).length === 0) {
@@ -124,6 +140,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       era: era,
       rarity: rarity,
       droppable: droppable ?? true,
+      is_limited: isLimited ?? false,
+      event_type: eventType,
       image_url: imageUrl
     }])
     .select();

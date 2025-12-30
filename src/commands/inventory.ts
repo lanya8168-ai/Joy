@@ -73,7 +73,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         era,
         rarity,
         cardcode,
-        image_url
+        image_url,
+        droppable
       )
     `)
     .eq('user_id', userId);

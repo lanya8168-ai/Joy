@@ -26,6 +26,9 @@ const client = new Client({
 
 const commands = new Collection<string, Command>();
 
+import * as addlimitcard from './commands/addlimitcard.js';
+import * as setevent from './commands/setevent.js';
+
 async function loadCommands() {
   const commandsPath = join(__dirname, 'commands');
   const commandFiles = (await readdir(commandsPath)).filter(file => file.endsWith('.js'));

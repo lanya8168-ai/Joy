@@ -39,6 +39,19 @@ export const data = new SlashCommandBuilder()
     option.setName('droppable')
       .setDescription('Can this card be dropped?')
       .setRequired(false))
+  .addBooleanOption(option =>
+    option.setName('is_limited')
+      .setDescription('Is this a limited edition card?')
+      .setRequired(false))
+  .addStringOption(option =>
+    option.setName('event_type')
+      .setDescription('Set event type')
+      .setRequired(false)
+      .addChoices(
+        { name: 'Event', value: 'event' },
+        { name: 'Birthday', value: 'birthday' },
+        { name: 'None', value: 'none' }
+      ))
   .addStringOption(option =>
     option.setName('image_url')
       .setDescription('New image URL')
@@ -61,13 +74,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const era = interaction.options.getString('era');
   const rarity = interaction.options.getInteger('rarity');
   const droppable = interaction.options.getBoolean('droppable');
+  const isLimited = interaction.options.getBoolean('is_limited');
+  const eventType = interaction.options.getString('event_type');
   const imageUrl = interaction.options.getString('image_url');
 
-  const { data: allCards } = await supabase
+  const { data: existingCard } = await supabase
     .from('cards')
-    .select('*');
-
-  const existingCard = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
+    .select('*')
+    .eq('cardcode', cardcode.toUpperCase())
+    .maybeSingle();
 
   if (!existingCard) {
     await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Card with code **${cardcode}** not found!` });
@@ -81,6 +96,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (era) updates.era = era;
   if (rarity) updates.rarity = rarity;
   if (droppable !== null) updates.droppable = droppable;
+  if (isLimited !== null) updates.is_limited = isLimited;
+  if (eventType) updates.event_type = eventType === 'none' ? null : eventType;
   if (imageUrl) updates.image_url = imageUrl;
 
   if (Object.keys(updates).length === 0) {

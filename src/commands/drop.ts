@@ -40,23 +40,50 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
   }
 
-  const { data: allCards } = await supabase
-    .from('cards')
-    .select('*')
-    .eq('droppable', true);
+  // Check for event/birthday drop (10% chance)
+  let selectedCard;
+  if (Math.random() < 0.1) {
+    const { data: eventCards } = await supabase
+      .from('cards')
+      .select('*')
+      .eq('droppable', true)
+      .not('event_type', 'is', null);
+    
+    if (eventCards && eventCards.length > 0) {
+      selectedCard = eventCards[Math.floor(Math.random() * eventCards.length)];
+    }
+  }
 
-  if (!allCards || allCards.length === 0) {
+  if (!selectedCard) {
+    const rarity = getRandomRarity();
+    const { data: possibleCards } = await supabase
+      .from('cards')
+      .select('*')
+      .eq('droppable', true)
+      .eq('rarity', rarity)
+      .eq('is_limited', false) // Normal drops don't include limited by default
+      .is('event_type', null);
+
+    if (possibleCards && possibleCards.length > 0) {
+      selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+    } else {
+      // Fallback to any droppable card if specific rarity is empty
+      const { data: fallbackCards } = await supabase
+        .from('cards')
+        .select('*')
+        .eq('droppable', true)
+        .eq('is_limited', false)
+        .is('event_type', null);
+      selectedCard = fallbackCards?.[Math.floor(Math.random() * (fallbackCards?.length || 1))];
+    }
+  }
+
+  if (!selectedCard) {
     await interaction.editReply({
-      content: '<:IMG_9904:1443371148543791218> No droppable cards available yet! Ask an admin to add cards using `/addcard`.'
+      content: '<:IMG_9904:1443371148543791218> No droppable cards available yet!'
     });
     return;
   }
-
-  const rarity = getRandomRarity();
-  const cardsOfRarity = allCards.filter(c => c.rarity === rarity);
-  const selectedCard = cardsOfRarity.length > 0
-    ? cardsOfRarity[Math.floor(Math.random() * cardsOfRarity.length)]
-    : allCards[Math.floor(Math.random() * allCards.length)];
 
   // Add card to inventory and update last_drop time
   const { data: existingItem } = await supabase
