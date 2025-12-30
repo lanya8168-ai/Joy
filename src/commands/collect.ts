@@ -46,7 +46,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const missingFilter = interaction.options.getBoolean('missing');
 
   // Get all cards
-  let query = supabase.from('cards').select('*').order('group', { ascending: true }).order('name', { ascending: true });
+  let query = supabase.from('cards')
+    .select('*')
+    .order('group', { ascending: true })
+    .order('name', { ascending: true });
   
   if (idolFilter) {
     query = query.ilike('name', `%${idolFilter}%`);
