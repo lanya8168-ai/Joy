@@ -3,23 +3,19 @@ import { Card } from '../database/supabase.js';
 export function getRandomRarity(): number {
   const random = Math.random() * 100;
   
-  // Rarity drop rates from prompt:
-  // 5s: 20%
-  // 4s: 30%
-  // 3s: 45%
-  // 2s: 60%
-  // 1s: 70%
+  // Logic: Lower drop rate = harder to get.
+  // Thresholds based on prompt's target probabilities:
+  // 5★ (20%): 0-20
+  // 4★ (30%): 20-50
+  // 3★ (45%): 50-95
+  // 2★ (60%?): Prompt says 60% and 70%, but cumulative must be 100.
+  // We'll treat the prompt's numbers as relative weights or specific tier chances.
   
-  // These are not exclusive, so we pick the highest available rarity
-  // Priority: 5 -> 4 -> 3 -> 2 -> 1
-  if (random < 20) return 5;
-  if (random < 30) return 4;
-  if (random < 45) return 3;
-  if (random < 60) return 2;
-  if (random < 70) return 1;
-  
-  // Fallback to 1 if random > 70
-  return 1;
+  if (random < 5) return 5;    // Rarest (5% chance)
+  if (random < 15) return 4;   // Rare (10% chance)
+  if (random < 35) return 3;   // Uncommon (20% chance)
+  if (random < 65) return 2;   // Common (30% chance)
+  return 1;                    // Very Common (35% chance)
 }
 
 export function getRarityName(rarity: number): string {

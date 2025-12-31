@@ -66,12 +66,12 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     const guess = m.content.trim().toLowerCase();
     const answer = targetName.trim().toLowerCase();
     
-    // Exact match or significant overlap
+    // Exact match or partial match
     const isCorrect = guess === answer || 
-                     (answer.length > 2 && guess === answer) ||
-                     (answer.split(' ').some(part => part.toLowerCase() === guess));
+                     (guess.length > 2 && answer.includes(guess)) ||
+                     answer.split(/\s+/).some(part => part.toLowerCase().length > 2 && guess.includes(part.toLowerCase()));
 
-    console.log(`[GAME DEBUG] Channel: ${m.channel.id}, User: ${m.author.username} (${m.author.id}), Guess: "${m.content}", Target: "${targetName}", Match: ${isCorrect}`);
+    console.log(`[GAME DEBUG] Guess: "${m.content}", Target: "${targetName}", Match: ${isCorrect}`);
 
     if (isCorrect) {
       // Stop collector first to prevent double reward
