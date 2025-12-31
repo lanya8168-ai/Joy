@@ -35,6 +35,10 @@ export const data = new SlashCommandBuilder()
       .setDescription('Filter by idol/member name')
       .setRequired(false))
   .addStringOption(option =>
+    option.setName('search')
+      .setDescription('Search for a specific idol or group name')
+      .setRequired(false))
+  .addStringOption(option =>
     option.setName('era')
       .setDescription('Filter by era')
       .setRequired(false));
@@ -50,6 +54,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const groupFilter = interaction.options.getString('group');
   const idolFilter = interaction.options.getString('idol');
   const eraFilter = interaction.options.getString('era');
+  const searchFilter = interaction.options.getString('search');
 
   const { data: user } = await supabase
     .from('users')
@@ -118,6 +123,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const eras = eraFilter.split(',').map(s => s.trim().toLowerCase());
     filteredInventory = filteredInventory.filter((item: any) =>
       item.cards.era && eras.some(e => item.cards.era.toLowerCase().includes(e))
+    );
+  }
+
+  if (searchFilter) {
+    const search = searchFilter.toLowerCase();
+    filteredInventory = filteredInventory.filter((item: any) =>
+      item.cards.name.toLowerCase().includes(search) || 
+      item.cards.group.toLowerCase().includes(search) ||
+      (item.cards.era && item.cards.era.toLowerCase().includes(search))
     );
   }
 
@@ -195,7 +209,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const row = new ActionRowBuilder<ButtonBuilder>()
     .addComponents(
       new ButtonBuilder()
-        .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${idolFilter || 'all'}`)
+        .setCustomId(`inv_prev_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${idolFilter || 'all'}_${searchFilter || 'all'}`)
         .setLabel('← Previous')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(validPage === 1),
@@ -205,7 +219,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         .setStyle(ButtonStyle.Primary)
         .setDisabled(true),
       new ButtonBuilder()
-        .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${idolFilter || 'all'}`)
+        .setCustomId(`inv_next_${userId}_${rarityFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${idolFilter || 'all'}_${searchFilter || 'all'}`)
         .setLabel('Next →')
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(validPage === totalPages)

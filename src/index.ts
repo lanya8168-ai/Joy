@@ -82,6 +82,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const groupFilter = parts[4] === 'all' ? null : parts[4];
       const eraFilter = parts[5] === 'all' ? null : parts[5];
       const idolFilter = parts[6] === 'all' ? null : parts[6];
+      const searchFilter = parts[7] === 'all' ? null : parts[7];
 
       const command = commands.get('inventory');
       if (command) {
@@ -107,6 +108,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
               if (name === 'group') return groupFilter === 'all' ? null : groupFilter;
               if (name === 'era') return eraFilter === 'all' ? null : eraFilter;
               if (name === 'idol') return idolFilter === 'all' ? null : idolFilter;
+              if (name === 'search') return searchFilter === 'all' ? null : searchFilter;
               return null;
             }
           }
