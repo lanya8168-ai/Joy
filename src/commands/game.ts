@@ -34,6 +34,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
     
     const randomCard = cards[Math.floor(Math.random() * cards.length)];
+    // FIX: Use isIdolMode to determine targetName correctly
     const targetName = isIdolMode ? randomCard.name : randomCard.group;
     const reward = 50;
 
@@ -42,6 +43,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
   
   const randomQuestion = questions[Math.floor(Math.random() * questions.length)];
+  // FIX: randomQuestion.answer might be wrong for the mode if questions aren't separated well
   await startGame(interaction, randomQuestion.image_url, randomQuestion.answer, randomQuestion.reward_coins, isIdolMode);
 }
 
