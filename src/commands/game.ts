@@ -55,24 +55,36 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
   await interaction.editReply({ embeds: [embed] });
   
   // Use a broader filter to catch messages in the channel from the specific user
-  const filter = (m: any) => m.author.id === interaction.user.id && !m.author.bot;
-  const channel = interaction.channel as TextChannel;
-  if (!channel || !channel.createMessageCollector) return;
+  const filter = (m: any) => {
+    const isAuthor = m.author.id === interaction.user.id;
+    const isNotBot = !m.author.bot;
+    return isAuthor && isNotBot;
+  };
+  const channel = interaction.channel;
+  if (!channel || !('createMessageCollector' in channel)) {
+    console.error(`[GAME ERROR] Channel ${channel?.id} does not support collectors`);
+    return;
+  }
 
   console.log(`[GAME DEBUG] Starting game in channel ${channel.id} for user ${interaction.user.id}. Target: ${targetName}`);
 
-  const collector = channel.createMessageCollector({ filter, time: 30000 });
+  const collector = (channel as any).createMessageCollector({ filter, time: 30000 });
   
   collector.on('collect', async (m: any) => {
     const guess = m.content.trim().toLowerCase();
     const answer = targetName.trim().toLowerCase();
     
-    // Exact match or partial match
+    console.log(`[GAME DEBUG] COLLECTED: "${m.content}" from ${m.author.tag} in ${m.channel.id}`);
+    
+    // Improved matching logic:
+    const answerWords = answer.split(/\s+/).filter(word => word.length > 2);
+    
     const isCorrect = guess === answer || 
                      (guess.length > 2 && answer.includes(guess)) ||
-                     answer.split(/\s+/).some(part => part.toLowerCase().length > 2 && guess.includes(part.toLowerCase()));
+                     (answer.length > 2 && guess.includes(answer)) ||
+                     answerWords.some(word => guess.includes(word));
 
-    console.log(`[GAME DEBUG] Guess: "${m.content}", Target: "${targetName}", Match: ${isCorrect}`);
+    console.log(`[GAME DEBUG] Match Result for "${guess}" against "${answer}": ${isCorrect}`);
 
     if (isCorrect) {
       // Stop collector first to prevent double reward
