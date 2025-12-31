@@ -90,10 +90,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const senderUserId = interaction.user.id;
   const receiverUser = interaction.options.getUser('user', true);
   const receiverUserId = receiverUser.id;
+  const OWNER_ID = '1403958587843149937';
 
-  // Check if sender has admin permissions
-  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> This command is staff only!' });
+  // Check if sender is the allowed owner
+  if (senderUserId !== OWNER_ID) {
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Only the bot owner can use this command!' });
     return;
   }
 
@@ -106,11 +107,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!receiver) {
     await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> ${receiverUser.username} needs to use \`/start\` first!` });
-    return;
-  }
-
-  if (senderUserId === receiverUserId) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You can\'t gift to yourself!' });
     return;
   }
 

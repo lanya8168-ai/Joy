@@ -18,8 +18,11 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
-  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> This command is staff only!' });
+  const senderId = interaction.user.id;
+  const OWNER_ID = '1403958587843149937';
+
+  if (senderId !== OWNER_ID) {
+    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Only the bot owner can use this command!' });
     return;
   }
 
