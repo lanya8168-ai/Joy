@@ -54,15 +54,52 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     
   await interaction.editReply({ embeds: [embed] });
   
-  // Use a broader filter to catch messages in the channel from the specific user
+  // Improved filter to be more explicit and log results
   const filter = (m: any) => {
-    const isAuthor = m.author.id === interaction.user.id;
-    const isNotBot = !m.author.bot;
-    return isAuthor && isNotBot;
+    try {
+      const authorId = String(m.author.id).trim();
+      const interactionUserId = String(interaction.user.id).trim();
+      const isAuthor = authorId === interactionUserId;
+      const isNotBot = !m.author.bot;
+      
+      console.log(`[FILTER DEBUG] Channel: ${m.channel.id} | Msg from ${m.author.tag} (${authorId}) | Target User: ${interactionUserId} | isAuthor: ${isAuthor} | isNotBot: ${isNotBot} | Content: "${m.content}"`);
+      
+      return isAuthor && isNotBot;
+    } catch (err) {
+      console.error('[FILTER ERROR]', err);
+      return false;
+    }
   };
+  
+  // Use client-level message event as a fallback
+  const messageHandler = async (m: any) => {
+    if (String(m.channel.id) !== String(interaction.channelId) || String(m.author.id) !== String(interaction.user.id) || m.author.bot) return;
+    console.log(`[CLIENT DEBUG] Received message in game channel: "${m.content}"`);
+    
+    // Manual trigger if collector fails
+    if (collector && !collector.ended) {
+      const guess = m.content.trim().toLowerCase();
+      const answer = targetName.trim().toLowerCase();
+      const answerWords = answer.split(/\s+/).filter(word => word.length > 2);
+      
+      const isCorrect = guess === answer || 
+                       (guess.length > 2 && answer.includes(guess)) ||
+                       (answer.length > 2 && guess.includes(answer)) ||
+                       answerWords.some(word => guess.includes(word));
+
+      if (isCorrect) {
+        console.log(`[CLIENT DEBUG] Manual match success for "${guess}"`);
+        collector.emit('collect', m);
+      }
+    }
+  };
+  interaction.client.on('messageCreate', messageHandler);
+
+  // Ensure we are using the correct channel object
   const channel = interaction.channel;
   if (!channel || !('createMessageCollector' in channel)) {
     console.error(`[GAME ERROR] Channel ${channel?.id} does not support collectors`);
+    interaction.client.off('messageCreate', messageHandler);
     return;
   }
 
@@ -74,7 +111,7 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     const guess = m.content.trim().toLowerCase();
     const answer = targetName.trim().toLowerCase();
     
-    console.log(`[GAME DEBUG] COLLECTED: "${m.content}" from ${m.author.tag} in ${m.channel.id}`);
+    console.log(`[GAME DEBUG] COLLECTED: "${m.content}" from ${m.author.tag} (${m.author.id}) in ${m.channel.id}`);
     
     // Improved matching logic:
     const answerWords = answer.split(/\s+/).filter(word => word.length > 2);
@@ -87,6 +124,9 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     console.log(`[GAME DEBUG] Match Result for "${guess}" against "${answer}": ${isCorrect}`);
 
     if (isCorrect) {
+      // Cleanup client listener
+      interaction.client.off('messageCreate', messageHandler);
+      
       // Stop collector first to prevent double reward
       collector.stop('correct');
       
@@ -101,6 +141,9 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
   });
   
   collector.on('end', (collected: any, reason: string) => {
+    // Cleanup client listener
+    interaction.client.off('messageCreate', messageHandler);
+    
     if (reason !== 'correct') {
       interaction.followUp(`⏰ Time's up! The answer was **${targetName}**.`);
     }
