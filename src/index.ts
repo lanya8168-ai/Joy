@@ -97,6 +97,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
         const mockInteraction = {
           ...interaction,
           deferReply: () => interaction.deferUpdate(),
+          editReply: (options: any) => interaction.editReply(options),
+          reply: (options: any) => interaction.reply(options),
           options: {
             getUser: () => (userId === interaction.user.id ? null : { id: userId }),
             getInteger: (name: string) => {
