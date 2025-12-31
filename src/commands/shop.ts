@@ -186,25 +186,38 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
         selectedCard = legendaryCards[Math.floor(Math.random() * legendaryCards.length)];
       } else {
         const rarity = getRandomRarity();
+        // Priority filter for Group Packs
         let possibleCards = allCards.filter((c: any) => c.rarity === rarity && !c.is_limited && !c.event_type);
         
-        if ((pack as any).groupPack) {
-          const groupOrIdol = interaction.options.getString('group_or_idol');
-          if (groupOrIdol) {
-            possibleCards = possibleCards.filter((c: any) => 
-              c.name.toLowerCase().includes(groupOrIdol.toLowerCase()) || 
-              c.group.toLowerCase().includes(groupOrIdol.toLowerCase())
-            );
+        const groupOrIdol = interaction.options.getString('group_or_idol');
+        if ((pack as any).groupPack && groupOrIdol) {
+          const search = groupOrIdol.toLowerCase();
+          const filtered = allCards.filter((c: any) => 
+            (c.name.toLowerCase().includes(search) || c.group.toLowerCase().includes(search)) &&
+            !c.is_limited && !c.event_type
+          );
+          
+          if (filtered.length > 0) {
+            // Filter by rarity within the found set
+            const rarityMatch = filtered.filter((c: any) => c.rarity === rarity);
+            if (rarityMatch.length > 0) {
+              selectedCard = rarityMatch[Math.floor(Math.random() * rarityMatch.length)];
+            } else {
+              // If rarity doesn't exist for that idol, pick any card for that idol
+              selectedCard = filtered[Math.floor(Math.random() * filtered.length)];
+            }
           }
         }
 
-        if (possibleCards.length > 0) {
-          selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
-        } else {
-          // Fallback to any card in this rarity if specific pack filters returned nothing
-          let fallback = allCards.filter((c: any) => c.rarity === rarity && !c.is_limited && !c.event_type);
-          if (fallback.length === 0) fallback = allCards.filter(c => !c.is_limited && !c.event_type);
-          selectedCard = fallback[Math.floor(Math.random() * fallback.length)];
+        if (!selectedCard) {
+          if (possibleCards.length > 0) {
+            selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
+          } else {
+            // Fallback to any card in this rarity if specific pack filters returned nothing
+            let fallback = allCards.filter((c: any) => c.rarity === rarity && !c.is_limited && !c.event_type);
+            if (fallback.length === 0) fallback = allCards.filter(c => !c.is_limited && !c.event_type);
+            selectedCard = fallback[Math.floor(Math.random() * fallback.length)];
+          }
         }
       }
     }
