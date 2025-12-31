@@ -54,9 +54,10 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     
   await interaction.editReply({ embeds: [embed] });
   
-  const filter = (m: any) => m.author.id === interaction.user.id;
-  const channel = interaction.channel;
-  if (!channel || !(channel instanceof TextChannel)) return;
+  // Use a broader filter to catch messages in the channel from the specific user
+  const filter = (m: any) => m.author.id === interaction.user.id && !m.author.bot;
+  const channel = interaction.channel as TextChannel;
+  if (!channel || !channel.createMessageCollector) return;
 
   console.log(`[GAME DEBUG] Starting game in channel ${channel.id} for user ${interaction.user.id}. Target: ${targetName}`);
 
