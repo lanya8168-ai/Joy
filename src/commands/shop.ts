@@ -150,32 +150,25 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   for (let i = 0; i < pack.cards; i++) {
     let selectedCard;
 
-    // Check for event/birthday (10%)
-    if (Math.random() < 0.10) {
-      let eventQuery = supabase.from('cards').select('*').eq('droppable', true).not('event_type', 'is', null);
+    // Check for event/birthday or limited cards (8%)
+    if (Math.random() < 0.08) {
+      let specialQuery = supabase.from('cards').select('*').eq('droppable', true).or('event_type.not.is.null,is_limited.eq.true');
       
-      if ((pack as any).groupPack) {
+      const { data: specialCards } = await specialQuery;
+      if (specialCards && specialCards.length > 0) {
+        let filteredSpecials = specialCards;
         const groupOrIdol = interaction.options.getString('group_or_idol');
-        if (groupOrIdol) {
-          // Note: Since we can't easily filter by text in query across all fields perfectly here without complex stuff
-          // we'll fetch and filter in JS for simplicity or just use the existing logic
+        
+        if ((pack as any).groupPack && groupOrIdol) {
+          const search = groupOrIdol.toLowerCase();
+          filteredSpecials = specialCards.filter((c: any) => 
+            c.name.toLowerCase().includes(search) || 
+            c.group.toLowerCase().includes(search)
+          );
         }
-      }
-      
-      const { data: eventCards } = await eventQuery;
-      if (eventCards && eventCards.length > 0) {
-        let filteredEvents = eventCards;
-        if ((pack as any).groupPack) {
-          const groupOrIdol = interaction.options.getString('group_or_idol');
-          if (groupOrIdol) {
-             filteredEvents = eventCards.filter((c: any) => 
-               c.name.toLowerCase().includes(groupOrIdol.toLowerCase()) || 
-               c.group.toLowerCase().includes(groupOrIdol.toLowerCase())
-             );
-          }
-        }
-        if (filteredEvents.length > 0) {
-          selectedCard = filteredEvents[Math.floor(Math.random() * filteredEvents.length)];
+        
+        if (filteredSpecials.length > 0) {
+          selectedCard = filteredSpecials[Math.floor(Math.random() * filteredSpecials.length)];
         }
       }
     }
@@ -187,14 +180,14 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
       } else {
         const rarity = getRandomRarity();
         // Priority filter for Group Packs
-        let possibleCards = allCards.filter((c: any) => c.rarity === rarity && !c.is_limited && !c.event_type);
+        let possibleCards = allCards.filter((c: any) => c.rarity === rarity && !c.event_type); // Removed is_limited check to allow limited cards as regular drops too
         
         const groupOrIdol = interaction.options.getString('group_or_idol');
         if ((pack as any).groupPack && groupOrIdol) {
           const search = groupOrIdol.toLowerCase();
           const filtered = allCards.filter((c: any) => 
             (c.name.toLowerCase().includes(search) || c.group.toLowerCase().includes(search)) &&
-            !c.is_limited && !c.event_type
+            !c.event_type
           );
           
           if (filtered.length > 0) {
@@ -214,8 +207,8 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
             selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
           } else {
             // Fallback to any card in this rarity if specific pack filters returned nothing
-            let fallback = allCards.filter((c: any) => c.rarity === rarity && !c.is_limited && !c.event_type);
-            if (fallback.length === 0) fallback = allCards.filter(c => !c.is_limited && !c.event_type);
+            let fallback = allCards.filter((c: any) => c.rarity === rarity && !c.event_type);
+            if (fallback.length === 0) fallback = allCards.filter(c => !c.event_type);
             selectedCard = fallback[Math.floor(Math.random() * fallback.length)];
           }
         }
