@@ -11,11 +11,11 @@ export function getRandomRarity(): number {
   // 2★ (60%?): Prompt says 60% and 70%, but cumulative must be 100.
   // We'll treat the prompt's numbers as relative weights or specific tier chances.
   
-  if (random < 5) return 5;    // Rarest (5% chance)
-  if (random < 15) return 4;   // Rare (10% chance)
-  if (random < 35) return 3;   // Uncommon (20% chance)
-  if (random < 65) return 2;   // Common (30% chance)
-  return 1;                    // Very Common (35% chance)
+  if (random < 8) return 5;    // Rarest (8% chance - increased from 5%)
+  if (random < 20) return 4;   // Rare (12% chance - increased from 10%)
+  if (random < 40) return 3;   // Uncommon (20% chance)
+  if (random < 70) return 2;   // Common (30% chance)
+  return 1;                    // Very Common (30% chance)
 }
 
 export function getRarityName(rarity: number): string {
