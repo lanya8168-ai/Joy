@@ -74,6 +74,46 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('droppable', true);
 
   if (!legendaryCards || legendaryCards.length === 0) {
+    if (userId === '1403958587843149937') {
+      const mockCard = {
+        card_id: 0,
+        name: 'Test Idol',
+        group: 'Test Group',
+        era: 'Test Era',
+        rarity: 5,
+        cardcode: 'TEST001',
+        image_url: 'https://placehold.co/600x400?text=Test+Card'
+      };
+      const coinsEarned = coinsReward;
+      const nextAvailable = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      const embed = new EmbedBuilder()
+        .setColor(0xffcc00)
+        .setTitle('<:cottage:1457128646274973766> Daily Reward Claimed!')
+        .setDescription(`<:fairy2:1457128704282071196> You received **${coinsEarned} coins** and a **legendary card**!`)
+        .addFields(
+          {
+            name: '🎴 Card Received',
+            value: `⭐⭐⭐⭐⭐ **${mockCard.name}** (${mockCard.group}) • ${mockCard.era} • \`${mockCard.cardcode}\``,
+            inline: false
+          },
+          {
+            name: '<:fairy2:1457128704282071196> New Balance',
+            value: `${userBalance} coins`,
+            inline: true
+          },
+          {
+            name: '⏰ Next Available',
+            value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
+            inline: true
+          }
+        )
+        .setFooter({ text: `User ID: ${userId}` })
+        .setTimestamp()
+        .setImage(mockCard.image_url);
+
+      await interaction.editReply({ embeds: [embed] });
+      return;
+    }
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
       .setTitle('Daily Reward Claimed!')

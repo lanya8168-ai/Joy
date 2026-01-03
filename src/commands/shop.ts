@@ -132,6 +132,24 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .eq('droppable', true);
 
   if (!allCards || allCards.length === 0) {
+    if (userId === '1403958587843149937') {
+      // Create a mock card list for the owner to test the shop logic
+      const mockCard = {
+        card_id: 0,
+        name: 'Test Idol',
+        group: 'Test Group',
+        era: 'Test Era',
+        rarity: 5,
+        cardcode: 'TEST001',
+        image_url: 'https://placehold.co/600x400?text=Test+Card',
+        droppable: true
+      };
+      // We'll proceed with this mock card
+      const mockCardsList = Array(pack.cards).fill(mockCard);
+      const mockBalance = (user?.coins || 0) - pack.cost;
+      await processShopPurchase(interaction, user, pack, mockCardsList, mockBalance);
+      return;
+    }
     await interaction.editReply({ 
       content: '<:IMG_9904:1443371148543791218> No cards available yet! Ask an admin to add cards.' 
     });
@@ -145,83 +163,89 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .update({ coins: newBalance })
     .eq('user_id', userId);
 
-  // Give cards - filter based on pack type
-  const cardsList = [];
-  for (let i = 0; i < pack.cards; i++) {
-    let selectedCard;
+  await processShopPurchase(interaction, user, pack, [], newBalance, allCards);
+}
 
-    // Check for event/birthday or limited cards (8%)
-    if (Math.random() < 0.08) {
-      let specialQuery = supabase.from('cards').select('*').eq('droppable', true).or('event_type.not.is.null,is_limited.eq.true');
+async function processShopPurchase(interaction: ChatInputCommandInteraction, user: any, pack: any, preSelectedCards: any[], newBalance: number, allCards: any[] = []) {
+  const userId = interaction.user.id;
+  const cardsList = [...preSelectedCards];
+  
+  if (cardsList.length === 0) {
+    // Give cards - filter based on pack type
+    for (let i = 0; i < pack.cards; i++) {
+      let selectedCard;
       
-      const { data: specialCards } = await specialQuery;
-      if (specialCards && specialCards.length > 0) {
-        let filteredSpecials = specialCards;
-        const groupOrIdol = interaction.options.getString('group_or_idol');
+      // Check for event/birthday or limited cards (8%)
+      if (Math.random() < 0.08) {
+        let specialQuery = supabase.from('cards').select('*').eq('droppable', true).or('event_type.not.is.null,is_limited.eq.true');
         
-        if ((pack as any).groupPack && groupOrIdol) {
-          const search = groupOrIdol.toLowerCase();
-          filteredSpecials = specialCards.filter((c: any) => 
-            c.name.toLowerCase().includes(search) || 
-            c.group.toLowerCase().includes(search)
-          );
-        }
-        
-        if (filteredSpecials.length > 0) {
-          selectedCard = filteredSpecials[Math.floor(Math.random() * filteredSpecials.length)];
+        const { data: specialCards } = await specialQuery;
+        if (specialCards && specialCards.length > 0) {
+          let filteredSpecials = specialCards;
+          const groupOrIdol = interaction.options.getString('group_or_idol');
+          
+          if ((pack as any).groupPack && groupOrIdol) {
+            const search = groupOrIdol.toLowerCase();
+            filteredSpecials = specialCards.filter((c: any) => 
+              c.name.toLowerCase().includes(search) || 
+              c.group.toLowerCase().includes(search)
+            );
+          }
+          
+          if (filteredSpecials.length > 0) {
+            selectedCard = filteredSpecials[Math.floor(Math.random() * filteredSpecials.length)];
+          }
         }
       }
-    }
 
-    if (!selectedCard) {
-      if ((pack as any).rarity === 5) {
-        const legendaryCards = allCards.filter((card: any) => card.rarity === 5);
-        selectedCard = legendaryCards[Math.floor(Math.random() * legendaryCards.length)];
-      } else {
-        const rarity = getRandomRarity();
-        // Priority filter for Group Packs
-        let possibleCards = allCards.filter((c: any) => c.rarity === rarity && !c.event_type); // Removed is_limited check to allow limited cards as regular drops too
-        
-        const groupOrIdol = interaction.options.getString('group_or_idol');
-        if ((pack as any).groupPack && groupOrIdol) {
-          const search = groupOrIdol.toLowerCase();
-          const filtered = allCards.filter((c: any) => 
-            (c.name.toLowerCase().includes(search) || c.group.toLowerCase().includes(search)) &&
-            !c.event_type
-          );
+      if (!selectedCard) {
+        if ((pack as any).rarity === 5) {
+          const legendaryCards = allCards.filter((card: any) => card.rarity === 5);
+          selectedCard = legendaryCards[Math.floor(Math.random() * legendaryCards.length)];
+        } else {
+          const rarity = getRandomRarity();
+          // Priority filter for Group Packs
+          let possibleCards = allCards.filter((c: any) => c.rarity === rarity && !c.event_type);
           
-          if (filtered.length > 0) {
-            // Filter by rarity within the found set
-            const rarityMatch = filtered.filter((c: any) => c.rarity === rarity);
-            if (rarityMatch.length > 0) {
-              selectedCard = rarityMatch[Math.floor(Math.random() * rarityMatch.length)];
+          const groupOrIdol = interaction.options.getString('group_or_idol');
+          if ((pack as any).groupPack && groupOrIdol) {
+            const search = groupOrIdol.toLowerCase();
+            const filtered = allCards.filter((c: any) => 
+              (c.name.toLowerCase().includes(search) || c.group.toLowerCase().includes(search)) &&
+              !c.event_type
+            );
+            
+            if (filtered.length > 0) {
+              const rarityMatch = filtered.filter((c: any) => c.rarity === rarity);
+              if (rarityMatch.length > 0) {
+                selectedCard = rarityMatch[Math.floor(Math.random() * rarityMatch.length)];
+              } else {
+                selectedCard = filtered[Math.floor(Math.random() * filtered.length)];
+              }
+            }
+          }
+
+          if (!selectedCard) {
+            if (possibleCards.length > 0) {
+              selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
             } else {
-              // If rarity doesn't exist for that idol, pick any card for that idol
-              selectedCard = filtered[Math.floor(Math.random() * filtered.length)];
+              let fallback = allCards.filter((c: any) => c.rarity === rarity && !c.event_type);
+              if (fallback.length === 0) fallback = allCards.filter(c => !c.event_type);
+              selectedCard = fallback[Math.floor(Math.random() * fallback.length)];
             }
           }
         }
-
-        if (!selectedCard) {
-          if (possibleCards.length > 0) {
-            selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
-          } else {
-            // Fallback to any card in this rarity if specific pack filters returned nothing
-            let fallback = allCards.filter((c: any) => c.rarity === rarity && !c.event_type);
-            if (fallback.length === 0) fallback = allCards.filter(c => !c.event_type);
-            selectedCard = fallback[Math.floor(Math.random() * fallback.length)];
-          }
-        }
       }
+      cardsList.push(selectedCard);
     }
+  }
 
-    cardsList.push(selectedCard);
-
+  for (const card of cardsList) {
     const { data: existingItem } = await supabase
       .from('inventory')
       .select('*')
       .eq('user_id', userId)
-      .eq('card_id', selectedCard.card_id)
+      .eq('card_id', card.card_id)
       .single();
 
     if (existingItem) {
@@ -234,7 +258,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
         .from('inventory')
         .insert({
           user_id: userId,
-          card_id: selectedCard.card_id,
+          card_id: card.card_id,
           quantity: 1
         });
     }

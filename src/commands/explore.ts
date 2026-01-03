@@ -23,6 +23,32 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
+    if (userId === '1403958587843149937') {
+        const { data: user } = await supabase.from('users').select('coins').eq('user_id', userId).single();
+        // Mock successful result for owner testing
+        const mockResult = {
+            success: true,
+            reward: reward,
+            new_balance: (user?.coins || 0) + reward
+        };
+        const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
+        const embed = new EmbedBuilder()
+          .setColor(0x00bfff)
+          .setTitle('<:fairy2:1457128704282071196> Exploring Complete!')
+          .setDescription(`You were exploring in the woods when you stumbled across ${mockResult.reward} coins!`)
+          .addFields(
+            { name: '<a:5ball:1435457849072550023> Reward', value: `${mockResult.reward} coins`, inline: true },
+            { name: '<:2_shell:1436124721413357770> New Balance', value: `${mockResult.new_balance} coins`, inline: true },
+            {
+              name: '⏰ Next Available',
+              value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
+              inline: true
+            }
+          )
+          .setTimestamp();
+        await interaction.editReply({ embeds: [embed] });
+        return;
+    }
     await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error surfing. Please try again!' });
     return;
   }

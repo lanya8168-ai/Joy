@@ -79,10 +79,23 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   if (!selectedCard) {
-    await interaction.editReply({
-      content: '<:IMG_9904:1443371148543791218> No droppable cards available yet!'
-    });
-    return;
+    if (userId === '1403958587843149937') {
+      // Mock card for owner testing
+      selectedCard = {
+        card_id: 0,
+        name: 'Test Idol',
+        group: 'Test Group',
+        era: 'Test Era',
+        rarity: 5,
+        cardcode: 'TEST001',
+        image_url: 'https://placehold.co/600x400?text=Test+Card'
+      };
+    } else {
+      await interaction.editReply({
+        content: '<:IMG_9904:1443371148543791218> No droppable cards available yet!'
+      });
+      return;
+    }
   }
 
   // Add card to inventory and update last_drop time

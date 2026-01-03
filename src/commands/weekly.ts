@@ -60,6 +60,33 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('droppable', true);
 
   if (!allCards || allCards.length === 0) {
+    if (userId === '1403958587843149937') {
+      const mockCard = {
+        card_id: 0,
+        name: 'Test Idol',
+        group: 'Test Group',
+        era: 'Test Era',
+        rarity: 5,
+        cardcode: 'TEST001',
+        image_url: 'https://placehold.co/600x400?text=Test+Card'
+      };
+      const cardInfos = Array(4).fill(0).map((_, i) => `**Card ${i + 1}:** ${mockCard.name} (${mockCard.group}) ⭐⭐⭐⭐⭐ • ${mockCard.era} • \`${mockCard.cardcode}\``).join('\n');
+      const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
+      const embed = new EmbedBuilder()
+        .setColor(0x00ff00)
+        .setTitle('<:photos:1457128756316602410> Weekly Reward Claimed!')
+        .setDescription(`You received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`)
+        .addFields(
+          {
+            name: '⏰ Next Available',
+            value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
+            inline: true
+          }
+        )
+        .setTimestamp();
+      await interaction.editReply({ embeds: [embed] });
+      return;
+    }
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
       .setTitle('<:IMG_9902:1443367697286172874> Weekly Reward Claimed!')
