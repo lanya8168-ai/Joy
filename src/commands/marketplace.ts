@@ -176,7 +176,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00d4ff)
-    .setTitle('🏖️ Beach Marketplace')
+    .setTitle('🌲 Fairy Marketplace')
     .setDescription(listingText)
     .setFooter({ text: 'Use /mp buy <code> to purchase' })
     .setTimestamp();

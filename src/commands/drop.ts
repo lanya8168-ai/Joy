@@ -132,12 +132,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       name: interaction.user.username,
       iconURL: interaction.user.avatarURL() || undefined
     })
-    .setTitle('<a:5lifesaver:1435457784576610374> You dove and found..')
+    .setTitle('<:wings5:1457127829438332969> Card Dropped!')
     .setDescription(description)
     .addFields(
       { name: '⏰ Next Available', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, inline: true }
     )
-    .setFooter({ text: 'Card dropped' })
     .setTimestamp();
 
   if (selectedCard.image_url) {

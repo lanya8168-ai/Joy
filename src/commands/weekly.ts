@@ -143,7 +143,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('<a:5blu_bubbles:1436124726010318870> Weekly Reward Claimed!')
+    .setTitle('<:photos:1457128756316602410> Weekly Reward Claimed!')
     .setDescription(description)
     .addFields(
       {

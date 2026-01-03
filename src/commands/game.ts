@@ -59,53 +59,33 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
   // Improved filter to be more explicit and log results
   const filter = (m: any) => {
     try {
-      const authorId = String(m.author.id).trim();
-      const interactionUserId = String(interaction.user.id).trim();
-      const isAuthor = authorId === interactionUserId;
+      // Allow any message in the channel that is NOT from a bot
       const isNotBot = !m.author.bot;
+      const content = m.content.trim().toLowerCase();
+      const answer = targetName.trim().toLowerCase();
       
-      console.log(`[FILTER DEBUG] Channel: ${m.channel.id} | Msg from ${m.author.tag} (${authorId}) | Target User: ${interactionUserId} | isAuthor: ${isAuthor} | isNotBot: ${isNotBot} | Content: "${m.content}"`);
+      // Simple word match check inside filter
+      const isCorrectMatch = content === answer || 
+                            (content.length > 2 && answer.includes(content)) ||
+                            (answer.length > 2 && content.includes(answer));
       
-      return isAuthor && isNotBot;
+      console.log(`[FILTER DEBUG] Msg from ${m.author.tag} | Content: "${m.content}" | Match: ${isCorrectMatch}`);
+      
+      return isNotBot; // Let the collector handle the logic, but allow all non-bot messages
     } catch (err) {
       console.error('[FILTER ERROR]', err);
       return false;
     }
   };
   
-  // Use client-level message event as a fallback
-  const messageHandler = async (m: any) => {
-    if (String(m.channel.id) !== String(interaction.channelId) || String(m.author.id) !== String(interaction.user.id) || m.author.bot) return;
-    console.log(`[CLIENT DEBUG] Received message in game channel: "${m.content}"`);
-    
-    // Manual trigger if collector fails
-    if (collector && !collector.ended) {
-      const guess = m.content.trim().toLowerCase();
-      const answer = targetName.trim().toLowerCase();
-      const answerWords = answer.split(/\s+/).filter(word => word.length > 2);
-      
-      const isCorrect = guess === answer || 
-                       (guess.length > 2 && answer.includes(guess)) ||
-                       (answer.length > 2 && guess.includes(answer)) ||
-                       answerWords.some(word => guess.includes(word));
-
-      if (isCorrect) {
-        console.log(`[CLIENT DEBUG] Manual match success for "${guess}"`);
-        collector.emit('collect', m);
-      }
-    }
-  };
-  interaction.client.on('messageCreate', messageHandler);
-
   // Ensure we are using the correct channel object
   const channel = interaction.channel;
   if (!channel || !('createMessageCollector' in channel)) {
     console.error(`[GAME ERROR] Channel ${channel?.id} does not support collectors`);
-    interaction.client.off('messageCreate', messageHandler);
     return;
   }
 
-  console.log(`[GAME DEBUG] Starting game in channel ${channel.id} for user ${interaction.user.id}. Target: ${targetName}`);
+  console.log(`[GAME DEBUG] Starting game in channel ${channel.id}. Target: ${targetName}`);
 
   const collector = (channel as any).createMessageCollector({ filter, time: 30000 });
   
@@ -113,9 +93,7 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
     const guess = m.content.trim().toLowerCase();
     const answer = targetName.trim().toLowerCase();
     
-    console.log(`[GAME DEBUG] COLLECTED: "${m.content}" from ${m.author.tag} (${m.author.id}) in ${m.channel.id}`);
-    
-    // Improved matching logic:
+    // Fuzzy matching logic
     const answerWords = answer.split(/\s+/).filter(word => word.length > 2);
     
     const isCorrect = guess === answer || 
@@ -123,29 +101,20 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
                      (answer.length > 2 && guess.includes(answer)) ||
                      answerWords.some(word => guess.includes(word));
 
-    console.log(`[GAME DEBUG] Match Result for "${guess}" against "${answer}": ${isCorrect}`);
-
     if (isCorrect) {
-      // Cleanup client listener
-      interaction.client.off('messageCreate', messageHandler);
-      
-      // Stop collector first to prevent double reward
       collector.stop('correct');
       
       // Add reward
-      const { data: user } = await supabase.from('users').select('coins').eq('user_id', interaction.user.id).single();
+      const { data: user } = await supabase.from('users').select('coins').eq('user_id', m.author.id).single();
       if (user) {
-        await supabase.from('users').update({ coins: (user.coins || 0) + (reward || 0) }).eq('user_id', interaction.user.id);
+        await supabase.from('users').update({ coins: (user.coins || 0) + (reward || 0) }).eq('user_id', m.author.id);
       }
       
-      await m.reply(`✅ Correct! It's **${targetName}**! You earned <:2_shell:1436124721413357770> **${reward}** coins!`);
+      await m.reply(`✅ Correct! It's **${targetName}**! You earned <:fairy2:1457128704282071196> **${reward}** coins!`);
     }
   });
   
   collector.on('end', (collected: any, reason: string) => {
-    // Cleanup client listener
-    interaction.client.off('messageCreate', messageHandler);
-    
     if (reason !== 'correct') {
       interaction.followUp(`⏰ Time's up! The answer was **${targetName}**.`);
     }

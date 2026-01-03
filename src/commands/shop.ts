@@ -4,13 +4,13 @@ import { mergeCardImages } from '../utils/imageUtils.js';
 import { getRandomRarity } from '../utils/cards.js';
 
 const PACKS = [
-  { id: '1', name: 'Sandy Shells', cost: 500, cards: 1 },
-  { id: '2', name: 'Tide Pool', cost: 1000, cards: 2 },
-  { id: '3', name: 'Coral Reef', cost: 3000, cards: 5 },
-  { id: '4', name: 'Deep Dive', cost: 5000, cards: 10 },
-  { id: '5', name: 'Legendary Treasure', cost: 35000, cards: 3, rarity: 5 },
-  { id: '6', name: 'Beach Vibes (5 cards)', cost: 8000, cards: 5, groupPack: true },
-  { id: '7', name: 'Tropical Paradise (10 cards)', cost: 15000, cards: 10, groupPack: true }
+  { id: '1', name: 'Magic Seeds', cost: 500, cards: 1 },
+  { id: '2', name: 'Glow Spores', cost: 1000, cards: 2 },
+  { id: '3', name: 'Fairy Dust', cost: 3000, cards: 5 },
+  { id: '4', name: 'Garden Bloom', cost: 5000, cards: 10 },
+  { id: '5', name: 'Ancient Grove', cost: 35000, cards: 3, rarity: 5 },
+  { id: '6', name: 'Forest Spirit (5 cards)', cost: 8000, cards: 5, groupPack: true },
+  { id: '7', name: 'Fairy Kingdom (10 cards)', cost: 15000, cards: 10, groupPack: true }
 ];
 
 export const data = new SlashCommandBuilder()
@@ -29,17 +29,17 @@ export const data = new SlashCommandBuilder()
           .setDescription('Pack type to buy')
           .setRequired(true)
           .addChoices(
-            { name: 'Sandy Shells - 500 coins (1 card)', value: '1' },
-            { name: 'Tide Pool - 1000 coins (2 cards)', value: '2' },
-            { name: 'Coral Reef - 3000 coins (5 cards)', value: '3' },
-            { name: 'Deep Dive - 5000 coins (10 cards)', value: '4' },
-            { name: 'Legendary Treasure - 35000 coins (3 legendary)', value: '5' },
-            { name: 'Beach Vibes - 8000 coins (5 cards)', value: '6' },
-            { name: 'Tropical Paradise - 15000 coins (10 cards)', value: '7' }
+            { name: 'Magic Seeds - 500 coins (1 card)', value: '1' },
+            { name: 'Glow Spores - 1000 coins (2 cards)', value: '2' },
+            { name: 'Fairy Dust - 3000 coins (5 cards)', value: '3' },
+            { name: 'Garden Bloom - 5000 coins (10 cards)', value: '4' },
+            { name: 'Ancient Grove - 35000 coins (3 legendary)', value: '5' },
+            { name: 'Forest Spirit - 8000 coins (5 cards)', value: '6' },
+            { name: 'Fairy Kingdom - 15000 coins (10 cards)', value: '7' }
           ))
       .addStringOption(option =>
         option.setName('group_or_idol')
-          .setDescription('Group or idol name for Beach Vibes/Tropical Paradise')
+        .setDescription('Group or idol name for Forest Spirit/Fairy Kingdom')
           .setRequired(false)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -72,21 +72,21 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('<:2_shell:1436124721413357770> Card Pack Shop')
-    .setDescription('Buy packs with your shells! <:2_shell:1436124721413357770>')
+    .setTitle('<:cottage:1457128646274973766> Card Pack Shop')
+    .setDescription('Buy packs for your garden! <:fairy2:1457128704282071196>')
     .addFields(
       {
-        name: '<:1_flower:1436124715797315687> Available Packs',
+        name: '📜 Available Packs',
         value: packList,
         inline: false
       },
       {
-        name: '<:2_shell:1436124721413357770> Your Balance',
+        name: '<:fairy2:1457128704282071196> Your Balance',
         value: `${user.coins} coins`,
         inline: false
       },
       {
-        name: '<a:5blu_bubbles:1436124726010318870> How to Buy',
+        name: '✨ How to Buy',
         value: 'Use `/shop buy` and select the pack you want!',
         inline: false
       }
@@ -261,16 +261,16 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle(`<a:5ball:1435457849072550023> ${pack.name} Purchased!`)
+    .setTitle(`✨ ${pack.name} Purchased!`)
     .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`)
     .addFields(
       {
-        name: '<a:5blu_bubbles:1436124726010318870> Cards Received',
+        name: '🎴 Cards Received',
         value: cardsInfo || 'No cards',
         inline: false
       },
       {
-        name: '<:2_shell:1436124721413357770> New Balance',
+        name: '<:fairy2:1457128704282071196> New Balance',
         value: `${newBalance} coins`,
         inline: true
       }

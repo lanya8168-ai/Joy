@@ -7,8 +7,8 @@ import { scheduleReminder } from '../utils/reminders.js';
 const SURF_COOLDOWN_HOURS = 1;
 
 export const data = new SlashCommandBuilder()
-  .setName('surf')
-  .setDescription('Surf for coins!');
+  .setName('explore')
+  .setDescription('Explore for coins!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -16,7 +16,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const reward = Math.floor(Math.random() * 1500) + 1500;
 
   const cooldownHours = isAdminUser(userId) ? 0 : SURF_COOLDOWN_HOURS;
-  const { data, error } = await supabase.rpc('claim_surf_reward', {
+  const { data, error } = await supabase.rpc('claim_explore_reward', {
     p_user_id: userId,
     p_reward: reward,
     p_cooldown_hours: cooldownHours
@@ -53,8 +53,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
-    .setTitle('<a:5lifesaver:1435457784576610374> Surfing Complete!')
-    .setDescription(`You found **${result.reward} coins** while surfing!`)
+    .setTitle('<:fairy2:1457128704282071196> Exploring Complete!')
+    .setDescription(`You were exploring in the woods when you stumbled across ${result.reward} coins!`)
     .addFields(
       { name: '<a:5ball:1435457849072550023> Reward', value: `${result.reward} coins`, inline: true },
       { name: '<:2_shell:1436124721413357770> New Balance', value: `${result.new_balance} coins`, inline: true },
@@ -68,7 +68,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Schedule reminder for next surf
   const client = interaction.client;
-  scheduleReminder(client, userId, interaction.channelId, 'surf', SURF_COOLDOWN_HOURS * 60 * 60 * 1000);
+  scheduleReminder(client, userId, interaction.channelId, 'explore', SURF_COOLDOWN_HOURS * 60 * 60 * 1000);
 
   await interaction.editReply({ embeds: [embed] });
 }

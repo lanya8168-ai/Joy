@@ -192,7 +192,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const isOwnInventory = userId === interaction.user.id;
-  const title = isOwnInventory ? '🏖️ Your K-pop Card Collection' : `🏖️ ${targetUser?.username}'s K-pop Card Collection`;
+  const title = isOwnInventory ? '🌲 Your K-pop Card Collection' : `🌲 ${targetUser?.username}'s K-pop Card Collection`;
 
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)

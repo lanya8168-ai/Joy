@@ -119,16 +119,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const nextAvailable = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0xffcc00)
-    .setTitle('<:1_petal:1436124714526445761> Daily Reward Claimed!')
-    .setDescription(`<:2_shell:1436124721413357770> You received **${coinsEarned} coins** and a **legendary card**!`)
+    .setTitle('<:cottage:1457128646274973766> Daily Reward Claimed!')
+    .setDescription(`<:fairy2:1457128704282071196> You received **${coinsEarned} coins** and a **legendary card**!`)
     .addFields(
       {
-        name: '<a:5blu_bubbles:1436124726010318870> Card Received',
+        name: '🎴 Card Received',
         value: `${getRarityEmoji(randomLegendary.rarity)} **${randomLegendary.name}** (${randomLegendary.group}) • ${randomLegendary.era || 'N/A'} • \`${randomLegendary.cardcode}\``,
         inline: false
       },
       {
-        name: '<:2_shell:1436124721413357770> New Balance',
+        name: '<:fairy2:1457128704282071196> New Balance',
         value: `${newBalance} coins`,
         inline: true
       },

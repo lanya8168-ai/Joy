@@ -98,11 +98,11 @@ async function handleView(interaction: ChatInputCommandInteraction) {
     .setTitle(`${targetUser.username}'s Profile`)
     .setThumbnail(targetUser.displayAvatarURL())
     .addFields(
-      { name: '<:2_shell:1436124721413357770> Coins', value: `${user.coins}`, inline: true },
+      { name: '<:fairy2:1457128704282071196> Coins', value: `${user.coins}`, inline: true },
       { name: '<:06_whitestar:1430048829700313100> Total Cards', value: `${totalCards}`, inline: true },
       { name: '\u200B', value: '\u200B', inline: false },
-      { name: '<:1_flower:1436124715797315687> Bio', value: user.bio || '*No bio set*', inline: false },
-      { name: '<a:5blu_bubbles:1436124726010318870> Favorite Card', value: favoriteCardText, inline: false }
+      { name: '📜 Bio', value: user.bio || '*No bio set*', inline: false },
+      { name: '<:fairy2:1457128704282071196> Favorite Card', value: favoriteCardText, inline: false }
     )
     .setFooter({ text: `Profile Color: ${user.profile_color || '#ff69b4'}` })
     .setTimestamp();
