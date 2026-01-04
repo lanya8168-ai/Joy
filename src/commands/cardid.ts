@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .order('card_id', { ascending: true });
 
   if (!allCards || allCards.length === 0) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> No cards available yet!' });
+    await interaction.editReply({ content: '🧚 No cards available yet!' });
     return;
   }
 

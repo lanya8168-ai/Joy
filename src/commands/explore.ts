@@ -34,11 +34,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
         const embed = new EmbedBuilder()
           .setColor(0x00bfff)
-          .setTitle('<:fairy2:1457128704282071196> Exploring Complete!')
+          .setTitle('🧚 Exploring Complete!')
           .setDescription(`You were exploring in the woods when you stumbled across ${mockResult.reward} coins!`)
           .addFields(
             { name: '💎 Reward', value: `${mockResult.reward} coins`, inline: true },
-            { name: '<:fairy2:1457128704282071196> New Balance', value: `${mockResult.new_balance} coins`, inline: true },
+            { name: '🧚 New Balance', value: `${mockResult.new_balance} coins`, inline: true },
             {
               name: '⏰ Next Available',
               value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
@@ -49,7 +49,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         await interaction.editReply({ embeds: [embed] });
         return;
     }
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error surfing. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error surfing. Please try again!' });
     return;
   }
 
@@ -57,7 +57,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+      await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
       return;
     }
 
@@ -72,18 +72,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error surfing. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error surfing. Please try again!' });
     return;
   }
 
   const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0x00bfff)
-    .setTitle('<:fairy2:1457128704282071196> Exploring Complete!')
+    .setTitle('🧚 Exploring Complete!')
     .setDescription(`You were exploring in the woods when you stumbled across ${result.reward} coins!`)
     .addFields(
       { name: '💎 Reward', value: `${result.reward} coins`, inline: true },
-      { name: '<:fairy2:1457128704282071196> New Balance', value: `${result.new_balance} coins`, inline: true },
+      { name: '🧚 New Balance', value: `${result.new_balance} coins`, inline: true },
       {
         name: '⏰ Next Available',
         value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,

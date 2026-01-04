@@ -17,7 +17,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 

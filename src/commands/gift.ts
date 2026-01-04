@@ -92,12 +92,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   //Existence checks
   const { data: sender } = await supabase.from('users').select('*').eq('user_id', senderUserId).single();
-  if (!sender) return interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first!' });
+  if (!sender) return interaction.editReply({ content: '🧚 Please use `/start` first!' });
 
   const { data: receiver } = await supabase.from('users').select('*').eq('user_id', receiverUserId).single();
-  if (!receiver) return interaction.editReply({ content: `<:fairy2:1457128704282071196> ${receiverUser.username} needs to use \`/start\` first!` });
+  if (!receiver) return interaction.editReply({ content: `🧚 ${receiverUser.username} needs to use \`/start\` first!` });
 
-  if (senderUserId === receiverUserId) return interaction.editReply({ content: '<:fairy2:1457128704282071196> You can\'t gift to yourself!' });
+  if (senderUserId === receiverUserId) return interaction.editReply({ content: '🧚 You can\'t gift to yourself!' });
 
   const cardsToGift = [];
   const failedCards = [];
@@ -125,7 +125,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   if (cardsToGift.length === 0) {
-    let errorMsg = '<:fairy2:1457128704282071196> No valid cards to gift!';
+    let errorMsg = '🧚 No valid cards to gift!';
     if (failedCards.length > 0) {
       errorMsg += `\n${failedCards.join('\n')}`;
     }

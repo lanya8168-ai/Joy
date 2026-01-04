@@ -22,7 +22,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const OWNER_ID = '1403958587843149937';
 
   if (senderId !== OWNER_ID) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Only the bot owner can use this command!' });
+    await interaction.editReply({ content: '🧚 Only the bot owner can use this command!' });
     return;
   }
 
@@ -38,7 +38,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!receiver) {
-    await interaction.editReply({ content: `<:fairy2:1457128704282071196> ${receiverUser.username} needs to use \`/start\` first!` });
+    await interaction.editReply({ content: `🧚 ${receiverUser.username} needs to use \`/start\` first!` });
     return;
   }
 

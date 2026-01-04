@@ -34,7 +34,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
   if (!card) {
-    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Card with code **${cardcode}** not found!` });
+    await interaction.editReply({ content: `🧚 Card with code **${cardcode}** not found!` });
     return;
   }
 

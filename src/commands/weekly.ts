@@ -26,7 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming weekly reward. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -34,7 +34,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result || !result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+      await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
       return;
     }
 
@@ -49,7 +49,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return;
     }
 
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming weekly reward. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -70,11 +70,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         cardcode: 'TEST001',
         image_url: 'https://placehold.co/600x400?text=Test+Card'
       };
-      const cardInfos = Array(4).fill(0).map((_, i) => `**Card ${i + 1}:** ${mockCard.name} (${mockCard.group}) <:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343> • ${mockCard.era} • \`${mockCard.cardcode}\``).join('\n');
+      const cardInfos = Array(4).fill(0).map((_, i) => `**Card ${i + 1}:** ${mockCard.name} (${mockCard.group}) ⭐⭐⭐⭐⭐ • ${mockCard.era} • \`${mockCard.cardcode}\``).join('\n');
       const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
       const embed = new EmbedBuilder()
         .setColor(0x00ff00)
-        .setTitle('<:photos:1457128756316602410> Weekly Reward Claimed!')
+        .setTitle('📸 Weekly Reward Claimed!')
         .setDescription(`You received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`)
         .addFields(
           {
@@ -89,7 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
     const embed = new EmbedBuilder()
       .setColor(0x00ff00)
-      .setTitle('<:cottage:1457128646274973766> Weekly Reward Claimed!')
+      .setTitle('🏡 Weekly Reward Claimed!')
       .setDescription(`You received **${result.reward} coins**!\n\n*No cards available yet.*`)
       .setTimestamp();
 
@@ -170,7 +170,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('<:photos:1457128756316602410> Weekly Reward Claimed!')
+    .setTitle('📸 Weekly Reward Claimed!')
     .setDescription(description)
     .addFields(
       {

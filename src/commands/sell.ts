@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -100,16 +100,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   let description = '';
   if (soldCards.length > 0) {
-    description = `<:cottage:1457128646274973766> Sold:\n${soldCards.join('\n')}\n\n💰 **Total: +${totalCoins} coins**`;
+    description = `🏡 Sold:\n${soldCards.join('\n')}\n\n💰 **Total: +${totalCoins} coins**`;
   }
 
   if (failedCards.length > 0) {
     if (description) description += '\n\n';
-    description += `<:fairy2:1457128704282071196> Failed:\n${failedCards.join('\n')}`;
+    description += `🧚 Failed:\n${failedCards.join('\n')}`;
   }
 
   if (!description) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> No cards were sold!' });
+    await interaction.editReply({ content: '🧚 No cards were sold!' });
     return;
   }
 
