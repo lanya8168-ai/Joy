@@ -34,7 +34,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
   if (!card) {
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Card with code **${cardcode}** not found!` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Card with code **${cardcode}** not found!` });
     return;
   }
 
@@ -55,7 +55,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const embed = new EmbedBuilder()
     .setColor(getRarityColor(card.rarity))
-    .setTitle('🏖️ Card Info')
+    .setTitle('🌲 Card Info')
     .setDescription(description)
     .setFooter({ text: `Rarity: ${card.rarity}/5 • Droppable: ${card.droppable ? 'Yes' : 'No'}` })
     .setTimestamp();

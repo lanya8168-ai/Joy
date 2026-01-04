@@ -21,7 +21,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -92,7 +92,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       };
     } else {
       await interaction.editReply({
-        content: '<:IMG_9904:1443371148543791218> No droppable cards available yet!'
+        content: '<:fairy2:1457128704282071196> No droppable cards available yet!'
       });
       return;
     }
@@ -131,13 +131,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Drop error updating last_drop:', error);
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Error processing drop: ${error.message}` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Error processing drop: ${error.message}` });
     return;
   }
 
   const rarityEmoji = getRarityEmoji(selectedCard.rarity);
-  const description = `**${selectedCard.name}** (${selectedCard.group}) ${rarityEmoji}\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
-
+  
   const nextAvailable = new Date(Date.now() + COOLDOWN_MINUTES * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(getRarityColor(selectedCard.rarity))
@@ -145,9 +144,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       name: interaction.user.username,
       iconURL: interaction.user.avatarURL() || undefined
     })
-    .setTitle('<:wings5:1457127829438332969> Card Dropped!')
-    .setDescription(description)
+    .setTitle('<:wings5:1457127829438332969> You explored and found..')
     .addFields(
+      { name: '✨ Idol', value: selectedCard.name, inline: true },
+      { name: '🌿 Group', value: selectedCard.group, inline: true },
+      { name: '📜 Era', value: selectedCard.era || 'N/A', inline: true },
+      { name: '💎 Rarity', value: `${rarityEmoji} (${selectedCard.rarity})`, inline: true },
+      { name: '🆔 Card code', value: `\`${selectedCard.cardcode}\``, inline: true },
       { name: '⏰ Next Available', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, inline: true }
     )
     .setTimestamp();

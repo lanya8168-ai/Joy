@@ -30,7 +30,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!sender) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -42,19 +42,19 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!receiver) {
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> ${receiverUser.username} needs to use \`/start\` first!` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> ${receiverUser.username} needs to use \`/start\` first!` });
     return;
   }
 
   // Prevent self-payment
   if (senderUserId === receiverUserId) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You can\'t pay yourself!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> You can\'t pay yourself!' });
     return;
   }
 
   // Check sender has enough coins
   if (sender.coins < amount) {
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> You only have **${sender.coins}** coins, but tried to pay **${amount}**!` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> You only have **${sender.coins}** coins, but tried to pay **${amount}**!` });
     return;
   }
 
@@ -73,7 +73,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0x00d4ff)
     .setTitle('💸 Coins Sent!')
-    .setDescription(`🏖️ You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Your new balance: **${sender.coins - amount} coins**`)
+    .setDescription(`🌲 You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Your new balance: **${sender.coins - amount} coins**`)
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });

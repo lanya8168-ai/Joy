@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -100,22 +100,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   let description = '';
   if (soldCards.length > 0) {
-    description = `<:IMG_9902:1443367697286172874> Sold:\n${soldCards.join('\n')}\n\n💰 **Total: +${totalCoins} coins**`;
+    description = `<:cottage:1457128646274973766> Sold:\n${soldCards.join('\n')}\n\n💰 **Total: +${totalCoins} coins**`;
   }
 
   if (failedCards.length > 0) {
     if (description) description += '\n\n';
-    description += `<:IMG_9904:1443371148543791218> Failed:\n${failedCards.join('\n')}`;
+    description += `<:fairy2:1457128704282071196> Failed:\n${failedCards.join('\n')}`;
   }
 
   if (!description) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> No cards were sold!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> No cards were sold!' });
     return;
   }
 
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
-    .setTitle('🏖️ Cards Sold!')
+    .setTitle('🌲 Cards Sold!')
     .setDescription(description)
     .addFields({ name: 'New Balance', value: `${user.coins + totalCoins} coins`, inline: true })
     .setTimestamp();

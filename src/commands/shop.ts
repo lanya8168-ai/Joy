@@ -62,7 +62,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.reply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!', ephemeral: true });
     return;
   }
 
@@ -104,7 +104,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const pack = PACKS.find(p => p.id === packId);
   if (!pack) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Invalid pack!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Invalid pack!' });
     return;
   }
 
@@ -115,13 +115,13 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
     return;
   }
 
   if (user.coins < pack.cost) {
     await interaction.editReply({ 
-      content: `<:IMG_9904:1443371148543791218> You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
+      content: `<:fairy2:1457128704282071196> You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
     });
     return;
   }
@@ -151,7 +151,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
       return;
     }
     await interaction.editReply({ 
-      content: '<:IMG_9904:1443371148543791218> No cards available yet! Ask an admin to add cards.' 
+      content: '<:fairy2:1457128704282071196> No cards available yet! Ask an admin to add cards.' 
     });
     return;
   }

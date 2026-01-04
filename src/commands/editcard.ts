@@ -63,7 +63,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You need Administrator permission to use this command!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> You need Administrator permission to use this command!' });
     return;
   }
 
@@ -85,7 +85,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .maybeSingle();
 
   if (!existingCard) {
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Card with code **${cardcode}** not found!` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Card with code **${cardcode}** not found!` });
     return;
   }
 
@@ -101,7 +101,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (imageUrl) updates.image_url = imageUrl;
 
   if (Object.keys(updates).length === 0) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please provide at least one field to update!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please provide at least one field to update!' });
     return;
   }
 
@@ -112,7 +112,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Database error:', error);
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Error updating card: ${error.message}` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Error updating card: ${error.message}` });
     return;
   }
 

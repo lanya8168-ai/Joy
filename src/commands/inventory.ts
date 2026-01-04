@@ -63,7 +63,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -91,7 +91,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setColor(0x808080)
       .setTitle('📦 Your Inventory')
       .setDescription('Your collection is empty! Use `/drop` to get cards.')
-      .addFields({ name: 'Coins', value: `${user.coins}` })
+      .addFields({ name: '<:fairy2:1457128704282071196> Coins', value: `${user.coins}` })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -140,7 +140,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       .setColor(0x808080)
       .setTitle('📦 Your Inventory')
       .setDescription('No cards match your filters!')
-      .addFields({ name: 'Coins', value: `${user.coins}` })
+      .addFields({ name: '<:fairy2:1457128704282071196> Coins', value: `${user.coins}` })
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });

@@ -72,7 +72,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
   if (!card) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Card not found! Check the card code.' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Card not found! Check the card code.' });
     return;
   }
 
@@ -101,7 +101,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
     if (!result.success) {
       if (result.error === 'insufficient_cards') {
         await interaction.editReply({ 
-          content: `<:IMG_9904:1443371148543791218> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`
+          content: `<:fairy2:1457128704282071196> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`
         });
         return;
       }
@@ -113,14 +113,14 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   }
 
   if (hasError) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error creating listing.' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error creating listing.' });
     return;
   }
 
   const codesDisplay = listingCodes.map(code => `\`${code}\``).join(', ');
   const embed = new EmbedBuilder()
     .setColor(0x00d4ff)
-    .setTitle('<:IMG_9902:1443367697286172874> Card Listed!')
+    .setTitle('<:cottage:1457128646274973766> Card Listed!')
     .setDescription(`Your card has been listed on the marketplace!`)
     .addFields(
       { name: 'Listing Codes', value: codesDisplay, inline: false },
@@ -206,7 +206,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!listing) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Listing not found! Check the code.' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Listing not found! Check the code.' });
     return;
   }
 
@@ -216,7 +216,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error purchasing card.' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error purchasing card.' });
     return;
   }
 
@@ -224,28 +224,28 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   if (!result.success) {
     if (result.error === 'listing_not_found') {
-      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Listing not found or already sold!' });
+      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Listing not found or already sold!' });
       return;
     }
 
     if (result.error === 'cannot_buy_own_listing') {
-      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You cannot buy your own listing!' });
+      await interaction.editReply({ content: '<:fairy2:1457128704282071196> You cannot buy your own listing!' });
       return;
     }
 
     if (result.error === 'buyer_not_found') {
-      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' });
+      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
       return;
     }
 
     if (result.error === 'insufficient_funds') {
       await interaction.editReply({ 
-        content: `<:IMG_9904:1443371148543791218> You need ${result.required} coins! You have ${result.available} coins.`
+        content: `<:fairy2:1457128704282071196> You need ${result.required} coins! You have ${result.available} coins.`
       });
       return;
     }
 
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Error purchasing card.' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error purchasing card.' });
     return;
   }
 
@@ -253,7 +253,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   const eraText = card.era ? ` - ${card.era}` : '';
   const embed = new EmbedBuilder()
     .setColor(0x00d4ff)
-    .setTitle('<:IMG_9902:1443367697286172874> Purchase Complete!')
+    .setTitle('<:cottage:1457128646274973766> Purchase Complete!')
     .setDescription(`You bought ${card.name}!`)
     .addFields(
       { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, inline: true },
@@ -271,7 +271,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     
     const sellerEmbed = new EmbedBuilder()
       .setColor(0x00d4ff)
-      .setTitle('<:IMG_9902:1443367697286172874> Card Sold!')
+      .setTitle('<:cottage:1457128646274973766> Card Sold!')
       .setDescription(`Your card was purchased!`)
       .addFields(
         { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, inline: true },

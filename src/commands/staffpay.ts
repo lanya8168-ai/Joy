@@ -22,7 +22,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const OWNER_ID = '1403958587843149937';
 
   if (senderId !== OWNER_ID) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Only the bot owner can use this command!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Only the bot owner can use this command!' });
     return;
   }
 
@@ -38,7 +38,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!receiver) {
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> ${receiverUser.username} needs to use \`/start\` first!` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> ${receiverUser.username} needs to use \`/start\` first!` });
     return;
   }
 
@@ -51,7 +51,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0x00d4ff)
     .setTitle('💸 Staff Payment Sent!')
-    .setDescription(`🏖️ You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Their new balance: **${receiver.coins + amount} coins**`)
+    .setDescription(`🌲 You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Their new balance: **${receiver.coins + amount} coins**`)
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });

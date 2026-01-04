@@ -25,8 +25,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!user) {
     await interaction.editReply({ 
       content: targetUser.id === interaction.user.id 
-        ? '<:IMG_9904:1443371148543791218> Please use `/start` first to create your account!' 
-        : '<:IMG_9904:1443371148543791218> This user has not started their journey yet!' 
+        ? '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' 
+        : '<:fairy2:1457128704282071196> This user has not started their journey yet!' 
     });
     return;
   }
@@ -34,7 +34,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0xffd700)
     .setTitle(`${targetUser.username}'s Balance`)
-    .setDescription(`<:2_shell:1436124721413357770> **${user.coins}** coins`)
+    .setDescription(`<:fairy2:1457128704282071196> **${user.coins}** coins`)
     .setThumbnail(targetUser.displayAvatarURL())
     .setTimestamp();
 

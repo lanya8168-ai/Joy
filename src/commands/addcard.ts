@@ -58,7 +58,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> You need Administrator permission to use this command!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> You need Administrator permission to use this command!' });
     return;
   }
 
@@ -92,7 +92,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (imageUrl) updates.image_url = imageUrl;
 
     if (Object.keys(updates).length === 0) {
-      await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> Please provide at least one field to update!' });
+      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please provide at least one field to update!' });
       return;
     }
 
@@ -103,13 +103,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     if (error) {
       console.error('Database error:', error);
-      await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Error updating card: ${error.message}` });
+      await interaction.editReply({ content: `<:fairy2:1457128704282071196> Error updating card: ${error.message}` });
       return;
     }
 
     const embed = new EmbedBuilder()
       .setColor(0xffaa00)
-      .setTitle('<:IMG_9902:1443367697286172874> Card Updated!')
+      .setTitle('<:cottage:1457128646274973766> Card Updated!')
       .setDescription(`Successfully updated card **${cardcode}**`)
       .addFields({ name: 'Card ID', value: `${existingCard.card_id}`, inline: true })
       .setTimestamp();
@@ -118,7 +118,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (group) embed.addFields({ name: 'Group', value: `${existingCard.group} → ${group}`, inline: true });
     if (rarity) embed.addFields({ name: 'Rarity', value: `${existingCard.rarity} → ${rarity}`, inline: true });
     if (era) embed.addFields({ name: 'Era', value: `${existingCard.era || 'None'} → ${era}`, inline: true });
-    if (droppable !== null) embed.addFields({ name: 'Droppable', value: droppable ? '<:IMG_9902:1443367697286172874> Yes' : '<:IMG_9904:1443371148543791218> No', inline: true });
+    if (droppable !== null) embed.addFields({ name: 'Droppable', value: droppable ? '<:cottage:1457128646274973766> Yes' : '<:fairy2:1457128704282071196> No', inline: true });
     if (imageUrl) embed.setThumbnail(imageUrl);
 
     await interaction.editReply({ embeds: [embed] });
@@ -127,7 +127,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // ADD MODE: card doesn't exist, create new one
   if (!name || !group || !rarity) {
-    await interaction.editReply({ content: '<:IMG_9904:1443371148543791218> To add a new card with code **' + cardcode + '**, please provide: name, group, and rarity!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> To add a new card with code **' + cardcode + '**, please provide: name, group, and rarity!' });
     return;
   }
 
@@ -148,20 +148,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Database error:', error);
-    await interaction.editReply({ content: `<:IMG_9904:1443371148543791218> Error adding card to database: ${error.message}` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Error adding card to database: ${error.message}` });
     return;
   }
 
   const embed = new EmbedBuilder()
     .setColor(0x00ff00)
-    .setTitle('<:IMG_9902:1443367697286172874> Card Added!')
+    .setTitle('<:cottage:1457128646274973766> Card Added!')
     .setDescription(`Successfully added **${name}** from ${group}`)
     .addFields(
       { name: 'Card ID', value: `${data[0].card_id}`, inline: true },
       { name: 'Card Code', value: cardcode, inline: true },
       { name: 'Rarity', value: `${rarity}`, inline: true },
       { name: 'Group', value: group, inline: true },
-      { name: 'Droppable', value: droppable ?? true ? '<:IMG_9902:1443367697286172874> Yes' : '<:IMG_9904:1443371148543791218> No', inline: true }
+      { name: 'Droppable', value: droppable ?? true ? '<:cottage:1457128646274973766> Yes' : '<:fairy2:1457128704282071196> No', inline: true }
     )
     .setTimestamp();
 

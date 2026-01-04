@@ -12,7 +12,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // Only dev user can execute this
   if (userId !== DEV_USER_ID) {
     await interaction.reply({ 
-      content: '<:IMG_9904:1443371148543791218> Only the dev user can execute this command!',
+      content: '<:fairy2:1457128704282071196> Only the dev user can execute this command!',
       ephemeral: true
     });
     return;
