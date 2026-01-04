@@ -38,7 +38,7 @@ async function loadCommands() {
     
     if ('data' in command && 'execute' in command) {
       commands.set(command.data.name, command);
-      console.log(`🏡 Loaded command: ${command.data.name}`);
+      console.log(`<:cottage:1457128646274973766> Loaded command: ${command.data.name}`);
     }
   }
 }
@@ -58,14 +58,14 @@ async function registerCommands() {
   try {
     console.log(`🔄 Registering ${commandData.length} slash commands...`);
     await rest.put(Routes.applicationCommands(clientId), { body: commandData });
-    console.log('🏡 Successfully registered slash commands globally!');
+    console.log('<:cottage:1457128646274973766> Successfully registered slash commands globally!');
   } catch (error) {
     console.error('Error registering commands:', error);
   }
 }
 
 client.once(Events.ClientReady, async (c) => {
-  console.log(`🏡 Bot is online as ${c.user.tag}!`);
+  console.log(`<:cottage:1457128646274973766> Bot is online as ${c.user.tag}!`);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {

@@ -110,7 +110,7 @@ async function startGame(interaction: ChatInputCommandInteraction, imageUrl: str
         await supabase.from('users').update({ coins: (user.coins || 0) + (reward || 0) }).eq('user_id', m.author.id);
       }
       
-      await m.reply(`✅ Correct! It's **${targetName}**! You earned 🧚 **${reward}** coins!`);
+      await m.reply(`✅ Correct! It's **${targetName}**! You earned <:fairy2:1457128704282071196> **${reward}** coins!`);
     }
   });
   

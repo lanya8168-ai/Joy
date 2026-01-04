@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const member = interaction.member as any;
   if (!isAdminUser(userId) && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
     await interaction.editReply({ 
-      content: '🧚 This command is only available to boosters!' 
+      content: '<:fairy2:1457128704282071196> This command is only available to boosters!' 
     });
     return;
   }
@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -66,7 +66,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   
   if (updateError) {
     console.error('Error updating coins:', updateError);
-    await interaction.editReply({ content: '🧚 Error claiming bonanza. Please try again!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming bonanza. Please try again!' });
     return;
   }
 
@@ -79,8 +79,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!legendaryCards || legendaryCards.length === 0) {
     const embed = new EmbedBuilder()
       .setColor(0x00d4ff)
-      .setTitle('🏡 Bonanza Claimed!')
-      .setDescription(`🧚 You received **25,000 coins**!\n\n*No legendary cards available yet.*`)
+      .setTitle('<:cottage:1457128646274973766> Bonanza Claimed!')
+      .setDescription(`<:fairy2:1457128704282071196> You received **25,000 coins**!\n\n*No legendary cards available yet.*`)
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -131,11 +131,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const nextAvailable = new Date(Date.now() + BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
     .setColor(0xffcc00)
-    .setTitle('🏡 Bonanza Claimed!')
-    .setDescription(`🧚 You received **25,000 coins** and **20 legendary cards**!`)
+    .setTitle('<:cottage:1457128646274973766> Bonanza Claimed!')
+    .setDescription(`<:fairy2:1457128704282071196> You received **25,000 coins** and **20 legendary cards**!`)
     .addFields(
       {
-        name: '🧚 New Balance',
+        name: '<:fairy2:1457128704282071196> New Balance',
         value: `${newBalance} coins`,
         inline: true
       },

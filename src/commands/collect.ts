@@ -67,7 +67,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const { data: allCards } = await query;
 
   if (!allCards || allCards.length === 0) {
-    await interaction.editReply({ content: '🧚 No cards match your filters!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> No cards match your filters!' });
     return;
   }
 
@@ -85,7 +85,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   if (displayCards.length === 0) {
-    await interaction.editReply({ content: '🧚 You have collected all cards matching these filters!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> You have collected all cards matching these filters!' });
     return;
   }
 
@@ -115,7 +115,7 @@ async function showCollectPage(
   const cardList = pageCards
     .map((card: any, index: number) => {
       const hasCard = userCardIds.has(card.card_id);
-      const checkMark = hasCard ? '🏡' : '🧚';
+      const checkMark = hasCard ? '<:cottage:1457128646274973766>' : '<:fairy2:1457128704282071196>';
       const rarityEmoji = getRarityEmoji(card.rarity);
       const eraText = card.era ? ` • ${card.era}` : '';
       return `${checkMark} **${card.name}** (${card.group}) ${rarityEmoji}${eraText} • \`${card.cardcode}\``;
@@ -153,8 +153,8 @@ async function showCollectPage(
     .setDescription(cardList || 'No cards on this page')
     .addFields(
       { name: 'Filters', value: filterText, inline: false },
-      { name: '🏡 Progress', value: `${ownedInFiltered} cards collected`, inline: true },
-      { name: '🧚 Missing', value: `${missingInFiltered} cards`, inline: true }
+      { name: '<:cottage:1457128646274973766> Progress', value: `${ownedInFiltered} cards collected`, inline: true },
+      { name: '<:fairy2:1457128704282071196> Missing', value: `${missingInFiltered} cards`, inline: true }
     )
     .setFooter({ text: `Page ${page} / ${totalPages}` })
     .setTimestamp();

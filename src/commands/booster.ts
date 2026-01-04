@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const member = interaction.member as any;
   if (!isAdminUser(userId) && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
     await interaction.editReply({ 
-      content: '🧚 This command is only available to boosters!' 
+      content: '<:fairy2:1457128704282071196> This command is only available to boosters!' 
     });
     return;
   }
@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
     return;
   }
 
@@ -66,7 +66,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   
   if (updateError) {
     console.error('Error updating coins:', updateError);
-    await interaction.editReply({ content: '🧚 Error claiming booster reward. Please try again!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming booster reward. Please try again!' });
     return;
   }
 
@@ -77,7 +77,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder()
       .setColor(0xffd700)
       .setTitle('<a:5surfboard:1433597347031683114> Booster Reward Claimed!')
-      .setDescription(`🧚 You received **10,000 coins**!\n\n*No cards available yet.*`)
+      .setDescription(`<:fairy2:1457128704282071196> You received **10,000 coins**!\n\n*No cards available yet.*`)
       .setTimestamp();
 
     await interaction.editReply({ embeds: [embed] });
@@ -132,7 +132,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(0x00d4ff)
     .setTitle('🌿 Booster Reward Claimed!')
-    .setDescription(`⭐ You received **10,000 coins** and **15 cards**!`)
+    .setDescription(`<:rarity_star:1442247814540296343> You received **10,000 coins** and **15 cards**!`)
     .addFields(
       {
         name: '<:1_flower:1436124715797315687> Cards Received',
@@ -140,7 +140,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         inline: false
       },
       {
-        name: '🧚 New Balance',
+        name: '<:fairy2:1457128704282071196> New Balance',
         value: `${newBalance} coins`,
         inline: true
       }

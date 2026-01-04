@@ -94,7 +94,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Check if sender is the allowed owner
   if (senderUserId !== OWNER_ID) {
-    await interaction.editReply({ content: '🧚 Only the bot owner can use this command!' });
+    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Only the bot owner can use this command!' });
     return;
   }
 
@@ -106,7 +106,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!receiver) {
-    await interaction.editReply({ content: `🧚 ${receiverUser.username} needs to use \`/start\` first!` });
+    await interaction.editReply({ content: `<:fairy2:1457128704282071196> ${receiverUser.username} needs to use \`/start\` first!` });
     return;
   }
 
@@ -130,7 +130,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   if (cardsToGift.length === 0) {
-    let errorMsg = '🧚 No valid cards to gift!';
+    let errorMsg = '<:fairy2:1457128704282071196> No valid cards to gift!';
     if (failedCards.length > 0) {
       errorMsg += `\n${failedCards.join('\n')}`;
     }
