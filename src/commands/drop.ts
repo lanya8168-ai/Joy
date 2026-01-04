@@ -136,6 +136,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const rarityEmoji = getRarityEmoji(selectedCard.rarity);
+  const description = `**${selectedCard.name}** (${selectedCard.group}) ${rarityEmoji}\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
   
   const nextAvailable = new Date(Date.now() + COOLDOWN_MINUTES * 60 * 1000);
   const embed = new EmbedBuilder()
@@ -145,12 +146,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       iconURL: interaction.user.avatarURL() || undefined
     })
     .setTitle('<:wings5:1457127829438332969> You explored and found..')
+    .setDescription(description)
     .addFields(
-      { name: '✨ Idol', value: selectedCard.name, inline: true },
-      { name: '🌿 Group', value: selectedCard.group, inline: true },
-      { name: '📜 Era', value: selectedCard.era || 'N/A', inline: true },
-      { name: '💎 Rarity', value: `${rarityEmoji} (${selectedCard.rarity})`, inline: true },
-      { name: '🆔 Card code', value: `\`${selectedCard.cardcode}\``, inline: true },
       { name: '⏰ Next Available', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, inline: true }
     )
     .setTimestamp();
