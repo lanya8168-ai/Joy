@@ -11,9 +11,10 @@ export const data = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-  await interaction.deferReply();
+  if (!interaction.deferred) await interaction.deferReply();
+  
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.reply({ content: '<:fairy2:1457128704282071196> You need Administrator permission to use this command!', ephemeral: true });
+    await interaction.editReply({ content: '🧚 You need Administrator permission to use this command!' });
     return;
   }
 
@@ -26,7 +27,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!card) {
-    await interaction.reply({ content: '<:fairy2:1457128704282071196> Card not found!', ephemeral: true });
+    await interaction.editReply({ content: '🧚 Card not found!' });
     return;
   }
 
@@ -36,7 +37,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .eq('card_id', cardId);
 
   if (error) {
-    await interaction.reply({ content: '<:fairy2:1457128704282071196> Error deleting card.', ephemeral: true });
+    console.error('Delete error:', error);
+    await interaction.editReply({ content: '🧚 Error deleting card. It might be referenced in inventories or marketplace listings.' });
     return;
   }
 
@@ -50,5 +52,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     )
     .setTimestamp();
 
-  await interaction.reply({ embeds: [embed] });
+  await interaction.editReply({ embeds: [embed] });
 }
