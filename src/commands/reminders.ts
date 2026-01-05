@@ -1,8 +1,8 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('reminders')
+export const data = new SlashCommandBuilder();
+  .setName('reminders');
   .setDescription('Manage your command reminders');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -31,9 +31,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       return `${isEnabled ? '✅' : '❌'} **/${cmd}**`;
     }).join('\n');
 
-    return new EmbedBuilder()
-      .setTitle('⏰ Reminder Settings')
-      .setDescription('Click the buttons below to toggle reminders for specific commands:\n\n' + description)
+    return new EmbedBuilder();
+      .setTitle('⏰ Reminder Settings');
+      .setDescription('Click the buttons below to toggle reminders for specific commands:\n\n' + description);
       .setColor(0xff69b4);
   };
 
@@ -44,10 +44,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     commands.forEach((cmd, index) => {
       const isEnabled = settings[cmd] !== false;
       currentRow.addComponents(
-        new ButtonBuilder()
-          .setCustomId(`remind_toggle_${cmd}`)
-          .setLabel(`/${cmd}`)
-          .setStyle(isEnabled ? ButtonStyle.Success : ButtonStyle.Danger)
+        new ButtonBuilder();
+          .setCustomId(`remind_toggle_${cmd}`);
+          .setLabel(`/${cmd}`);
+          .setStyle(isEnabled ? ButtonStyle.Success : ButtonStyle.Danger);
       );
       
       if ((index + 1) % 5 === 0 || index === commands.length - 1) {
@@ -61,7 +61,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const response = await interaction.editReply({
     embeds: [getEmbed()],
-    components: getButtons()
+    components: getButtons();
   });
 
   const collector = response.createMessageComponentCollector({
@@ -80,7 +80,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     
     await i.update({
       embeds: [getEmbed()],
-      components: getButtons()
+      components: getButtons();
     });
   });
 }

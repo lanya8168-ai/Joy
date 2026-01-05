@@ -3,85 +3,85 @@ import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 import { getRarityEmoji } from '../utils/cards.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('staffgift')
-  .setDescription('Staff only: Gift cards to a user')
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+export const data = new SlashCommandBuilder();
+  .setName('staffgift');
+  .setDescription('Staff only: Gift cards to a user');
+  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
   .addUserOption(option =>
-    option.setName('user')
-      .setDescription('User to gift to')
-      .setRequired(true))
+    option.setName('user');
+      .setDescription('User to gift to');
+      .setRequired(true));
   .addStringOption(option =>
-    option.setName('card1')
-      .setDescription('First card code')
-      .setRequired(true))
+    option.setName('card1');
+      .setDescription('First card code');
+      .setRequired(true));
   .addIntegerOption(option =>
-    option.setName('amount1')
-      .setDescription('Amount for first card')
-      .setRequired(false)
-      .setMinValue(1))
+    option.setName('amount1');
+      .setDescription('Amount for first card');
+      .setRequired(false);
+      .setMinValue(1));
   .addStringOption(option =>
-    option.setName('card2')
-      .setDescription('Second card code')
-      .setRequired(false))
+    option.setName('card2');
+      .setDescription('Second card code');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('amount2')
-      .setDescription('Amount for second card')
-      .setRequired(false)
-      .setMinValue(1))
+    option.setName('amount2');
+      .setDescription('Amount for second card');
+      .setRequired(false);
+      .setMinValue(1));
   .addStringOption(option =>
-    option.setName('card3')
-      .setDescription('Third card code')
-      .setRequired(false))
+    option.setName('card3');
+      .setDescription('Third card code');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('amount3')
-      .setDescription('Amount for third card')
-      .setRequired(false)
-      .setMinValue(1))
+    option.setName('amount3');
+      .setDescription('Amount for third card');
+      .setRequired(false);
+      .setMinValue(1));
   .addStringOption(option =>
-    option.setName('card4')
-      .setDescription('Fourth card code')
-      .setRequired(false))
+    option.setName('card4');
+      .setDescription('Fourth card code');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('amount4')
-      .setDescription('Amount for fourth card')
-      .setRequired(false)
-      .setMinValue(1))
+    option.setName('amount4');
+      .setDescription('Amount for fourth card');
+      .setRequired(false);
+      .setMinValue(1));
   .addStringOption(option =>
-    option.setName('card5')
-      .setDescription('Fifth card code')
-      .setRequired(false))
+    option.setName('card5');
+      .setDescription('Fifth card code');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('amount5')
-      .setDescription('Amount for fifth card')
-      .setRequired(false)
-      .setMinValue(1))
+    option.setName('amount5');
+      .setDescription('Amount for fifth card');
+      .setRequired(false);
+      .setMinValue(1));
   .addStringOption(option =>
-    option.setName('card6')
-      .setDescription('Sixth card code')
-      .setRequired(false))
+    option.setName('card6');
+      .setDescription('Sixth card code');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('amount6')
-      .setDescription('Amount for sixth card')
-      .setRequired(false)
-      .setMinValue(1))
+    option.setName('amount6');
+      .setDescription('Amount for sixth card');
+      .setRequired(false);
+      .setMinValue(1));
   .addStringOption(option =>
-    option.setName('card7')
-      .setDescription('Seventh card code')
-      .setRequired(false))
+    option.setName('card7');
+      .setDescription('Seventh card code');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('amount7')
-      .setDescription('Amount for seventh card')
-      .setRequired(false)
-      .setMinValue(1))
+    option.setName('amount7');
+      .setDescription('Amount for seventh card');
+      .setRequired(false);
+      .setMinValue(1));
   .addStringOption(option =>
-    option.setName('card8')
-      .setDescription('Eighth card code')
-      .setRequired(false))
+    option.setName('card8');
+      .setDescription('Eighth card code');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('amount8')
-      .setDescription('Amount for eighth card')
-      .setRequired(false)
+    option.setName('amount8');
+      .setDescription('Amount for eighth card');
+      .setRequired(false);
       .setMinValue(1));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -100,9 +100,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Check receiver exists
   const { data: receiver } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', receiverUserId)
+    .from('users');
+    .select('*');
+    .eq('user_id', receiverUserId);
     .single();
 
   if (!receiver) {
@@ -143,20 +143,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .map(({ card, amount }) => {
       const rarityEmoji = getRarityEmoji(card.rarity);
       return `${card.name} (${card.group}) ${rarityEmoji} • \`${card.cardcode}\` x${amount}`;
-    })
+    });
     .join('\n');
 
-  const confirmEmbed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🌲 Confirm Staff Gift')
-    .setDescription(`Send to ${receiverUser.username}?\n\n${confirmCards}`)
+  const confirmEmbed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🌲 Confirm Staff Gift');
+    .setDescription(`Send to ${receiverUser.username}?\n\n${confirmCards}`);
     .;
 
   // Merge images for preview
   let attachment = null;
   try {
     const imageUrls = cardsToGift
-      .map((item: any) => item.card.image_url)
+      .map((item: any) => item.card.image_url);
       .filter((url: string) => url);
 
     if (imageUrls.length > 0) {
@@ -168,16 +168,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error('Error merging images:', error);
   }
 
-  const row = new ActionRowBuilder<ButtonBuilder>()
+  const row = new ActionRowBuilder<ButtonBuilder>();
     .addComponents(
-      new ButtonBuilder()
-        .setCustomId(`staffgift_confirm_${senderUserId}_${receiverUserId}_${cardsToGift.map(c => `${c.card.card_id}:${c.amount}`).join(',')}`)
-        .setLabel('Yes')
+      new ButtonBuilder();
+        .setCustomId(`staffgift_confirm_${senderUserId}_${receiverUserId}_${cardsToGift.map(c => `${c.card.card_id}:${c.amount}`).join(',')}`);
+        .setLabel('Yes');
         .setStyle(ButtonStyle.Success),
-      new ButtonBuilder()
-        .setCustomId(`staffgift_cancel_${senderUserId}`)
-        .setLabel('No')
-        .setStyle(ButtonStyle.Danger)
+      new ButtonBuilder();
+        .setCustomId(`staffgift_cancel_${senderUserId}`);
+        .setLabel('No');
+        .setStyle(ButtonStyle.Danger);
     );
 
   if (attachment) {

@@ -1,61 +1,61 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('editcard')
-  .setDescription('Edit a card by cardcode (Admin only)')
+export const data = new SlashCommandBuilder();
+  .setName('editcard');
+  .setDescription('Edit a card by cardcode (Admin only)');
   .addStringOption(option =>
-    option.setName('cardcode')
-      .setDescription('Card code/ID to edit (e.g., NWSK#101)')
-      .setRequired(true))
+    option.setName('cardcode');
+      .setDescription('Card code/ID to edit (e.g., NWSK#101)');
+      .setRequired(true));
   .addStringOption(option =>
-    option.setName('name')
-      .setDescription('New card name')
-      .setRequired(false))
+    option.setName('name');
+      .setDescription('New card name');
+      .setRequired(false));
   .addStringOption(option =>
-    option.setName('group')
-      .setDescription('New group name')
-      .setRequired(false))
+    option.setName('group');
+      .setDescription('New group name');
+      .setRequired(false));
   .addStringOption(option =>
-    option.setName('new_cardcode')
-      .setDescription('New card code (to rename the code itself)')
-      .setRequired(false))
+    option.setName('new_cardcode');
+      .setDescription('New card code (to rename the code itself)');
+      .setRequired(false));
   .addStringOption(option =>
-    option.setName('era')
-      .setDescription('New era or album name')
-      .setRequired(false))
+    option.setName('era');
+      .setDescription('New era or album name');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('rarity')
-      .setDescription('New rarity (1-5)')
-      .setRequired(false)
+    option.setName('rarity');
+      .setDescription('New rarity (1-5)');
+      .setRequired(false);
       .addChoices(
         { name: 'Common (1)', value: 1 },
         { name: 'Uncommon (2)', value: 2 },
         { name: 'Rare (3)', value: 3 },
         { name: 'Epic (4)', value: 4 },
         { name: 'Legendary (5)', value: 5 }
-      ))
+      ));
   .addBooleanOption(option =>
-    option.setName('droppable')
-      .setDescription('Can this card be dropped?')
-      .setRequired(false))
+    option.setName('droppable');
+      .setDescription('Can this card be dropped?');
+      .setRequired(false));
   .addBooleanOption(option =>
-    option.setName('is_limited')
-      .setDescription('Is this a limited edition card?')
-      .setRequired(false))
+    option.setName('is_limited');
+      .setDescription('Is this a limited edition card?');
+      .setRequired(false));
   .addStringOption(option =>
-    option.setName('event_type')
-      .setDescription('Set event type')
-      .setRequired(false)
+    option.setName('event_type');
+      .setDescription('Set event type');
+      .setRequired(false);
       .addChoices(
         { name: 'Event', value: 'event' },
         { name: 'Birthday', value: 'birthday' },
         { name: 'None', value: 'none' }
-      ))
+      ));
   .addStringOption(option =>
-    option.setName('image_url')
-      .setDescription('New image URL')
-      .setRequired(false))
+    option.setName('image_url');
+      .setDescription('New image URL');
+      .setRequired(false));
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -79,9 +79,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const imageUrl = interaction.options.getString('image_url');
 
   const { data: existingCard } = await supabase
-    .from('cards')
-    .select('*')
-    .eq('cardcode', cardcode.toUpperCase())
+    .from('cards');
+    .select('*');
+    .eq('cardcode', cardcode.toUpperCase());
     .maybeSingle();
 
   if (!existingCard) {
@@ -106,8 +106,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const { error } = await supabase
-    .from('cards')
-    .update(updates)
+    .from('cards');
+    .update(updates);
     .eq('card_id', existingCard.card_id);
 
   if (error) {
@@ -140,11 +140,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     fields.push({ name: 'Image URL', value: 'Updated', });
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('✏️ Card Updated!')
-    .setDescription(`Successfully updated card **${cardcode}**`)
-    .addFields(...fields)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('✏️ Card Updated!');
+    .setDescription(`Successfully updated card **${cardcode}**`);
+    .addFields(...fields);
     .;
 
   await interaction.editReply({ embeds: [embed] });

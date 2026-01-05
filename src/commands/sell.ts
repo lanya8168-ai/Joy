@@ -10,12 +10,12 @@ const RARITY_PRICES: { [key: number]: number } = {
   1: 1000
 };
 
-export const data = new SlashCommandBuilder()
-  .setName('sell')
-  .setDescription('Sell cards from your inventory')
+export const data = new SlashCommandBuilder();
+  .setName('sell');
+  .setDescription('Sell cards from your inventory');
   .addStringOption(option =>
-    option.setName('cards')
-      .setDescription('Card codes separated by commas (e.g., BP001, LSCW#501)')
+    option.setName('cards');
+      .setDescription('Card codes separated by commas (e.g., BP001, LSCW#501)');
       .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -25,9 +25,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const cardsInput = interaction.options.getString('cards', true);
 
   const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
+    .from('users');
+    .select('*');
+    .eq('user_id', userId);
     .single();
 
   if (!user) {
@@ -43,7 +43,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Fetch all cards once
   const { data: allCards } = await supabase
-    .from('cards')
+    .from('cards');
     .select('*');
 
   for (const cardcode of cardcodes) {
@@ -57,10 +57,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     // Check user has the card
     const { data: inventory } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('card_id', card.card_id)
+      .from('inventory');
+      .select('*');
+      .eq('user_id', userId);
+      .eq('card_id', card.card_id);
       .single();
 
     if (!inventory || inventory.quantity < 1) {
@@ -72,13 +72,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     const newQuantity = inventory.quantity - 1;
     if (newQuantity > 0) {
       await supabase
-        .from('inventory')
-        .update({ quantity: newQuantity })
+        .from('inventory');
+        .update({ quantity: newQuantity });
         .eq('id', inventory.id);
     } else {
       await supabase
-        .from('inventory')
-        .delete()
+        .from('inventory');
+        .delete();
         .eq('id', inventory.id);
     }
 
@@ -93,8 +93,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (totalCoins > 0) {
     // Add coins to user
     await supabase
-      .from('users')
-      .update({ coins: user.coins + totalCoins })
+      .from('users');
+      .update({ coins: user.coins + totalCoins });
       .eq('user_id', userId);
   }
 
@@ -113,11 +113,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🌲 Cards Sold!')
-    .setDescription(description)
-    .addFields({ name: 'New Balance', value: `${user.coins + totalCoins} coins`, })
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🌲 Cards Sold!');
+    .setDescription(description);
+    .addFields({ name: 'New Balance', value: `${user.coins + totalCoins} coins`, });
     .;
 
   await interaction.editReply({ embeds: [embed] });

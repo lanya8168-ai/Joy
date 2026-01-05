@@ -13,21 +13,21 @@ const PACKS = [
   { id: '7', name: 'Fairy Kingdom (10 cards)', cost: 15000, cards: 10, groupPack: true }
 ];
 
-export const data = new SlashCommandBuilder()
-  .setName('shop')
-  .setDescription('Buy card packs')
+export const data = new SlashCommandBuilder();
+  .setName('shop');
+  .setDescription('Buy card packs');
   .addSubcommand(subcommand =>
     subcommand
-      .setName('browse')
-      .setDescription('View available packs'))
+      .setName('browse');
+      .setDescription('View available packs'));
   .addSubcommand(subcommand =>
     subcommand
-      .setName('buy')
-      .setDescription('Buy a card pack')
+      .setName('buy');
+      .setDescription('Buy a card pack');
       .addStringOption(option =>
-        option.setName('pack')
-          .setDescription('Pack type to buy')
-          .setRequired(true)
+        option.setName('pack');
+          .setDescription('Pack type to buy');
+          .setRequired(true);
           .addChoices(
             { name: 'Magic Seeds - 500 coins (1 card)', value: '1' },
             { name: 'Glow Spores - 1000 coins (2 cards)', value: '2' },
@@ -36,10 +36,10 @@ export const data = new SlashCommandBuilder()
             { name: 'Ancient Grove - 35000 coins (3 legendary)', value: '5' },
             { name: 'Forest Spirit - 8000 coins (5 cards)', value: '6' },
             { name: 'Fairy Kingdom - 15000 coins (10 cards)', value: '7' }
-          ))
+          ));
       .addStringOption(option =>
-        option.setName('group_or_idol')
-        .setDescription('Group or idol name for Forest Spirit/Fairy Kingdom')
+        option.setName('group_or_idol');
+        .setDescription('Group or idol name for Forest Spirit/Fairy Kingdom');
           .setRequired(false)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -56,9 +56,9 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
 
   const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
+    .from('users');
+    .select('*');
+    .eq('user_id', userId);
     .single();
 
   if (!user) {
@@ -67,13 +67,13 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
   }
 
   const packList = PACKS
-    .map(pack => `**${pack.name}** - ${pack.cost} coins → ${pack.cards} card(s)`)
+    .map(pack => `**${pack.name}** - ${pack.cost} coins → ${pack.cards} card(s)`);
     .join('\n');
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🏘️ Shop')
-    .setDescription('Buy packs for your garden! 🧚')
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🏘️ Shop');
+    .setDescription('Buy packs for your garden! 🧚');
     .addFields(
       {
         name: '📜 Available Packs',
@@ -90,7 +90,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
         value: 'Use `/shop buy` and select the pack you want!',
        
       }
-    )
+    );
     .;
 
   await interaction.reply({ embeds: [embed] });
@@ -109,9 +109,9 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   }
 
   const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
+    .from('users');
+    .select('*');
+    .eq('user_id', userId);
     .single();
 
   if (!user) {
@@ -127,8 +127,8 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   }
 
   const { data: allCards } = await supabase
-    .from('cards')
-    .select('*')
+    .from('cards');
+    .select('*');
     .eq('droppable', true);
 
   if (!allCards || allCards.length === 0) {
@@ -159,8 +159,8 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   // Deduct coins
   const newBalance = user.coins - pack.cost;
   await supabase
-    .from('users')
-    .update({ coins: newBalance })
+    .from('users');
+    .update({ coins: newBalance });
     .eq('user_id', userId);
 
   await processShopPurchase(interaction, user, pack, [], newBalance, allCards);
@@ -175,7 +175,7 @@ async function processShopPurchase(interaction: ChatInputCommandInteraction, use
     for (let i = 0; i < pack.cards; i++) {
       let selectedCard;
       
-      // Check for event/birthday or limited cards (8%)
+      // Check for event/birthday or limited cards (8%);
       if (Math.random() < 0.08) {
         let specialQuery = supabase.from('cards').select('*').eq('droppable', true).or('event_type.not.is.null,is_limited.eq.true');
         
@@ -188,7 +188,7 @@ async function processShopPurchase(interaction: ChatInputCommandInteraction, use
             const search = groupOrIdol.toLowerCase();
             filteredSpecials = specialCards.filter((c: any) => 
               c.name.toLowerCase().includes(search) || 
-              c.group.toLowerCase().includes(search)
+              c.group.toLowerCase().includes(search);
             );
           }
           
@@ -242,20 +242,20 @@ async function processShopPurchase(interaction: ChatInputCommandInteraction, use
 
   for (const card of cardsList) {
     const { data: existingItem } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('card_id', card.card_id)
+      .from('inventory');
+      .select('*');
+      .eq('user_id', userId);
+      .eq('card_id', card.card_id);
       .single();
 
     if (existingItem) {
       await supabase
-        .from('inventory')
-        .update({ quantity: existingItem.quantity + 1 })
+        .from('inventory');
+        .update({ quantity: existingItem.quantity + 1 });
         .eq('id', existingItem.id);
     } else {
       await supabase
-        .from('inventory')
+        .from('inventory');
         .insert({
           user_id: userId,
           card_id: card.card_id,
@@ -265,13 +265,13 @@ async function processShopPurchase(interaction: ChatInputCommandInteraction, use
   }
 
   const cardsInfo = cardsList
-    .map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``)
+    .map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``);
     .join('\n');
 
   let attachment = null;
   try {
     const imageUrls = cardsList
-      .map((card: any) => card.image_url)
+      .map((card: any) => card.image_url);
       .filter((url: string) => url);
 
     if (imageUrls.length > 0) {
@@ -283,10 +283,10 @@ async function processShopPurchase(interaction: ChatInputCommandInteraction, use
     console.error('Error merging images:', error);
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle(`🧚 ${pack.name} Purchased!`)
-    .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle(`🧚 ${pack.name} Purchased!`);
+    .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`);
     .addFields(
       {
         name: '🎴 Cards Received',
@@ -298,7 +298,7 @@ async function processShopPurchase(interaction: ChatInputCommandInteraction, use
         value: `${newBalance} coins`,
        
       }
-    )
+    );
     .;
 
   if (attachment) {

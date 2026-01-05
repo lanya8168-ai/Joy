@@ -9,8 +9,8 @@ import { scheduleReminder } from '../utils/reminders.js';
 const WEEKLY_REWARD = 1500;
 const WEEKLY_COOLDOWN_HOURS = 168;
 
-export const data = new SlashCommandBuilder()
-  .setName('weekly')
+export const data = new SlashCommandBuilder();
+  .setName('weekly');
   .setDescription('Claim your weekly coin reward!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -39,10 +39,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 
     if (result.error === 'on_cooldown') {
-      const embed = new EmbedBuilder()
-        .setColor(0xff69b4)
-        .setTitle('⏰ Weekly Reward On Cooldown')
-        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`)
+      const embed = new EmbedBuilder();
+        .setColor(0xff69b4);
+        .setTitle('⏰ Weekly Reward On Cooldown');
+        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
         .;
 
       await interaction.editReply({ embeds: [embed] });
@@ -55,8 +55,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Get all droppable cards
   const { data: allCards } = await supabase
-    .from('cards')
-    .select('*')
+    .from('cards');
+    .select('*');
     .eq('droppable', true);
 
   if (!allCards || allCards.length === 0) {
@@ -72,25 +72,25 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       };
       const cardInfos = Array(4).fill(0).map((_, i) => `**Card ${i + 1}:** ${mockCard.name} (${mockCard.group}) ⭐⭐⭐⭐⭐ • ${mockCard.era} • \`${mockCard.cardcode}\``).join('\n');
       const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
-      const embed = new EmbedBuilder()
-        .setColor(0xff69b4)
-        .setTitle('📸 Weekly')
-        .setDescription(`Received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`)
+      const embed = new EmbedBuilder();
+        .setColor(0xff69b4);
+        .setTitle('📸 Weekly');
+        .setDescription(`Received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`);
         .addFields(
           {
             name: '⏰ Next',
             value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
            
           }
-        )
+        );
         .;
       await interaction.editReply({ embeds: [embed] });
       return;
     }
-    const embed = new EmbedBuilder()
-      .setColor(0xff69b4)
-      .setTitle('🏘️ Weekly')
-      .setDescription(`Received **${result.reward} coins**!\n\n*No cards available yet.*`)
+    const embed = new EmbedBuilder();
+      .setColor(0xff69b4);
+      .setTitle('🏘️ Weekly');
+      .setDescription(`Received **${result.reward} coins**!\n\n*No cards available yet.*`);
       .;
 
     await interaction.editReply({ embeds: [embed] });
@@ -123,20 +123,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     // Add to inventory
     const { data: existingItem } = await supabase
-      .from('inventory')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('card_id', card.card_id)
+      .from('inventory');
+      .select('*');
+      .eq('user_id', userId);
+      .eq('card_id', card.card_id);
       .single();
 
     if (existingItem) {
       await supabase
-        .from('inventory')
-        .update({ quantity: existingItem.quantity + 1 })
+        .from('inventory');
+        .update({ quantity: existingItem.quantity + 1 });
         .eq('id', existingItem.id);
     } else {
       await supabase
-        .from('inventory')
+        .from('inventory');
         .insert({
           user_id: userId,
           card_id: card.card_id,
@@ -156,7 +156,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   let attachment = null;
   try {
     const imageUrls = selectedCards
-      .filter(card => card.image_url)
+      .filter(card => card.image_url);
       .map(card => card.image_url);
 
     if (imageUrls.length > 0) {
@@ -168,17 +168,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('📸 Weekly')
-    .setDescription(description)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('📸 Weekly');
+    .setDescription(description);
     .addFields(
       {
         name: '⏰ Next',
         value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
        
       }
-    )
+    );
     .;
 
   // Schedule reminder for next weekly

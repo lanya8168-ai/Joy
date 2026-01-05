@@ -1,18 +1,18 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('staffpay')
-  .setDescription('Staff only: Send coins to a user')
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+export const data = new SlashCommandBuilder();
+  .setName('staffpay');
+  .setDescription('Staff only: Send coins to a user');
+  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
   .addUserOption(option =>
-    option.setName('user')
-      .setDescription('User to pay')
-      .setRequired(true))
+    option.setName('user');
+      .setDescription('User to pay');
+      .setRequired(true));
   .addIntegerOption(option =>
-    option.setName('amount')
-      .setDescription('Number of coins to send')
-      .setRequired(true)
+    option.setName('amount');
+      .setDescription('Number of coins to send');
+      .setRequired(true);
       .setMinValue(1));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -32,9 +32,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Check receiver exists
   const { data: receiver } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', receiverUserId)
+    .from('users');
+    .select('*');
+    .eq('user_id', receiverUserId);
     .single();
 
   if (!receiver) {
@@ -44,14 +44,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Update receiver coins
   await supabase
-    .from('users')
-    .update({ coins: receiver.coins + amount })
+    .from('users');
+    .update({ coins: receiver.coins + amount });
     .eq('user_id', receiverUserId);
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('💸 Staff Payment Sent!')
-    .setDescription(`🌲 You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Their new balance: **${receiver.coins + amount} coins**`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('💸 Staff Payment Sent!');
+    .setDescription(`🌲 You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Their new balance: **${receiver.coins + amount} coins**`);
     .;
 
   await interaction.editReply({ embeds: [embed] });

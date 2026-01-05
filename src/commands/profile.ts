@@ -2,41 +2,41 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('profile')
-  .setDescription('View or edit your profile')
+export const data = new SlashCommandBuilder();
+  .setName('profile');
+  .setDescription('View or edit your profile');
   .addSubcommand(subcommand =>
     subcommand
-      .setName('view')
-      .setDescription('View a user profile')
+      .setName('view');
+      .setDescription('View a user profile');
       .addUserOption(option =>
-        option.setName('user')
-          .setDescription('User to view (default: yourself)')
-          .setRequired(false)))
+        option.setName('user');
+          .setDescription('User to view (default: yourself)');
+          .setRequired(false)));
   .addSubcommand(subcommand =>
     subcommand
-      .setName('bio')
-      .setDescription('Edit your profile bio')
+      .setName('bio');
+      .setDescription('Edit your profile bio');
       .addStringOption(option =>
-        option.setName('text')
-          .setDescription('Your bio text (max 200 characters)')
-          .setRequired(true)
-          .setMaxLength(200)))
+        option.setName('text');
+          .setDescription('Your bio text (max 200 characters)');
+          .setRequired(true);
+          .setMaxLength(200)));
   .addSubcommand(subcommand =>
     subcommand
-      .setName('color')
-      .setDescription('Edit your profile color')
+      .setName('color');
+      .setDescription('Edit your profile color');
       .addStringOption(option =>
-        option.setName('hex')
-          .setDescription('Hex color code (e.g., #ff69b4)')
-          .setRequired(true)))
+        option.setName('hex');
+          .setDescription('Hex color code (e.g., #ff69b4)');
+          .setRequired(true)));
   .addSubcommand(subcommand =>
     subcommand
-      .setName('favoritecard')
-      .setDescription('Set your favorite card')
+      .setName('favoritecard');
+      .setDescription('Set your favorite card');
       .addStringOption(option =>
-        option.setName('cardcode')
-          .setDescription('Card code (e.g., BP001)')
+        option.setName('cardcode');
+          .setDescription('Card code (e.g., BP001)');
           .setRequired(true)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -59,9 +59,9 @@ async function handleView(interaction: ChatInputCommandInteraction) {
   const userId = targetUser.id;
 
   const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
+    .from('users');
+    .select('*');
+    .eq('user_id', userId);
     .single();
 
   if (!user) {
@@ -71,8 +71,8 @@ async function handleView(interaction: ChatInputCommandInteraction) {
 
   // Get inventory count
   const { data: inventoryItems } = await supabase
-    .from('inventory')
-    .select('quantity')
+    .from('inventory');
+    .select('quantity');
     .eq('user_id', userId);
 
   const totalCards = inventoryItems?.reduce((sum, item) => sum + item.quantity, 0) || 0;
@@ -81,9 +81,9 @@ async function handleView(interaction: ChatInputCommandInteraction) {
   let favoriteCardText = 'Not set';
   if (user.favorite_card_id) {
     const { data: favoriteCard } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('card_id', user.favorite_card_id)
+      .from('cards');
+      .select('*');
+      .eq('card_id', user.favorite_card_id);
       .single();
 
     if (favoriteCard) {
@@ -93,16 +93,16 @@ async function handleView(interaction: ChatInputCommandInteraction) {
 
   const color = parseInt(user.profile_color?.replace('#', '') || 'ff69b4', 16);
 
-  const embed = new EmbedBuilder()
-    .setColor(color)
-    .setTitle(`${targetUser.username}'s Profile`)
-    .setThumbnail(targetUser.displayAvatarURL())
+  const embed = new EmbedBuilder();
+    .setColor(color);
+    .setTitle(`${targetUser.username}'s Profile`);
+    .setThumbnail(targetUser.displayAvatarURL());
     .addFields(
       { name: '🧚 Coins', value: `${user.coins}`, },
       { name: '⭐ Cards', value: `${totalCards}`, },
       { name: '📜 Bio', value: user.bio || '*No bio set*', },
       { name: '🧚 Favorite', value: favoriteCardText, }
-    )
+    );
     .setFooter({ text: `Color: ${user.profile_color || '#ff69b4'}` });
 
   await interaction.editReply({ embeds: [embed] });
@@ -113,9 +113,9 @@ async function handleBio(interaction: ChatInputCommandInteraction) {
   const bioText = interaction.options.getString('text', true);
 
   const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
+    .from('users');
+    .select('*');
+    .eq('user_id', userId);
     .single();
 
   if (!user) {
@@ -124,8 +124,8 @@ async function handleBio(interaction: ChatInputCommandInteraction) {
   }
 
   const { error } = await supabase
-    .from('users')
-    .update({ bio: bioText })
+    .from('users');
+    .update({ bio: bioText });
     .eq('user_id', userId);
 
   if (error) {
@@ -134,10 +134,10 @@ async function handleBio(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('✅ Bio Updated!')
-    .setDescription(`Bio set to:\n\n${bioText}`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('✅ Bio Updated!');
+    .setDescription(`Bio set to:\n\n${bioText}`);
     .;
 
   await interaction.editReply({ embeds: [embed] });
@@ -155,9 +155,9 @@ async function handleColor(interaction: ChatInputCommandInteraction) {
   }
 
   const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
+    .from('users');
+    .select('*');
+    .eq('user_id', userId);
     .single();
 
   if (!user) {
@@ -166,8 +166,8 @@ async function handleColor(interaction: ChatInputCommandInteraction) {
   }
 
   const { error } = await supabase
-    .from('users')
-    .update({ profile_color: hexColor })
+    .from('users');
+    .update({ profile_color: hexColor });
     .eq('user_id', userId);
 
   if (error) {
@@ -178,10 +178,10 @@ async function handleColor(interaction: ChatInputCommandInteraction) {
 
   const color = parseInt(hexColor.replace('#', ''), 16);
 
-  const embed = new EmbedBuilder()
-    .setColor(color)
-    .setTitle('✅ Profile Color Updated!')
-    .setDescription(`Color set to ${hexColor}`)
+  const embed = new EmbedBuilder();
+    .setColor(color);
+    .setTitle('✅ Profile Color Updated!');
+    .setDescription(`Color set to ${hexColor}`);
     .;
 
   await interaction.editReply({ embeds: [embed] });
@@ -192,9 +192,9 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
   const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
 
   const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
+    .from('users');
+    .select('*');
+    .eq('user_id', userId);
     .single();
 
   if (!user) {
@@ -204,9 +204,9 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
 
   // Check if card exists
   const { data: card } = await supabase
-    .from('cards')
-    .select('*')
-    .eq('cardcode', cardcode)
+    .from('cards');
+    .select('*');
+    .eq('cardcode', cardcode);
     .single();
 
   if (!card) {
@@ -216,10 +216,10 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
 
   // Check if user owns the card
   const { data: inventoryItem } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('card_id', card.card_id)
+    .from('inventory');
+    .select('*');
+    .eq('user_id', userId);
+    .eq('card_id', card.card_id);
     .single();
 
   if (!inventoryItem) {
@@ -228,8 +228,8 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
   }
 
   const { error } = await supabase
-    .from('users')
-    .update({ favorite_card_id: card.card_id })
+    .from('users');
+    .update({ favorite_card_id: card.card_id });
     .eq('user_id', userId);
 
   if (error) {
@@ -238,10 +238,10 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('✅ Favorite Card Set!')
-    .setDescription(`Your favorite card is now:\n**${card.name}** (${card.group}) • \`${card.cardcode}\``)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('✅ Favorite Card Set!');
+    .setDescription(`Your favorite card is now:\n**${card.name}** (${card.group}) • \`${card.cardcode}\``);
     .;
 
   if (card.image_url) {

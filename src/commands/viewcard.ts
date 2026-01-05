@@ -13,12 +13,12 @@ function getRarityColor(rarity: number): number {
   return colors[rarity] || 0xffffff;
 }
 
-export const data = new SlashCommandBuilder()
-  .setName('viewcard')
-  .setDescription('View card information by card code')
+export const data = new SlashCommandBuilder();
+  .setName('viewcard');
+  .setDescription('View card information by card code');
   .addStringOption(option =>
-    option.setName('cardcode')
-      .setDescription('Card code (e.g., BP001)')
+    option.setName('cardcode');
+      .setDescription('Card code (e.g., BP001)');
       .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -28,7 +28,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const userId = interaction.user.id;
 
   const { data: allCards } = await supabase
-    .from('cards')
+    .from('cards');
     .select('*');
 
   const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
@@ -40,10 +40,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Check if user owns this card
   const { data: inventoryItem } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('card_id', card.card_id)
+    .from('inventory');
+    .select('*');
+    .eq('user_id', userId);
+    .eq('card_id', card.card_id);
     .single();
 
   const rarityEmoji = getRarityEmoji(card.rarity);
@@ -53,11 +53,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     description += ` • copies: **${inventoryItem.quantity}**`;
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(getRarityColor(card.rarity))
-    .setTitle('🌲 Card Info')
-    .setDescription(description)
-    .setFooter({ text: `Rarity: ${card.rarity}/5 • Droppable: ${card.droppable ? 'Yes' : 'No'}` })
+  const embed = new EmbedBuilder();
+    .setColor(getRarityColor(card.rarity));
+    .setTitle('🌲 Card Info');
+    .setDescription(description);
+    .setFooter({ text: `Rarity: ${card.rarity}/5 • Droppable: ${card.droppable ? 'Yes' : 'No'}` });
     .;
 
   if (card.image_url) {

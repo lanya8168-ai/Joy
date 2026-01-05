@@ -9,8 +9,8 @@ const MIN_COINS = 50;
 const MAX_COINS = 100;
 const DAILY_COOLDOWN_HOURS = 24;
 
-export const data = new SlashCommandBuilder()
-  .setName('daily')
+export const data = new SlashCommandBuilder();
+  .setName('daily');
   .setDescription('Claim your daily coin reward!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -41,10 +41,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 
     if (result && result.error === 'on_cooldown') {
-      const embed = new EmbedBuilder()
-        .setColor(0xff69b4)
-        .setTitle('⏰ Daily Reward On Cooldown')
-        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`)
+      const embed = new EmbedBuilder();
+        .setColor(0xff69b4);
+        .setTitle('⏰ Daily Reward On Cooldown');
+        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
         .;
 
       await interaction.editReply({ embeds: [embed] });
@@ -59,18 +59,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   
   // Fetch current balance from database to ensure accuracy
   const { data: currentUser } = await supabase
-    .from('users')
-    .select('coins')
-    .eq('user_id', userId)
+    .from('users');
+    .select('coins');
+    .eq('user_id', userId);
     .single();
   
   const userBalance = currentUser?.coins ?? result.balance ?? 0;
 
   // Get a random legendary card
   const { data: legendaryCards } = await supabase
-    .from('cards')
-    .select('*')
-    .eq('rarity', 5)
+    .from('cards');
+    .select('*');
+    .eq('rarity', 5);
     .eq('droppable', true);
 
   if (!legendaryCards || legendaryCards.length === 0) {
@@ -86,10 +86,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       };
       const coinsEarned = coinsReward;
       const nextAvailable = new Date(Date.now() + 24 * 60 * 60 * 1000);
-      const embed = new EmbedBuilder()
-        .setColor(0xff69b4)
-        .setTitle('🏘️ Daily')
-        .setDescription(`🧚 Received **${coinsEarned} coins** and a **legendary card**!`)
+      const embed = new EmbedBuilder();
+        .setColor(0xff69b4);
+        .setTitle('🏘️ Daily');
+        .setDescription(`🧚 Received **${coinsEarned} coins** and a **legendary card**!`);
         .addFields(
           {
             name: '🎴 Card Received',
@@ -106,18 +106,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
            
           }
-        )
-        .setFooter({ text: `User ID: ${userId}` })
+        );
+        .setFooter({ text: `User ID: ${userId}` });
         .
         .setImage(mockCard.image_url);
 
       await interaction.editReply({ embeds: [embed] });
       return;
     }
-    const embed = new EmbedBuilder()
-      .setColor(0xff69b4)
-      .setTitle('Daily')
-      .setDescription(`🧚 Received **${coinsReward} coins**!\n\n*No legendary cards available yet.*`)
+    const embed = new EmbedBuilder();
+      .setColor(0xff69b4);
+      .setTitle('Daily');
+      .setDescription(`🧚 Received **${coinsReward} coins**!\n\n*No legendary cards available yet.*`);
       .;
 
     await interaction.editReply({ embeds: [embed] });
@@ -128,20 +128,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Add card to inventory
   const { data: existingItem } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('card_id', selectedCard.card_id)
+    .from('inventory');
+    .select('*');
+    .eq('user_id', userId);
+    .eq('card_id', selectedCard.card_id);
     .single();
 
   if (existingItem) {
     await supabase
-      .from('inventory')
-      .update({ quantity: existingItem.quantity + 1 })
+      .from('inventory');
+      .update({ quantity: existingItem.quantity + 1 });
       .eq('id', existingItem.id);
   } else {
     await supabase
-      .from('inventory')
+      .from('inventory');
       .insert({
         user_id: userId,
         card_id: selectedCard.card_id,
@@ -157,10 +157,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const randomLegendary = selectedCard;
 
   const nextAvailable = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🏘️ Daily')
-    .setDescription(`🧚 Received **${coinsEarned} coins** and a **legendary card**!`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🏘️ Daily');
+    .setDescription(`🧚 Received **${coinsEarned} coins** and a **legendary card**!`);
     .addFields(
       {
         name: '🎴 Card Received',
@@ -177,8 +177,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
        
       }
-    )
-    .setFooter({ text: `User ID: ${userId}` })
+    );
+    .setFooter({ text: `User ID: ${userId}` });
     .;
 
   if (selectedCard.image_url) {

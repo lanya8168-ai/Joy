@@ -6,8 +6,8 @@ import { scheduleReminder } from '../utils/reminders.js';
 
 const SURF_COOLDOWN_HOURS = 1;
 
-export const data = new SlashCommandBuilder()
-  .setName('explore')
+export const data = new SlashCommandBuilder();
+  .setName('explore');
   .setDescription('Explore for coins!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -32,10 +32,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             new_balance: (user?.coins || 0) + reward
         };
         const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
-        const embed = new EmbedBuilder()
-          .setColor(0xff69b4)
-          .setTitle('🧚 Exploring Complete!')
-          .setDescription(`You were exploring in the woods when you stumbled across ${mockResult.reward} coins!`)
+        const embed = new EmbedBuilder();
+          .setColor(0xff69b4);
+          .setTitle('🧚 Exploring Complete!');
+          .setDescription(`You were exploring in the woods when you stumbled across ${mockResult.reward} coins!`);
           .addFields(
             { name: '💎 Reward', value: `${mockResult.reward} coins`, },
             { name: '🧚 New Balance', value: `${mockResult.new_balance} coins`, },
@@ -44,7 +44,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
               value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
              
             }
-          )
+          );
           .;
         await interaction.editReply({ embeds: [embed] });
         return;
@@ -62,10 +62,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 
     if (result.error === 'on_cooldown') {
-      const embed = new EmbedBuilder()
-        .setColor(0xff69b4)
-        .setTitle('⏰ Surf On Cooldown')
-        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`)
+      const embed = new EmbedBuilder();
+        .setColor(0xff69b4);
+        .setTitle('⏰ Surf On Cooldown');
+        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
         .;
 
       await interaction.editReply({ embeds: [embed] });
@@ -77,10 +77,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🧚 Exploring Complete!')
-    .setDescription(`You were exploring in the woods when you stumbled across ${result.reward} coins!`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🧚 Exploring Complete!');
+    .setDescription(`You were exploring in the woods when you stumbled across ${result.reward} coins!`);
     .addFields(
       { name: '💎 Reward', value: `${result.reward} coins`, },
       { name: '🧚 New Balance', value: `${result.new_balance} coins`, },
@@ -89,7 +89,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
        
       }
-    )
+    );
     .;
 
   // Schedule reminder for next surf

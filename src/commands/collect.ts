@@ -5,34 +5,34 @@ import { mergeCardImages } from '../utils/imageUtils.js';
 
 const CARDS_PER_PAGE = 5;
 
-export const data = new SlashCommandBuilder()
-  .setName('collect')
-  .setDescription('View all collectible cards with ownership status')
+export const data = new SlashCommandBuilder();
+  .setName('collect');
+  .setDescription('View all collectible cards with ownership status');
   .addStringOption(option =>
-    option.setName('idol')
-      .setDescription('Filter by idol name')
-      .setRequired(false))
+    option.setName('idol');
+      .setDescription('Filter by idol name');
+      .setRequired(false));
   .addStringOption(option =>
-    option.setName('group')
-      .setDescription('Filter by group')
-      .setRequired(false))
+    option.setName('group');
+      .setDescription('Filter by group');
+      .setRequired(false));
   .addStringOption(option =>
-    option.setName('era')
-      .setDescription('Filter by era')
-      .setRequired(false))
+    option.setName('era');
+      .setDescription('Filter by era');
+      .setRequired(false));
   .addIntegerOption(option =>
-    option.setName('rarity')
-      .setDescription('Filter by rarity (1-5)')
-      .setRequired(false)
-      .setMinValue(1)
-      .setMaxValue(5))
+    option.setName('rarity');
+      .setDescription('Filter by rarity (1-5)');
+      .setRequired(false);
+      .setMinValue(1);
+      .setMaxValue(5));
   .addBooleanOption(option =>
-    option.setName('missing')
-      .setDescription('Only show cards you are missing')
-      .setRequired(false))
+    option.setName('missing');
+      .setDescription('Only show cards you are missing');
+      .setRequired(false));
   .addUserOption(option =>
-    option.setName('user')
-      .setDescription('Check another user\'s collection')
+    option.setName('user');
+      .setDescription('Check another user\'s collection');
       .setRequired(false));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -46,9 +46,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const missingFilter = interaction.options.getBoolean('missing');
 
   // Get all cards
-  let query = supabase.from('cards')
-    .select('*')
-    .order('group', { ascending: true })
+  let query = supabase.from('cards');
+    .select('*');
+    .order('group', { ascending: true });
     .order('name', { ascending: true });
   
   if (idolFilter) {
@@ -73,8 +73,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Get user's inventory
   const { data: userInventory } = await supabase
-    .from('inventory')
-    .select('card_id')
+    .from('inventory');
+    .select('card_id');
     .eq('user_id', userId);
 
   const userCardIds = new Set(userInventory?.map(item => item.card_id) || []);
@@ -119,13 +119,13 @@ async function showCollectPage(
       const rarityEmoji = getRarityEmoji(card.rarity);
       const eraText = card.era ? ` • ${card.era}` : '';
       return `${checkMark} **${card.name}** (${card.group}) ${rarityEmoji}${eraText} • \`${card.cardcode}\``;
-    })
+    });
     .join('\n');
 
   let attachment = null;
   try {
     const imageUrls = pageCards
-      .filter((card: any) => card.image_url)
+      .filter((card: any) => card.image_url);
       .map((card: any) => card.image_url);
 
     if (imageUrls.length > 0) {
@@ -147,16 +147,16 @@ async function showCollectPage(
   const ownedInFiltered = allCards.filter((card: any) => userCardIds.has(card.card_id)).length;
   const missingInFiltered = allCards.length - ownedInFiltered;
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('<:1_flower:1436124715797315687> Card Collection')
-    .setDescription(cardList || 'No cards on this page')
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('<:1_flower:1436124715797315687> Card Collection');
+    .setDescription(cardList || 'No cards on this page');
     .addFields(
       { name: 'Filters', value: filterText, },
       { name: '🏘️ Progress', value: `${ownedInFiltered} cards collected`, },
       { name: '🧚 Missing', value: `${missingInFiltered} cards`, }
-    )
-    .setFooter({ text: `Page ${page} / ${totalPages}` })
+    );
+    .setFooter({ text: `Page ${page} / ${totalPages}` });
     .;
 
   if (attachment) {
@@ -164,23 +164,23 @@ async function showCollectPage(
   }
 
   // Create pagination buttons
-  const row = new ActionRowBuilder()
+  const row = new ActionRowBuilder();
     .addComponents(
-      new ButtonBuilder()
-        .setCustomId(`collect_prev_${userId}_${idolFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${rarityFilter || 'all'}`)
-        .setLabel('← Previous')
-        .setStyle(ButtonStyle.Secondary)
+      new ButtonBuilder();
+        .setCustomId(`collect_prev_${userId}_${idolFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${rarityFilter || 'all'}`);
+        .setLabel('← Previous');
+        .setStyle(ButtonStyle.Secondary);
         .setDisabled(page === 1),
-      new ButtonBuilder()
-        .setCustomId(`collect_page`)
-        .setLabel(`${page} / ${totalPages}`)
-        .setStyle(ButtonStyle.Primary)
+      new ButtonBuilder();
+        .setCustomId(`collect_page`);
+        .setLabel(`${page} / ${totalPages}`);
+        .setStyle(ButtonStyle.Primary);
         .setDisabled(true),
-      new ButtonBuilder()
-        .setCustomId(`collect_next_${userId}_${idolFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${rarityFilter || 'all'}`)
-        .setLabel('Next →')
-        .setStyle(ButtonStyle.Secondary)
-        .setDisabled(page === totalPages)
+      new ButtonBuilder();
+        .setCustomId(`collect_next_${userId}_${idolFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${rarityFilter || 'all'}`);
+        .setLabel('Next →');
+        .setStyle(ButtonStyle.Secondary);
+        .setDisabled(page === totalPages);
     );
 
   if (attachment) {

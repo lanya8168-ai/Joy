@@ -1,17 +1,17 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('pay')
-  .setDescription('Send coins to another user')
+export const data = new SlashCommandBuilder();
+  .setName('pay');
+  .setDescription('Send coins to another user');
   .addUserOption(option =>
-    option.setName('user')
-      .setDescription('User to pay')
-      .setRequired(true))
+    option.setName('user');
+      .setDescription('User to pay');
+      .setRequired(true));
   .addIntegerOption(option =>
-    option.setName('amount')
-      .setDescription('Number of coins to send')
-      .setRequired(true)
+    option.setName('amount');
+      .setDescription('Number of coins to send');
+      .setRequired(true);
       .setMinValue(1));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -24,9 +24,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Check sender exists
   const { data: sender } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', senderUserId)
+    .from('users');
+    .select('*');
+    .eq('user_id', senderUserId);
     .single();
 
   if (!sender) {
@@ -36,9 +36,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Check receiver exists
   const { data: receiver } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', receiverUserId)
+    .from('users');
+    .select('*');
+    .eq('user_id', receiverUserId);
     .single();
 
   if (!receiver) {
@@ -60,20 +60,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Update sender coins
   await supabase
-    .from('users')
-    .update({ coins: sender.coins - amount })
+    .from('users');
+    .update({ coins: sender.coins - amount });
     .eq('user_id', senderUserId);
 
   // Update receiver coins
   await supabase
-    .from('users')
-    .update({ coins: receiver.coins + amount })
+    .from('users');
+    .update({ coins: receiver.coins + amount });
     .eq('user_id', receiverUserId);
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('💸 Coins Sent!')
-    .setDescription(`🌲 You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Your new balance: **${sender.coins - amount} coins**`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('💸 Coins Sent!');
+    .setDescription(`🌲 You sent **${amount} coins** to ${receiverUser.username}!\n\n💰 Your new balance: **${sender.coins - amount} coins**`);
     .;
 
   await interaction.editReply({ embeds: [embed] });

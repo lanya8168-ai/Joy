@@ -2,38 +2,38 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from '
 import { supabase } from '../database/supabase.js';
 import { getRarityEmoji } from '../utils/cards.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('mp')
-  .setDescription('Browse the marketplace')
+export const data = new SlashCommandBuilder();
+  .setName('mp');
+  .setDescription('Browse the marketplace');
   .addSubcommand(subcommand =>
     subcommand
-      .setName('list')
-      .setDescription('List a card for sale')
+      .setName('list');
+      .setDescription('List a card for sale');
       .addStringOption(option =>
-        option.setName('cardcode')
-          .setDescription('Card code (e.g., BP001)')
-          .setRequired(true))
+        option.setName('cardcode');
+          .setDescription('Card code (e.g., BP001)');
+          .setRequired(true));
       .addIntegerOption(option =>
-        option.setName('price')
-          .setDescription('Price in coins')
-          .setRequired(true)
-          .setMinValue(1))
+        option.setName('price');
+          .setDescription('Price in coins');
+          .setRequired(true);
+          .setMinValue(1));
       .addIntegerOption(option =>
-        option.setName('quantity')
-          .setDescription('Quantity to sell')
-          .setMinValue(1)
-          .setRequired(false)))
+        option.setName('quantity');
+          .setDescription('Quantity to sell');
+          .setMinValue(1);
+          .setRequired(false)));
   .addSubcommand(subcommand =>
     subcommand
-      .setName('browse')
-      .setDescription('Browse available cards'))
+      .setName('browse');
+      .setDescription('Browse available cards'));
   .addSubcommand(subcommand =>
     subcommand
-      .setName('buy')
-      .setDescription('Buy a card from the marketplace')
+      .setName('buy');
+      .setDescription('Buy a card from the marketplace');
       .addStringOption(option =>
-        option.setName('code')
-          .setDescription('The listing code to purchase (e.g., 691.BCA)')
+        option.setName('code');
+          .setDescription('The listing code to purchase (e.g., 691.BCA)');
           .setRequired(true)));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -66,7 +66,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
 
   // Get card by cardcode
   const { data: allCards } = await supabase
-    .from('cards')
+    .from('cards');
     .select('*');
 
   const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
@@ -118,15 +118,15 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   }
 
   const codesDisplay = listingCodes.map(code => `\`${code}\``).join(', ');
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🏘️ Card Listed!')
-    .setDescription(`Your card has been listed on the marketplace!`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🏘️ Card Listed!');
+    .setDescription(`Your card has been listed on the marketplace!`);
     .addFields(
       { name: 'Listing Codes', value: codesDisplay, },
       { name: 'Price Per Card', value: `${price} coins`, },
       { name: 'Total Quantity', value: `${quantity}`, }
-    )
+    );
     .;
 
   await interaction.editReply({ embeds: [embed] });
@@ -134,7 +134,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
 
 async function handleBrowse(interaction: ChatInputCommandInteraction) {
   const { data: listings } = await supabase
-    .from('marketplace')
+    .from('marketplace');
     .select(`
       code,
       price,
@@ -147,8 +147,8 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
         era,
         rarity,
         cardcode
-      )
-    `)
+      );
+    `);
     .limit(10);
 
   if (!listings || listings.length === 0) {
@@ -171,14 +171,14 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
       }
       
       return `**\`${listing.code}\`** | ${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText}) • \`${card.cardcode}\` | ${listing.price} coins | x${listing.quantity} | *from @${sellerName}*`;
-    })
+    });
   ).then(lines => lines.join('\n'));
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🌲 Fairy Marketplace')
-    .setDescription(listingText)
-    .setFooter({ text: 'Use /mp buy <code> to purchase' })
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🌲 Fairy Marketplace');
+    .setDescription(listingText);
+    .setFooter({ text: 'Use /mp buy <code> to purchase' });
     .;
 
   await interaction.editReply({ embeds: [embed] });
@@ -189,7 +189,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   const code = interaction.options.getString('code', true).toUpperCase();
 
   const { data: listing } = await supabase
-    .from('marketplace')
+    .from('marketplace');
     .select(`
       listing_id,
       code,
@@ -200,9 +200,9 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
         group,
         era,
         rarity
-      )
-    `)
-    .eq('code', code)
+      );
+    `);
+    .eq('code', code);
     .single();
 
   if (!listing) {
@@ -251,15 +251,15 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const card = listing.cards as any;
   const eraText = card.era ? ` - ${card.era}` : '';
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🏘️ Purchase Complete!')
-    .setDescription(`You bought ${card.name}!`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🏘️ Purchase Complete!');
+    .setDescription(`You bought ${card.name}!`);
     .addFields(
       { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, },
       { name: 'Price', value: `${result.price} coins`, },
       { name: 'Remaining Coins', value: `${result.new_balance}`, }
-    )
+    );
     .;
 
   await interaction.editReply({ embeds: [embed] });
@@ -269,16 +269,16 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     const seller = await interaction.client.users.fetch(listing.seller_id);
     const buyerName = interaction.user.username;
     
-    const sellerEmbed = new EmbedBuilder()
-      .setColor(0xff69b4)
-      .setTitle('🏘️ Card Sold!')
-      .setDescription(`Your card was purchased!`)
+    const sellerEmbed = new EmbedBuilder();
+      .setColor(0xff69b4);
+      .setTitle('🏘️ Card Sold!');
+      .setDescription(`Your card was purchased!`);
       .addFields(
         { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, },
         { name: 'Quantity', value: `x${result.quantity}`, },
         { name: 'Buyer', value: `@${buyerName}`, },
         { name: 'Price', value: `${result.price} coins`, }
-      )
+      );
       .;
     
     await seller.send({ embeds: [sellerEmbed] });

@@ -7,8 +7,8 @@ import { BOOSTER_ROLE_ID, isAdminUser } from '../utils/constants.js';
 
 const BOOSTER_COOLDOWN_HOURS = 6;
 
-export const data = new SlashCommandBuilder()
-  .setName('booster')
+export const data = new SlashCommandBuilder();
+  .setName('booster');
   .setDescription('Exclusive booster reward! (6 hour cooldown)');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -25,9 +25,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('user_id', userId)
+    .from('users');
+    .select('*');
+    .eq('user_id', userId);
     .single();
 
   if (!user) {
@@ -39,10 +39,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const lastBooster = user.last_booster;
   if (!isAdminUser(userId) && lastBooster && new Date(lastBooster).getTime() > Date.now() - BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
     const cooldownMs = new Date(lastBooster).getTime() + (BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
-    const embed = new EmbedBuilder()
-      .setColor(0xff69b4)
-      .setTitle('⏰ Booster Reward On Cooldown')
-      .setDescription(`Come back in **${formatCooldown(cooldownMs)}**`)
+    const embed = new EmbedBuilder();
+      .setColor(0xff69b4);
+      .setTitle('⏰ Booster Reward On Cooldown');
+      .setDescription(`Come back in **${formatCooldown(cooldownMs)}**`);
       .;
 
     await interaction.editReply({ embeds: [embed] });
@@ -74,10 +74,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const { data: allCards } = await supabase.from('cards').select('*');
 
   if (!allCards || allCards.length === 0) {
-    const embed = new EmbedBuilder()
-      .setColor(0xff69b4)
-      .setTitle('<a:5surfboard:1433597347031683114> Booster Reward Claimed!')
-      .setDescription(`🧚 Received **10,000 coins**!\n\n*No cards available yet.*`)
+    const embed = new EmbedBuilder();
+      .setColor(0xff69b4);
+      .setTitle('<a:5surfboard:1433597347031683114> Booster Reward Claimed!');
+      .setDescription(`🧚 Received **10,000 coins**!\n\n*No cards available yet.*`);
       .;
 
     await interaction.editReply({ embeds: [embed] });
@@ -97,9 +97,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // Get existing inventory items for all selected cards
   const cardIds = Array.from(cardCounts.keys());
   const { data: existingItems } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', userId)
+    .from('inventory');
+    .select('*');
+    .eq('user_id', userId);
     .in('card_id', cardIds);
 
   const existingMap = new Map((existingItems || []).map(item => [item.card_id, item]));
@@ -115,7 +115,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const cardsInfo = selectedCards
-    .map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``)
+    .map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``);
     .join('\n');
 
   let attachment = null;
@@ -129,10 +129,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error('Error merging images:', error);
   }
 
-  const embed = new EmbedBuilder()
-    .setColor(0xff69b4)
-    .setTitle('🍃 Booster Reward Claimed!')
-    .setDescription(`⭐ Received **10,000 coins** and **15 cards**!`)
+  const embed = new EmbedBuilder();
+    .setColor(0xff69b4);
+    .setTitle('🍃 Booster Reward Claimed!');
+    .setDescription(`⭐ Received **10,000 coins** and **15 cards**!`);
     .addFields(
       {
         name: '<:1_flower:1436124715797315687> Cards Received',
@@ -144,7 +144,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         value: `${newBalance} coins`,
        
       }
-    )
+    );
     .;
 
   if (attachment) {

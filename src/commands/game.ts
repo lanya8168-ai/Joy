@@ -2,16 +2,16 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, TextChannel } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
-export const data = new SlashCommandBuilder()
-  .setName('game')
-  .setDescription('Play a K-pop guessing game')
+export const data = new SlashCommandBuilder();
+  .setName('game');
+  .setDescription('Play a K-pop guessing game');
   .addSubcommand(subcommand =>
     subcommand
-      .setName('idol')
-      .setDescription('Guess the idol from an image'))
+      .setName('idol');
+      .setDescription('Guess the idol from an image'));
   .addSubcommand(subcommand =>
     subcommand
-      .setName('group')
+      .setName('group');
       .setDescription('Guess the group from an image'));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -22,8 +22,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   
   // Get a random question from quiz_questions table
   const { data: questions } = await supabase
-    .from('quiz_questions')
-    .select('*')
+    .from('quiz_questions');
+    .select('*');
     .eq('type', type);
 
   if (!questions || questions.length === 0) {
@@ -48,10 +48,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 }
 
 async function startGame(interaction: ChatInputCommandInteraction, imageUrl: string, targetName: string, reward: number, isIdolMode: boolean) {
-  const embed = new EmbedBuilder()
-    .setTitle(`Guess the ${isIdolMode ? 'Idol' : 'Group'}!`)
-    .setDescription(`Type the name of the ${isIdolMode ? 'idol' : 'group'} below. You have 30 seconds!`)
-    .setImage(imageUrl)
+  const embed = new EmbedBuilder();
+    .setTitle(`Guess the ${isIdolMode ? 'Idol' : 'Group'}!`);
+    .setDescription(`Type the name of the ${isIdolMode ? 'idol' : 'group'} below. You have 30 seconds!`);
+    .setImage(imageUrl);
     .setColor(0xff69b4);
     
   await interaction.editReply({ embeds: [embed] });
