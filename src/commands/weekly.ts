@@ -1,17 +1,17 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
-import { supabase } from '../database/supabase.js';
-import { formatCooldown } from '../utils/cooldowns.js';
-import { mergeCardImages } from '../utils/imageUtils.js';
-import { getRandomRarity, getRarityEmoji } from '../utils/cards.js';
-import { isAdminUser } from '../utils/constants.js';
-import { scheduleReminder } from '../utils/reminders.js';
+import { supabase } from './database/supabase.js';
+import { formatCooldown } from './utils/cooldowns.js';
+import { mergeCardImages } from './utils/imageUtils.js';
+import { getRarityEmoji } from './utils/cards.js';
+import { isAdminUser } from './utils/constants.js';
+import { scheduleReminder } from './utils/reminders.js';
 
 const WEEKLY_REWARD = 1500;
 const WEEKLY_COOLDOWN_HOURS = 168;
 
-export const data = new SlashCommandBuilder();
-  .setName('weekly');
-  .setDescription('Claim your weekly coin reward!');
+export const data = new SlashCommandBuilder()
+setName('weekly')
+setDescription('Claim your weekly coin reward!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -39,11 +39,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 
     if (result.error === 'on_cooldown') {
-      const embed = new EmbedBuilder();
-        .setColor(0xff69b4);
-        .setTitle('⏰ Weekly Reward On Cooldown');
-        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
-        .;
+      const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('⏰ Weekly Reward On Cooldown')
+setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
 
       await interaction.editReply({ embeds: [embed] });
       return;
@@ -53,11 +52,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  // Get all droppable cards
   const { data: allCards } = await supabase
-    .from('cards');
-    .select('*');
-    .eq('droppable', true);
+from('cards')
+select('*')
+eq('droppable', true);
+
+  const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
 
   if (!allCards || allCards.length === 0) {
     if (userId === '1403958587843149937') {
@@ -71,49 +71,32 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         image_url: 'https://placehold.co/600x400?text=Test+Card'
       };
       const cardInfos = Array(4).fill(0).map((_, i) => `**Card ${i + 1}:** ${mockCard.name} (${mockCard.group}) ⭐⭐⭐⭐⭐ • ${mockCard.era} • \`${mockCard.cardcode}\``).join('\n');
-      const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
-      const embed = new EmbedBuilder();
-        .setColor(0xff69b4);
-        .setTitle('📸 Weekly');
-        .setDescription(`Received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`);
-        .addFields(
-          {
-            name: '⏰ Next',
-            value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-           
-          }
-        );
-        .;
+      const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('📸 Weekly')
+setDescription(`Received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`);
+addFields({ name: '⏰ Next', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>` });
       await interaction.editReply({ embeds: [embed] });
       return;
     }
-    const embed = new EmbedBuilder();
-      .setColor(0xff69b4);
-      .setTitle('🏘️ Weekly');
-      .setDescription(`Received **${result.reward} coins**!\n\n*No cards available yet.*`);
-      .;
+    const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('🏘️ Weekly')
+setDescription(`Received **${result.reward} coins**!\n\n*No cards available yet.*`);
 
     await interaction.editReply({ embeds: [embed] });
     return;
   }
 
-  // Select 4 random cards with higher rarity 5 chance
   const selectedCards = [];
   for (let i = 0; i < 4; i++) {
-    // Boost rarity 5 chance to 80% for weekly rewards
     const random = Math.random() * 100;
     let rarity: number;
-    if (random < 80) {
-      rarity = 5; // 80% chance for legendary
-    } else if (random < 90) {
-      rarity = 4; // 10% chance for epic
-    } else if (random < 95) {
-      rarity = 3; // 5% chance for rare
-    } else if (random < 98) {
-      rarity = 2; // 3% chance for uncommon
-    } else {
-      rarity = 1; // 2% chance for common
-    }
+    if (random < 80) rarity = 5;
+    else if (random < 90) rarity = 4;
+    else if (random < 95) rarity = 3;
+    else if (random < 98) rarity = 2;
+    else rarity = 1;
 
     const cardsOfRarity = allCards.filter(c => c.rarity === rarity);
     const card = cardsOfRarity.length > 0
@@ -121,31 +104,20 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       : allCards[Math.floor(Math.random() * allCards.length)];
     selectedCards.push(card);
 
-    // Add to inventory
     const { data: existingItem } = await supabase
-      .from('inventory');
-      .select('*');
-      .eq('user_id', userId);
-      .eq('card_id', card.card_id);
-      .single();
+from('inventory')
+select('*')
+eq('user_id', userId)
+eq('card_id', card.card_id)
+single()
 
     if (existingItem) {
-      await supabase
-        .from('inventory');
-        .update({ quantity: existingItem.quantity + 1 });
-        .eq('id', existingItem.id);
+      await supabase.from('inventory').update({ quantity: existingItem.quantity + 1 }).eq('id', existingItem.id);
     } else {
-      await supabase
-        .from('inventory');
-        .insert({
-          user_id: userId,
-          card_id: card.card_id,
-          quantity: 1
-        });
+      await supabase.from('inventory').insert({ user_id: userId, card_id: card.card_id, quantity: 1 });
     }
   }
 
-  // Create card info description
   const cardInfos = selectedCards.map((card, index) => {
     const rarityEmoji = getRarityEmoji(card.rarity);
     return `**Card ${index + 1}:** ${card.name} (${card.group}) ${rarityEmoji} • ${card.era || 'N/A'} • \`${card.cardcode}\``;
@@ -155,10 +127,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   let attachment = null;
   try {
-    const imageUrls = selectedCards
-      .filter(card => card.image_url);
-      .map(card => card.image_url);
-
+    const imageUrls = selectedCards.map(card => card.image_url).filter(Boolean);
     if (imageUrls.length > 0) {
       const mergedImageBuffer = await mergeCardImages(imageUrls);
       attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'weekly_cards.png' });
@@ -167,28 +136,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error('Error merging images:', error);
   }
 
-  const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle('📸 Weekly');
-    .setDescription(description);
-    .addFields(
-      {
-        name: '⏰ Next',
-        value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-       
-      }
-    );
-    .;
+  const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('📸 Weekly')
+setDescription(description);
+addFields({ name: '⏰ Next', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>` });
 
-  // Schedule reminder for next weekly
-  const client = interaction.client;
-  scheduleReminder(client, userId, interaction.channelId, 'weekly', WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
+  scheduleReminder(interaction.client, userId, interaction.channelId, 'weekly', WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
 
-  if (attachment) {
-    embed.setImage('attachment://weekly_cards.png');
-    await interaction.editReply({ embeds: [embed], files: [attachment] });
-  } else {
-    await interaction.editReply({ embeds: [embed] });
-  }
+  await interaction.editReply({ 
+    embeds: [embed], 
+    files: attachment ? [attachment] : [] 
+  });
 }

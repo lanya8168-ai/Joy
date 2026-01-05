@@ -1,13 +1,12 @@
-
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 
-export const data = new SlashCommandBuilder();
-  .setName('balance');
-  .setDescription('Check your coin balance');
+export const data = new SlashCommandBuilder()
+  .setName('balance')
+  .setDescription('Check your coin balance')
   .addUserOption(option =>
-    option.setName('user');
-      .setDescription('User to check balance for (default: yourself)');
+    option.setName('user')
+      .setDescription('User to check balance for (default: yourself)')
       .setRequired(false));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -17,9 +16,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const userId = targetUser.id;
 
   const { data: user } = await supabase
-    .from('users');
-    .select('*');
-    .eq('user_id', userId);
+    .from('users')
+    .select('*')
+    .eq('user_id', userId)
     .single();
 
   if (!user) {
@@ -31,12 +30,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return;
   }
 
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle(`${targetUser.username}'s Balance`);
-    .setDescription(`🧚 **${user.coins}** coins`);
+  const embed = new EmbedBuilder()
+    .setColor(0xff69b4)
+    .setTitle(`${targetUser.username}'s Balance`)
+    .setDescription(`🧚 **${user.coins}** coins`)
     .setThumbnail(targetUser.displayAvatarURL());
-    .;
 
   await interaction.editReply({ embeds: [embed] });
 }

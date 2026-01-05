@@ -1,15 +1,15 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
-import { supabase } from '../database/supabase.js';
-import { formatCooldown } from '../utils/cooldowns.js';
-import { mergeCardImages } from '../utils/imageUtils.js';
-import { BOOSTER_ROLE_ID, isAdminUser } from '../utils/constants.js';
-import { scheduleReminder } from '../utils/reminders.js';
+import { supabase } from './database/supabase.js';
+import { formatCooldown } from './utils/cooldowns.js';
+import { mergeCardImages } from './utils/imageUtils.js';
+import { BOOSTER_ROLE_ID, isAdminUser } from './utils/constants.js';
+import { scheduleReminder } from './utils/reminders.js';
 
 const BONANZA_COOLDOWN_HOURS = 6;
 
-export const data = new SlashCommandBuilder();
-  .setName('bonanza');
-  .setDescription('Exclusive booster mega reward! (6 hour cooldown)');
+export const data = new SlashCommandBuilder()
+setName('bonanza')
+setDescription('Exclusive booster mega reward! (6 hour cooldown)');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -25,10 +25,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const { data: user } = await supabase
-    .from('users');
-    .select('*');
-    .eq('user_id', userId);
-    .single();
+from('users')
+select('*')
+eq('user_id', userId)
+single()
 
   if (!user) {
     await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
@@ -39,11 +39,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const lastBonanza = user.last_bonanza;
   if (!isAdminUser(userId) && lastBonanza && new Date(lastBonanza).getTime() > Date.now() - BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000) {
     const cooldownMs = new Date(lastBonanza).getTime() + (BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
-    const embed = new EmbedBuilder();
-      .setColor(0xff69b4);
-      .setTitle('⏰ Bonanza On Cooldown');
-      .setDescription(`Come back in **${formatCooldown(cooldownMs)}**`);
-      .;
+    const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('⏰ Bonanza On Cooldown')
+setDescription(`Come back in **${formatCooldown(cooldownMs)}**`);
+
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -54,11 +54,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   let updateError = null;
   
   // Try updating with last_bonanza column first
-  const { error: error1 } = await supabase.from('users').update({ coins: newBalance, last_bonanza: new Date().toISOString() }).eq('user_id', userId);
+  const { error: error1 } = await supabase.from('users').update({ coins: newBalance, last_bonanza: new Date().toISOString() }).eq('user_id', userId)
   
   if (error1 && error1.code === 'PGRST204') {
     // Column doesn't exist, update only coins
-    const { error: error2 } = await supabase.from('users').update({ coins: newBalance }).eq('user_id', userId);
+    const { error: error2 } = await supabase.from('users').update({ coins: newBalance }).eq('user_id', userId)
     updateError = error2;
   } else {
     updateError = error1;
@@ -71,17 +71,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   // Get legendary cards only (droppable) - explicitly filter
-  const { data: allLegendaryCards } = await supabase.from('cards').select('*').eq('rarity', 5);
+  const { data: allLegendaryCards } = await supabase.from('cards').select('*').eq('rarity', 5)
   
   // Filter to only include droppable cards (handles null/undefined/false cases);
   const legendaryCards = (allLegendaryCards || []).filter((card: any) => card.droppable === true);
 
   if (!legendaryCards || legendaryCards.length === 0) {
-    const embed = new EmbedBuilder();
-      .setColor(0xff69b4);
-      .setTitle('🏘️ Bonanza Claimed!');
-      .setDescription(`🧚 Received **25,000 coins**!\n\n*No legendary cards available yet.*`);
-      .;
+    const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('🏘️ Bonanza Claimed!')
+setDescription(`🧚 Received **25,000 coins**!\n\n*No legendary cards available yet.*`);
+
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -100,10 +100,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // Get existing inventory items for all selected cards
   const cardIds = Array.from(cardCounts.keys());
   const { data: existingItems } = await supabase
-    .from('inventory');
-    .select('*');
-    .eq('user_id', userId);
-    .in('card_id', cardIds);
+from('inventory')
+select('*')
+eq('user_id', userId)
+in('card_id', cardIds);
 
   const existingMap = new Map((existingItems || []).map(item => [item.card_id, item]));
 
@@ -111,9 +111,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   for (const [cardId, count] of cardCounts) {
     const existing = existingMap.get(cardId);
     if (existing) {
-      await supabase.from('inventory').update({ quantity: existing.quantity + count }).eq('id', existing.id);
+      await supabase.from('inventory').update({ quantity: existing.quantity + count }).eq('id', existing.id)
     } else {
-      await supabase.from('inventory').insert({ user_id: userId, card_id: cardId, quantity: count });
+      await supabase.from('inventory').insert({ user_id: userId, card_id: cardId, quantity: count })
     }
   }
 
@@ -129,11 +129,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const nextAvailable = new Date(Date.now() + BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000);
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle('🏘️ Bonanza Claimed!');
-    .setDescription(`🧚 Received **25,000 coins** and **20 legendary cards**!`);
-    .addFields(
+  const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('🏘️ Bonanza Claimed!')
+setDescription(`🧚 Received **25,000 coins** and **20 legendary cards**!`);
+addFields(
       {
         name: '🧚 New Balance',
         value: `${newBalance} coins`,
@@ -145,15 +145,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
        
       }
     );
-    .setFooter({ text: `User ID: ${userId}` });
-    .;
+setFooter({ text: `User ID: ${userId}` })
+
 
   // Schedule reminder for next bonanza
   const client = interaction.client;
   scheduleReminder(client, userId, interaction.channelId, 'bonanza', BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000);
 
   if (attachment) {
-    embed.setImage('attachment://bonanza_cards.png');
+    embed.setImage('attachment://bonanza_cards.png')
     await interaction.editReply({ embeds: [embed], files: [attachment] });
   } else {
     await interaction.editReply({ embeds: [embed] });

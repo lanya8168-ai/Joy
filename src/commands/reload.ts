@@ -1,9 +1,9 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 
-export const data = new SlashCommandBuilder();
-  .setName('reload');
-  .setDescription('Reload and refresh all bot commands (Admin only)');
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+export const data = new SlashCommandBuilder()
+setName('reload')
+setDescription('Reload and refresh all bot commands (Admin only)');
+setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {

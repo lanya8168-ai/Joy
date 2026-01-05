@@ -5,187 +5,56 @@ import { mergeCardImages } from '../utils/imageUtils.js';
 
 const CARDS_PER_PAGE = 5;
 
-export const data = new SlashCommandBuilder();
-  .setName('collect');
-  .setDescription('View all collectible cards with ownership status');
-  .addStringOption(option =>
-    option.setName('idol');
-      .setDescription('Filter by idol name');
-      .setRequired(false));
-  .addStringOption(option =>
-    option.setName('group');
-      .setDescription('Filter by group');
-      .setRequired(false));
-  .addStringOption(option =>
-    option.setName('era');
-      .setDescription('Filter by era');
-      .setRequired(false));
-  .addIntegerOption(option =>
-    option.setName('rarity');
-      .setDescription('Filter by rarity (1-5)');
-      .setRequired(false);
-      .setMinValue(1);
-      .setMaxValue(5));
-  .addBooleanOption(option =>
-    option.setName('missing');
-      .setDescription('Only show cards you are missing');
-      .setRequired(false));
-  .addUserOption(option =>
-    option.setName('user');
-      .setDescription('Check another user\'s collection');
-      .setRequired(false));
+export const data = new SlashCommandBuilder()
+  .setName('collect')
+  .setDescription('View all collectible cards')
+  .addStringOption(option => option.setName('idol').setDescription('Filter by idol'))
+  .addStringOption(option => option.setName('group').setDescription('Filter by group'))
+  .addIntegerOption(option => option.setName('rarity').setDescription('Filter by rarity').setMinValue(1).setMaxValue(5))
+  .addBooleanOption(option => option.setName('missing').setDescription('Only show missing'))
+  .addUserOption(option => option.setName('user').setDescription('Check another user'));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
-  
   const userId = interaction.options.getUser('user')?.id || interaction.user.id;
-  const idolFilter = interaction.options.getString('idol');
-  const groupFilter = interaction.options.getString('group');
-  const eraFilter = interaction.options.getString('era');
-  const rarityFilter = interaction.options.getInteger('rarity');
-  const missingFilter = interaction.options.getBoolean('missing');
+  const idol = interaction.options.getString('idol');
+  const group = interaction.options.getString('group');
+  const rarity = interaction.options.getInteger('rarity');
+  const missing = interaction.options.getBoolean('missing');
 
-  // Get all cards
-  let query = supabase.from('cards');
-    .select('*');
-    .order('group', { ascending: true });
-    .order('name', { ascending: true });
-  
-  if (idolFilter) {
-    query = query.ilike('name', `%${idolFilter}%`);
-  }
-  if (groupFilter) {
-    query = query.ilike('group', `%${groupFilter}%`);
-  }
-  if (eraFilter) {
-    query = query.ilike('era', `%${eraFilter}%`);
-  }
-  if (rarityFilter) {
-    query = query.eq('rarity', rarityFilter);
-  }
+  let query = supabase.from('cards').select('*').order('group').order('name');
+  if (idol) query = query.ilike('name', `%${idol}%`);
+  if (group) query = query.ilike('group', `%${group}%`);
+  if (rarity) query = query.eq('rarity', rarity);
 
-  const { data: allCards } = await query;
+  const { data: cards } = await query;
+  if (!cards || cards.length === 0) return interaction.editReply('No cards found!');
 
-  if (!allCards || allCards.length === 0) {
-    await interaction.editReply({ content: '🧚 No cards match your filters!' });
-    return;
-  }
+  const { data: inv } = await supabase.from('inventory').select('card_id').eq('user_id', userId);
+  const owned = new Set(inv?.map(i => i.card_id) || []);
 
-  // Get user's inventory
-  const { data: userInventory } = await supabase
-    .from('inventory');
-    .select('card_id');
-    .eq('user_id', userId);
+  let display = cards;
+  if (missing) display = cards.filter(c => !owned.has(c.card_id));
+  if (display.length === 0) return interaction.editReply('No cards match!');
 
-  const userCardIds = new Set(userInventory?.map(item => item.card_id) || []);
-
-  let displayCards = allCards;
-  if (missingFilter) {
-    displayCards = allCards.filter(card => !userCardIds.has(card.card_id));
-  }
-
-  if (displayCards.length === 0) {
-    await interaction.editReply({ content: '🧚 You have collected all cards matching these filters!' });
-    return;
-  }
-
-  // Paginate
-  const totalPages = Math.ceil(displayCards.length / CARDS_PER_PAGE);
   const page = 1;
+  const totalPages = Math.ceil(display.length / CARDS_PER_PAGE);
+  const start = (page - 1) * CARDS_PER_PAGE;
+  const paged = display.slice(start, start + CARDS_PER_PAGE);
 
-  await showCollectPage(interaction, displayCards, userCardIds, page, totalPages, userId, idolFilter, groupFilter, eraFilter, rarityFilter);
-}
+  const list = paged.map(c => `${owned.has(c.card_id) ? '🏘️' : '🧚'} **${c.name}** (${c.group}) ${getRarityEmoji(c.rarity)} • \`${c.cardcode}\``).join('\n');
 
-async function showCollectPage(
-  interaction: ChatInputCommandInteraction,
-  allCards: any[],
-  userCardIds: Set<number>,
-  page: number,
-  totalPages: number,
-  userId: string,
-  idolFilter: string | null,
-  groupFilter: string | null,
-  eraFilter: string | null,
-  rarityFilter: number | null
-) {
-  const startIndex = (page - 1) * CARDS_PER_PAGE;
-  const endIndex = startIndex + CARDS_PER_PAGE;
-  const pageCards = allCards.slice(startIndex, endIndex);
+  const embed = new EmbedBuilder()
+    .setColor(0xff69b4)
+    .setTitle('🌸 Collection')
+    .setDescription(list)
+    .setFooter({ text: `Page ${page}/${totalPages}` });
 
-  const cardList = pageCards
-    .map((card: any, index: number) => {
-      const hasCard = userCardIds.has(card.card_id);
-      const checkMark = hasCard ? '🏘️' : '🧚';
-      const rarityEmoji = getRarityEmoji(card.rarity);
-      const eraText = card.era ? ` • ${card.era}` : '';
-      return `${checkMark} **${card.name}** (${card.group}) ${rarityEmoji}${eraText} • \`${card.cardcode}\``;
-    });
-    .join('\n');
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder().setCustomId(`collect_prev_${userId}_${page}`).setLabel('←').setStyle(ButtonStyle.Secondary).setDisabled(true),
+    new ButtonBuilder().setCustomId('page_num').setLabel(`${page}/${totalPages}`).setStyle(ButtonStyle.Primary).setDisabled(true),
+    new ButtonBuilder().setCustomId(`collect_next_${userId}_${page}`).setLabel('→').setStyle(ButtonStyle.Secondary).setDisabled(totalPages <= 1)
+  );
 
-  let attachment = null;
-  try {
-    const imageUrls = pageCards
-      .filter((card: any) => card.image_url);
-      .map((card: any) => card.image_url);
-
-    if (imageUrls.length > 0) {
-      const mergedImageBuffer = await mergeCardImages(imageUrls);
-      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'collect_cards.png' });
-    }
-  } catch (error) {
-    console.error('Error merging images:', error);
-  }
-
-  const filterText = [
-    idolFilter && `Idol: ${idolFilter}`,
-    groupFilter && `Group: ${groupFilter}`,
-    eraFilter && `Era: ${eraFilter}`,
-    rarityFilter && `Rarity: ${rarityFilter}★`
-  ].filter(Boolean).join(' • ') || 'No filters';
-
-  // Count owned and missing in filtered results
-  const ownedInFiltered = allCards.filter((card: any) => userCardIds.has(card.card_id)).length;
-  const missingInFiltered = allCards.length - ownedInFiltered;
-
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle('<:1_flower:1436124715797315687> Card Collection');
-    .setDescription(cardList || 'No cards on this page');
-    .addFields(
-      { name: 'Filters', value: filterText, },
-      { name: '🏘️ Progress', value: `${ownedInFiltered} cards collected`, },
-      { name: '🧚 Missing', value: `${missingInFiltered} cards`, }
-    );
-    .setFooter({ text: `Page ${page} / ${totalPages}` });
-    .;
-
-  if (attachment) {
-    embed.setImage('attachment://collect_cards.png');
-  }
-
-  // Create pagination buttons
-  const row = new ActionRowBuilder();
-    .addComponents(
-      new ButtonBuilder();
-        .setCustomId(`collect_prev_${userId}_${idolFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${rarityFilter || 'all'}`);
-        .setLabel('← Previous');
-        .setStyle(ButtonStyle.Secondary);
-        .setDisabled(page === 1),
-      new ButtonBuilder();
-        .setCustomId(`collect_page`);
-        .setLabel(`${page} / ${totalPages}`);
-        .setStyle(ButtonStyle.Primary);
-        .setDisabled(true),
-      new ButtonBuilder();
-        .setCustomId(`collect_next_${userId}_${idolFilter || 'all'}_${groupFilter || 'all'}_${eraFilter || 'all'}_${rarityFilter || 'all'}`);
-        .setLabel('Next →');
-        .setStyle(ButtonStyle.Secondary);
-        .setDisabled(page === totalPages);
-    );
-
-  if (attachment) {
-    await interaction.editReply({ embeds: [embed], files: [attachment], components: [row as any] });
-  } else {
-    await interaction.editReply({ embeds: [embed], components: [row as any] });
-  }
+  await interaction.editReply({ embeds: [embed], components: [row] });
 }

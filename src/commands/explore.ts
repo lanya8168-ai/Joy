@@ -1,14 +1,14 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { supabase } from '../database/supabase.js';
-import { formatCooldown } from '../utils/cooldowns.js';
-import { isAdminUser } from '../utils/constants.js';
-import { scheduleReminder } from '../utils/reminders.js';
+import { supabase } from './database/supabase.js';
+import { formatCooldown } from './utils/cooldowns.js';
+import { isAdminUser } from './utils/constants.js';
+import { scheduleReminder } from './utils/reminders.js';
 
 const SURF_COOLDOWN_HOURS = 1;
 
-export const data = new SlashCommandBuilder();
-  .setName('explore');
-  .setDescription('Explore for coins!');
+export const data = new SlashCommandBuilder()
+setName('explore')
+setDescription('Explore for coins!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error || !data) {
     if (userId === '1403958587843149937') {
-        const { data: user } = await supabase.from('users').select('coins').eq('user_id', userId).single();
+        const { data: user } = await supabase.from('users').select('coins').eq('user_id', userId).single()
         // Mock successful result for owner testing
         const mockResult = {
             success: true,
@@ -32,11 +32,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
             new_balance: (user?.coins || 0) + reward
         };
         const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
-        const embed = new EmbedBuilder();
-          .setColor(0xff69b4);
-          .setTitle('🧚 Exploring Complete!');
-          .setDescription(`You were exploring in the woods when you stumbled across ${mockResult.reward} coins!`);
-          .addFields(
+        const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('🧚 Exploring Complete!')
+setDescription(`You were exploring in the woods when you stumbled across ${mockResult.reward} coins!`);
+addFields(
             { name: '💎 Reward', value: `${mockResult.reward} coins`, },
             { name: '🧚 New Balance', value: `${mockResult.new_balance} coins`, },
             {
@@ -45,7 +45,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
              
             }
           );
-          .;
+
         await interaction.editReply({ embeds: [embed] });
         return;
     }
@@ -62,11 +62,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 
     if (result.error === 'on_cooldown') {
-      const embed = new EmbedBuilder();
-        .setColor(0xff69b4);
-        .setTitle('⏰ Surf On Cooldown');
-        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
-        .;
+      const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('⏰ Surf On Cooldown')
+setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
+
 
       await interaction.editReply({ embeds: [embed] });
       return;
@@ -77,11 +77,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle('🧚 Exploring Complete!');
-    .setDescription(`You were exploring in the woods when you stumbled across ${result.reward} coins!`);
-    .addFields(
+  const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('🧚 Exploring Complete!')
+setDescription(`You were exploring in the woods when you stumbled across ${result.reward} coins!`);
+addFields(
       { name: '💎 Reward', value: `${result.reward} coins`, },
       { name: '🧚 New Balance', value: `${result.new_balance} coins`, },
       {
@@ -90,7 +90,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
        
       }
     );
-    .;
+
 
   // Schedule reminder for next surf
   const client = interaction.client;

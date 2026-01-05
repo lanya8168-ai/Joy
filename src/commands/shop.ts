@@ -1,310 +1,51 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
-import { mergeCardImages } from '../utils/imageUtils.js';
 import { getRandomRarity } from '../utils/cards.js';
 
 const PACKS = [
   { id: '1', name: 'Magic Seeds', cost: 500, cards: 1 },
-  { id: '2', name: 'Glow Spores', cost: 1000, cards: 2 },
-  { id: '3', name: 'Fairy Dust', cost: 3000, cards: 5 },
-  { id: '4', name: 'Garden Bloom', cost: 5000, cards: 10 },
-  { id: '5', name: 'Ancient Grove', cost: 35000, cards: 3, rarity: 5 },
-  { id: '6', name: 'Forest Spirit (5 cards)', cost: 8000, cards: 5, groupPack: true },
-  { id: '7', name: 'Fairy Kingdom (10 cards)', cost: 15000, cards: 10, groupPack: true }
+  { id: '2', name: 'Glow Spores', cost: 1000, cards: 2 }
 ];
 
-export const data = new SlashCommandBuilder();
-  .setName('shop');
-  .setDescription('Buy card packs');
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName('browse');
-      .setDescription('View available packs'));
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName('buy');
-      .setDescription('Buy a card pack');
-      .addStringOption(option =>
-        option.setName('pack');
-          .setDescription('Pack type to buy');
-          .setRequired(true);
-          .addChoices(
-            { name: 'Magic Seeds - 500 coins (1 card)', value: '1' },
-            { name: 'Glow Spores - 1000 coins (2 cards)', value: '2' },
-            { name: 'Fairy Dust - 3000 coins (5 cards)', value: '3' },
-            { name: 'Garden Bloom - 5000 coins (10 cards)', value: '4' },
-            { name: 'Ancient Grove - 35000 coins (3 legendary)', value: '5' },
-            { name: 'Forest Spirit - 8000 coins (5 cards)', value: '6' },
-            { name: 'Fairy Kingdom - 15000 coins (10 cards)', value: '7' }
-          ));
-      .addStringOption(option =>
-        option.setName('group_or_idol');
-        .setDescription('Group or idol name for Forest Spirit/Fairy Kingdom');
-          .setRequired(false)));
+export const data = new SlashCommandBuilder()
+  .setName('shop')
+  .setDescription('Buy packs')
+  .addSubcommand(s => s.setName('browse').setDescription('View packs'))
+  .addSubcommand(s => s.setName('buy').setDescription('Buy pack').addStringOption(o => o.setName('pack').setDescription('Pack').setRequired(true).addChoices(
+    { name: 'Magic Seeds (500)', value: '1' }, { name: 'Glow Spores (1000)', value: '2' }
+  )));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-  const subcommand = interaction.options.getSubcommand();
-
-  if (subcommand === 'browse') {
-    await handleBrowse(interaction);
-  } else if (subcommand === 'buy') {
-    await handleBuy(interaction);
+  const sub = interaction.options.getSubcommand();
+  if (sub === 'browse') {
+    const embed = new EmbedBuilder().setTitle('🌸 Shop').setDescription(PACKS.map(p => `**${p.name}** - ${p.cost} coins`).join('\n'));
+    return interaction.reply({ embeds: [embed] });
   }
-}
-
-async function handleBrowse(interaction: ChatInputCommandInteraction) {
-  const userId = interaction.user.id;
-
-  const { data: user } = await supabase
-    .from('users');
-    .select('*');
-    .eq('user_id', userId);
-    .single();
-
-  if (!user) {
-    await interaction.reply({ content: '🧚 Please use `/start` first to create your account!', ephemeral: true });
-    return;
-  }
-
-  const packList = PACKS
-    .map(pack => `**${pack.name}** - ${pack.cost} coins → ${pack.cards} card(s)`);
-    .join('\n');
-
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle('🏘️ Shop');
-    .setDescription('Buy packs for your garden! 🧚');
-    .addFields(
-      {
-        name: '📜 Available Packs',
-        value: packList,
-       
-      },
-      {
-        name: '🧚 Balance',
-        value: `${user.coins} coins`,
-       
-      },
-      {
-        name: '🧚 How to Buy',
-        value: 'Use `/shop buy` and select the pack you want!',
-       
-      }
-    );
-    .;
-
-  await interaction.reply({ embeds: [embed] });
-}
-
-async function handleBuy(interaction: ChatInputCommandInteraction) {
+  
   await interaction.deferReply();
-  
-  const userId = interaction.user.id;
   const packId = interaction.options.getString('pack', true);
-
   const pack = PACKS.find(p => p.id === packId);
-  if (!pack) {
-    await interaction.editReply({ content: '🧚 Invalid pack!' });
-    return;
-  }
-
-  const { data: user } = await supabase
-    .from('users');
-    .select('*');
-    .eq('user_id', userId);
-    .single();
-
-  if (!user) {
-    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
-    return;
-  }
-
-  if (user.coins < pack.cost) {
-    await interaction.editReply({ 
-      content: `🧚 You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
-    });
-    return;
-  }
-
-  const { data: allCards } = await supabase
-    .from('cards');
-    .select('*');
-    .eq('droppable', true);
-
-  if (!allCards || allCards.length === 0) {
-    if (userId === '1403958587843149937') {
-      // Create a mock card list for the owner to test the shop logic
-      const mockCard = {
-        card_id: 0,
-        name: 'Test Idol',
-        group: 'Test Group',
-        era: 'Test Era',
-        rarity: 5,
-        cardcode: 'TEST001',
-        image_url: 'https://placehold.co/600x400?text=Test+Card',
-        droppable: true
-      };
-      // We'll proceed with this mock card
-      const mockCardsList = Array(pack.cards).fill(mockCard);
-      const mockBalance = (user?.coins || 0) - pack.cost;
-      await processShopPurchase(interaction, user, pack, mockCardsList, mockBalance);
-      return;
-    }
-    await interaction.editReply({ 
-      content: '🧚 No cards available yet! Ask an admin to add cards.' 
-    });
-    return;
-  }
-
-  // Deduct coins
-  const newBalance = user.coins - pack.cost;
-  await supabase
-    .from('users');
-    .update({ coins: newBalance });
-    .eq('user_id', userId);
-
-  await processShopPurchase(interaction, user, pack, [], newBalance, allCards);
-}
-
-async function processShopPurchase(interaction: ChatInputCommandInteraction, user: any, pack: any, preSelectedCards: any[], newBalance: number, allCards: any[] = []) {
-  const userId = interaction.user.id;
-  const cardsList = [...preSelectedCards];
+  const { data: user } = await supabase.from('users').select('*').eq('user_id', interaction.user.id).single();
   
-  if (cardsList.length === 0) {
-    // Give cards - filter based on pack type
-    for (let i = 0; i < pack.cards; i++) {
-      let selectedCard;
-      
-      // Check for event/birthday or limited cards (8%);
-      if (Math.random() < 0.08) {
-        let specialQuery = supabase.from('cards').select('*').eq('droppable', true).or('event_type.not.is.null,is_limited.eq.true');
-        
-        const { data: specialCards } = await specialQuery;
-        if (specialCards && specialCards.length > 0) {
-          let filteredSpecials = specialCards;
-          const groupOrIdol = interaction.options.getString('group_or_idol');
-          
-          if ((pack as any).groupPack && groupOrIdol) {
-            const search = groupOrIdol.toLowerCase();
-            filteredSpecials = specialCards.filter((c: any) => 
-              c.name.toLowerCase().includes(search) || 
-              c.group.toLowerCase().includes(search);
-            );
-          }
-          
-          if (filteredSpecials.length > 0) {
-            selectedCard = filteredSpecials[Math.floor(Math.random() * filteredSpecials.length)];
-          }
-        }
-      }
+  if (!user || (user as any).coins < (pack as any).cost) return interaction.editReply('Not enough coins!');
+  
+  const { data: cards } = await supabase.from('cards').select('*').eq('droppable', true);
+  if (!cards || cards.length === 0) return interaction.editReply('No cards available!');
 
-      if (!selectedCard) {
-        if ((pack as any).rarity === 5) {
-          const legendaryCards = allCards.filter((card: any) => card.rarity === 5);
-          selectedCard = legendaryCards[Math.floor(Math.random() * legendaryCards.length)];
-        } else {
-          const rarity = getRandomRarity();
-          // Priority filter for Group Packs
-          let possibleCards = allCards.filter((c: any) => c.rarity === rarity && !c.event_type);
-          
-          const groupOrIdol = interaction.options.getString('group_or_idol');
-          if ((pack as any).groupPack && groupOrIdol) {
-            const search = groupOrIdol.toLowerCase();
-            const filtered = allCards.filter((c: any) => 
-              (c.name.toLowerCase().includes(search) || c.group.toLowerCase().includes(search)) &&
-              !c.event_type
-            );
-            
-            if (filtered.length > 0) {
-              const rarityMatch = filtered.filter((c: any) => c.rarity === rarity);
-              if (rarityMatch.length > 0) {
-                selectedCard = rarityMatch[Math.floor(Math.random() * rarityMatch.length)];
-              } else {
-                selectedCard = filtered[Math.floor(Math.random() * filtered.length)];
-              }
-            }
-          }
-
-          if (!selectedCard) {
-            if (possibleCards.length > 0) {
-              selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
-            } else {
-              let fallback = allCards.filter((c: any) => c.rarity === rarity && !c.event_type);
-              if (fallback.length === 0) fallback = allCards.filter(c => !c.event_type);
-              selectedCard = fallback[Math.floor(Math.random() * fallback.length)];
-            }
-          }
-        }
-      }
-      cardsList.push(selectedCard);
-    }
+  const pulled = [];
+  for (let i = 0; i < (pack as any).cards; i++) {
+    const rarity = getRandomRarity();
+    let pool = cards.filter(c => c.rarity === rarity);
+    if (pool.length === 0) pool = cards;
+    pulled.push(pool[Math.floor(Math.random() * pool.length)]);
   }
 
-  for (const card of cardsList) {
-    const { data: existingItem } = await supabase
-      .from('inventory');
-      .select('*');
-      .eq('user_id', userId);
-      .eq('card_id', card.card_id);
-      .single();
-
-    if (existingItem) {
-      await supabase
-        .from('inventory');
-        .update({ quantity: existingItem.quantity + 1 });
-        .eq('id', existingItem.id);
-    } else {
-      await supabase
-        .from('inventory');
-        .insert({
-          user_id: userId,
-          card_id: card.card_id,
-          quantity: 1
-        });
-    }
+  for (const c of pulled) {
+    const { data: ex } = await supabase.from('inventory').select('*').eq('user_id', interaction.user.id).eq('card_id', c.card_id).maybeSingle();
+    if (ex) await supabase.from('inventory').update({ quantity: (ex as any).quantity + 1 }).eq('id', (ex as any).id);
+    else await supabase.from('inventory').insert({ user_id: interaction.user.id, card_id: c.card_id, quantity: 1 });
   }
 
-  const cardsInfo = cardsList
-    .map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``);
-    .join('\n');
-
-  let attachment = null;
-  try {
-    const imageUrls = cardsList
-      .map((card: any) => card.image_url);
-      .filter((url: string) => url);
-
-    if (imageUrls.length > 0) {
-      const columns = pack.cards === 10 ? 5 : undefined;
-      const mergedImageBuffer = await mergeCardImages(imageUrls, columns);
-      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'pack_cards.png' });
-    }
-  } catch (error) {
-    console.error('Error merging images:', error);
-  }
-
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle(`🧚 ${pack.name} Purchased!`);
-    .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`);
-    .addFields(
-      {
-        name: '🎴 Cards Received',
-        value: cardsInfo || 'No cards',
-       
-      },
-      {
-        name: '🧚 New Balance',
-        value: `${newBalance} coins`,
-       
-      }
-    );
-    .;
-
-  if (attachment) {
-    embed.setImage('attachment://pack_cards.png');
-    await interaction.editReply({ embeds: [embed], files: [attachment] });
-  } else {
-    await interaction.editReply({ embeds: [embed] });
-  }
+  await supabase.from('users').update({ coins: (user as any).coins - (pack as any).cost }).eq('user_id', interaction.user.id);
+  await interaction.editReply(`Bought **${(pack as any).name}**! Pulled: ${pulled.map(c => c.name).join(', ')}`);
 }

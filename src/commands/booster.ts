@@ -1,15 +1,15 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { supabase } from '../database/supabase.js';
-import { formatCooldown } from '../utils/cooldowns.js';
-import { mergeCardImages } from '../utils/imageUtils.js';
+import { supabase } from './database/supabase.js';
+import { formatCooldown } from './utils/cooldowns.js';
+import { mergeCardImages } from './utils/imageUtils.js';
 import { AttachmentBuilder } from 'discord.js';
-import { BOOSTER_ROLE_ID, isAdminUser } from '../utils/constants.js';
+import { BOOSTER_ROLE_ID, isAdminUser } from './utils/constants.js';
 
 const BOOSTER_COOLDOWN_HOURS = 6;
 
-export const data = new SlashCommandBuilder();
-  .setName('booster');
-  .setDescription('Exclusive booster reward! (6 hour cooldown)');
+export const data = new SlashCommandBuilder()
+setName('booster')
+setDescription('Exclusive booster reward! (6 hour cooldown)');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -25,10 +25,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const { data: user } = await supabase
-    .from('users');
-    .select('*');
-    .eq('user_id', userId);
-    .single();
+from('users')
+select('*')
+eq('user_id', userId)
+single()
 
   if (!user) {
     await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
@@ -39,11 +39,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const lastBooster = user.last_booster;
   if (!isAdminUser(userId) && lastBooster && new Date(lastBooster).getTime() > Date.now() - BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
     const cooldownMs = new Date(lastBooster).getTime() + (BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
-    const embed = new EmbedBuilder();
-      .setColor(0xff69b4);
-      .setTitle('⏰ Booster Reward On Cooldown');
-      .setDescription(`Come back in **${formatCooldown(cooldownMs)}**`);
-      .;
+    const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('⏰ Booster Reward On Cooldown')
+setDescription(`Come back in **${formatCooldown(cooldownMs)}**`);
+
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -54,11 +54,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   let updateError = null;
   
   // Try updating with last_booster column first
-  const { error: error1 } = await supabase.from('users').update({ coins: newBalance, last_booster: new Date().toISOString() }).eq('user_id', userId);
+  const { error: error1 } = await supabase.from('users').update({ coins: newBalance, last_booster: new Date().toISOString() }).eq('user_id', userId)
   
   if (error1 && error1.code === 'PGRST204') {
     // Column doesn't exist, update only coins
-    const { error: error2 } = await supabase.from('users').update({ coins: newBalance }).eq('user_id', userId);
+    const { error: error2 } = await supabase.from('users').update({ coins: newBalance }).eq('user_id', userId)
     updateError = error2;
   } else {
     updateError = error1;
@@ -71,14 +71,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   // Get all cards
-  const { data: allCards } = await supabase.from('cards').select('*');
+  const { data: allCards } = await supabase.from('cards').select('*')
 
   if (!allCards || allCards.length === 0) {
-    const embed = new EmbedBuilder();
-      .setColor(0xff69b4);
-      .setTitle('<a:5surfboard:1433597347031683114> Booster Reward Claimed!');
-      .setDescription(`🧚 Received **10,000 coins**!\n\n*No cards available yet.*`);
-      .;
+    const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('<a:5surfboard:1433597347031683114> Booster Reward Claimed!')
+setDescription(`🧚 Received **10,000 coins**!\n\n*No cards available yet.*`);
+
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -97,10 +97,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // Get existing inventory items for all selected cards
   const cardIds = Array.from(cardCounts.keys());
   const { data: existingItems } = await supabase
-    .from('inventory');
-    .select('*');
-    .eq('user_id', userId);
-    .in('card_id', cardIds);
+from('inventory')
+select('*')
+eq('user_id', userId)
+in('card_id', cardIds);
 
   const existingMap = new Map((existingItems || []).map(item => [item.card_id, item]));
 
@@ -108,15 +108,15 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   for (const [cardId, count] of cardCounts) {
     const existing = existingMap.get(cardId);
     if (existing) {
-      await supabase.from('inventory').update({ quantity: existing.quantity + count }).eq('id', existing.id);
+      await supabase.from('inventory').update({ quantity: existing.quantity + count }).eq('id', existing.id)
     } else {
-      await supabase.from('inventory').insert({ user_id: userId, card_id: cardId, quantity: count });
+      await supabase.from('inventory').insert({ user_id: userId, card_id: cardId, quantity: count })
     }
   }
 
   const cardsInfo = selectedCards
-    .map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``);
-    .join('\n');
+map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``);
+join('\n')
 
   let attachment = null;
   try {
@@ -129,11 +129,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     console.error('Error merging images:', error);
   }
 
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle('🍃 Booster Reward Claimed!');
-    .setDescription(`⭐ Received **10,000 coins** and **15 cards**!`);
-    .addFields(
+  const embed = new EmbedBuilder()
+setColor(0xff69b4)
+setTitle('🍃 Booster Reward Claimed!')
+setDescription(`⭐ Received **10,000 coins** and **15 cards**!`);
+addFields(
       {
         name: '<:1_flower:1436124715797315687> Cards Received',
         value: cardsInfo,
@@ -145,10 +145,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
        
       }
     );
-    .;
+
 
   if (attachment) {
-    embed.setImage('attachment://booster_cards.png');
+    embed.setImage('attachment://booster_cards.png')
     await interaction.editReply({ embeds: [embed], files: [attachment] });
   } else {
     await interaction.editReply({ embeds: [embed] });

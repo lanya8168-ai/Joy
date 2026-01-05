@@ -10,115 +10,65 @@ const RARITY_PRICES: { [key: number]: number } = {
   1: 1000
 };
 
-export const data = new SlashCommandBuilder();
-  .setName('sell');
-  .setDescription('Sell cards from your inventory');
+export const data = new SlashCommandBuilder()
+  .setName('sell')
+  .setDescription('Sell cards from your inventory')
   .addStringOption(option =>
-    option.setName('cards');
-      .setDescription('Card codes separated by commas (e.g., BP001, LSCW#501)');
+    option.setName('cards')
+      .setDescription('Card codes separated by commas (e.g., BP001, LSCW#501)')
       .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
-
   const userId = interaction.user.id;
   const cardsInput = interaction.options.getString('cards', true);
 
-  const { data: user } = await supabase
-    .from('users');
-    .select('*');
-    .eq('user_id', userId);
-    .single();
+  const { data: user } = await supabase.from('users').select('*').eq('user_id', userId).single();
+  if (!user) return interaction.editReply({ content: '🧚 Use `/start` first!' });
 
-  if (!user) {
-    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
-    return;
-  }
-
-  // Parse card codes
-  const cardcodes = cardsInput.split(',').map(c => c.trim());
+  const cardcodes = cardsInput.split(',').map(c => c.trim().toUpperCase());
   const soldCards = [];
   const failedCards = [];
   let totalCoins = 0;
 
-  // Fetch all cards once
-  const { data: allCards } = await supabase
-    .from('cards');
-    .select('*');
-
-  for (const cardcode of cardcodes) {
-    // Find the card
-    const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
-
+  for (const code of cardcodes) {
+    const { data: card } = await supabase.from('cards').select('*').eq('cardcode', code).maybeSingle();
     if (!card) {
-      failedCards.push(`${cardcode} (not found)`);
+      failedCards.push(`${code} (not found)`);
       continue;
     }
 
-    // Check user has the card
-    const { data: inventory } = await supabase
-      .from('inventory');
-      .select('*');
-      .eq('user_id', userId);
-      .eq('card_id', card.card_id);
-      .single();
-
-    if (!inventory || inventory.quantity < 1) {
-      failedCards.push(`${cardcode} (don't own)`);
+    const { data: inv } = await supabase.from('inventory').select('*').eq('user_id', userId).eq('card_id', card.card_id).maybeSingle();
+    if (!inv || inv.quantity < 1) {
+      failedCards.push(`${code} (don't own)`);
       continue;
     }
 
-    // Remove card from inventory
-    const newQuantity = inventory.quantity - 1;
-    if (newQuantity > 0) {
-      await supabase
-        .from('inventory');
-        .update({ quantity: newQuantity });
-        .eq('id', inventory.id);
+    if (inv.quantity > 1) {
+      await supabase.from('inventory').update({ quantity: inv.quantity - 1 }).eq('id', inv.id);
     } else {
-      await supabase
-        .from('inventory');
-        .delete();
-        .eq('id', inventory.id);
+      await supabase.from('inventory').delete().eq('id', inv.id);
     }
 
-    // Calculate price based on rarity
     const price = RARITY_PRICES[card.rarity] || 0;
     totalCoins += price;
-
-    const rarityEmoji = getRarityEmoji(card.rarity);
-    soldCards.push(`**${card.name}** ${rarityEmoji} (\`${card.cardcode}\`) • ${price} coins`);
+    soldCards.push(`**${card.name}** ${getRarityEmoji(card.rarity)} (\`${card.cardcode}\`) • ${price} coins`);
   }
 
   if (totalCoins > 0) {
-    // Add coins to user
-    await supabase
-      .from('users');
-      .update({ coins: user.coins + totalCoins });
-      .eq('user_id', userId);
+    await supabase.from('users').update({ coins: user.coins + totalCoins }).eq('user_id', userId);
   }
 
-  let description = '';
-  if (soldCards.length > 0) {
-    description = `🏘️ Sold:\n${soldCards.join('\n')}\n\n💰 **Total: +${totalCoins} coins**`;
-  }
+  let description = soldCards.length > 0 ? `🏘️ Sold:\n${soldCards.join('\n')}\n\n💰 **Total: +${totalCoins} coins**` : '';
+  if (failedCards.length > 0) description += `\n\n🧚 Failed:\n${failedCards.join('\n')}`;
 
-  if (failedCards.length > 0) {
-    if (description) description += '\n\n';
-    description += `🧚 Failed:\n${failedCards.join('\n')}`;
-  }
+  if (!description) return interaction.editReply({ content: '🧚 No cards were sold!' });
 
-  if (!description) {
-    await interaction.editReply({ content: '🧚 No cards were sold!' });
-    return;
-  }
-
-  const embed = new EmbedBuilder();
-    .setColor(0xff69b4);
-    .setTitle('🌲 Cards Sold!');
-    .setDescription(description);
-    .addFields({ name: 'New Balance', value: `${user.coins + totalCoins} coins`, });
-    .;
+  const embed = new EmbedBuilder()
+    .setColor(0xff69b4)
+    .setTitle('🌲 Cards Sold!')
+    .setDescription(description)
+    .addFields({ name: 'New Balance', value: `${user.coins + totalCoins} coins` });
 
   await interaction.editReply({ embeds: [embed] });
 }

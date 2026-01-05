@@ -1,12 +1,12 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
-import { supabase } from '../database/supabase.js';
+import { supabase } from './database/supabase.js';
 
-export const data = new SlashCommandBuilder();
-  .setName('trade');
-  .setDescription('Trade cards with another user');
-  .addUserOption(option => option.setName('user').setDescription('The user to trade with').setRequired(true));
-  .addStringOption(option => option.setName('card_id').setDescription('The code of the card you want to give').setRequired(true));
-  .addStringOption(option => option.setName('receive_card_id').setDescription('The code of the card you want to receive').setRequired(true));
+export const data = new SlashCommandBuilder()
+setName('trade')
+setDescription('Trade cards with another user');
+addUserOption(option => option.setName('user').setDescription('The user to trade with').setRequired(true));
+addStringOption(option => option.setName('card_id').setDescription('The code of the card you want to give').setRequired(true));
+addStringOption(option => option.setName('receive_card_id').setDescription('The code of the card you want to receive').setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   const targetUser = interaction.options.getUser('user');
@@ -21,40 +21,40 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // 1. Verify ownership of card to give
   const { data: ownCard } = await supabase
-    .from('inventory');
-    .select('id, cards!inner(*)');
-    .eq('user_id', interaction.user.id);
-    .eq('card_code', cardIdToGive);
-    .single();
+from('inventory')
+select('id, cards!inner(*)');
+eq('user_id', interaction.user.id)
+eq('card_code', cardIdToGive)
+single()
 
   if (!ownCard) return interaction.editReply(`You do not own a card with code \`${cardIdToGive}\`.`);
 
   // 2. Verify target ownership of card to receive
   const { data: targetCard } = await supabase
-    .from('inventory');
-    .select('id, cards!inner(*)');
-    .eq('user_id', targetUser.id);
-    .eq('card_code', cardIdToReceive);
-    .single();
+from('inventory')
+select('id, cards!inner(*)');
+eq('user_id', targetUser.id)
+eq('card_code', cardIdToReceive)
+single()
 
   if (!targetCard) return interaction.editReply(`${targetUser.username} does not own a card with code \`${cardIdToReceive}\`.`);
 
   const ownCardData = ownCard.cards as any;
   const targetCardData = targetCard.cards as any;
 
-  const embed = new EmbedBuilder();
-    .setTitle('🤝 Trade Proposal');
-    .setDescription(`<@${interaction.user.id}> wants to trade with <@${targetUser.id}>`);
-    .addFields(
+  const embed = new EmbedBuilder()
+setTitle('🤝 Trade Proposal')
+setDescription(`<@${interaction.user.id}> wants to trade with <@${targetUser.id}>`);
+addFields(
       { name: 'Giving', value: `**${ownCardData.name}** (${ownCardData.group})\nCode: \`${cardIdToGive}\``, },
       { name: 'Receiving', value: `**${targetCardData.name}** (${targetCardData.group})\nCode: \`${cardIdToReceive}\``, }
     );
-    .setColor(0xff69b4);
-    .setFooter({ text: 'Target user must click Accept to complete the trade.' });
+setColor(0xff69b4)
+setFooter({ text: 'Target user must click Accept to complete the trade.' })
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     new ButtonBuilder().setCustomId('accept_trade').setLabel('Accept').setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId('decline_trade').setLabel('Decline').setStyle(ButtonStyle.Danger);
+    new ButtonBuilder().setCustomId('decline_trade').setLabel('Decline').setStyle(ButtonStyle.Danger)
   );
 
   const response = await interaction.editReply({ embeds: [embed], components: [row] });
@@ -70,7 +70,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 
     if (i.customId === 'decline_trade') {
-      await i.update({ content: '❌ Trade declined.', embeds: [], components: [] });
+      await i.update({ content: '❌ Trade declined.', embeds: [], components: [] })
       return collector.stop();
     }
 

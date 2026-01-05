@@ -1,24 +1,24 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { supabase } from '../database/supabase.js';
-import { getRandomRarity, getRarityColor, getRarityEmoji } from '../utils/cards.js';
-import { isAdminUser } from '../utils/constants.js';
-import { scheduleReminder } from '../utils/reminders.js';
+import { supabase } from './database/supabase.js';
+import { getRandomRarity, getRarityColor, getRarityEmoji } from './utils/cards.js';
+import { isAdminUser } from './utils/constants.js';
+import { scheduleReminder } from './utils/reminders.js';
 
 const COOLDOWN_MINUTES = 2;
 
-export const data = new SlashCommandBuilder();
-  .setName('drop');
-  .setDescription('Open a FREE card pack! (2 minute cooldown)');
+export const data = new SlashCommandBuilder()
+setName('drop')
+setDescription('Open a FREE card pack! (2 minute cooldown)');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
 
   const { data: user } = await supabase
-    .from('users');
-    .select('*');
-    .eq('user_id', userId);
-    .single();
+from('users')
+select('*')
+eq('user_id', userId)
+single()
 
   if (!user) {
     await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
@@ -44,10 +44,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   let selectedCard;
   if (Math.random() < 0.10) {
     const { data: eventCards } = await supabase
-      .from('cards');
-      .select('*');
-      .eq('droppable', true);
-      .not('event_type', 'is', null);
+from('cards')
+select('*')
+eq('droppable', true)
+not('event_type', 'is', null);
     
     if (eventCards && eventCards.length > 0) {
       selectedCard = eventCards[Math.floor(Math.random() * eventCards.length)];
@@ -57,23 +57,23 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!selectedCard) {
     const rarity = getRandomRarity();
     const { data: possibleCards } = await supabase
-      .from('cards');
-      .select('*');
-      .eq('droppable', true);
-      .eq('rarity', rarity);
-      .eq('is_limited', false) // Normal drops don't include limited by default
-      .is('event_type', null);
+from('cards')
+select('*')
+eq('droppable', true)
+eq('rarity', rarity)
+eq('is_limited', false) // Normal drops don't include limited by default
+is('event_type', null);
 
     if (possibleCards && possibleCards.length > 0) {
       selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
     } else {
       // Fallback to any droppable card if specific rarity is empty
       const { data: fallbackCards } = await supabase
-        .from('cards');
-        .select('*');
-        .eq('droppable', true);
-        .eq('is_limited', false);
-        .is('event_type', null);
+from('cards')
+select('*')
+eq('droppable', true)
+eq('is_limited', false)
+is('event_type', null);
       selectedCard = fallbackCards?.[Math.floor(Math.random() * (fallbackCards?.length || 1))];
     }
   }
@@ -100,23 +100,23 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Add card to inventory and update last_drop time
   const { data: existingItem } = await supabase
-    .from('inventory');
-    .select('*');
-    .eq('user_id', userId);
-    .eq('card_id', selectedCard.card_id);
-    .single();
+from('inventory')
+select('*')
+eq('user_id', userId)
+eq('card_id', selectedCard.card_id)
+single()
 
   if (existingItem) {
     // Update quantity
     await supabase
-      .from('inventory');
-      .update({ quantity: existingItem.quantity + 1 });
-      .eq('id', existingItem.id);
+from('inventory')
+update({ quantity: existingItem.quantity + 1 })
+eq('id', existingItem.id)
   } else {
     // Insert new item
     await supabase
-      .from('inventory');
-      .insert({
+from('inventory')
+insert({
         user_id: userId,
         card_id: selectedCard.card_id,
         quantity: 1
@@ -125,9 +125,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // Update last_drop timestamp
   const { error } = await supabase
-    .from('users');
-    .update({ last_drop: new Date().toISOString() });
-    .eq('user_id', userId);
+from('users')
+update({ last_drop: new Date().toISOString() });
+eq('user_id', userId)
 
   if (error) {
     console.error('Drop error updating last_drop:', error);
@@ -139,21 +139,21 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const description = `**${selectedCard.name}** (${selectedCard.group}) ${rarityEmoji}\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``;
   
   const nextAvailable = new Date(Date.now() + COOLDOWN_MINUTES * 60 * 1000);
-  const embed = new EmbedBuilder();
-    .setColor(getRarityColor(selectedCard.rarity));
-    .setAuthor({
+  const embed = new EmbedBuilder()
+setColor(getRarityColor(selectedCard.rarity));
+setAuthor({
       name: interaction.user.username,
       iconURL: interaction.user.avatarURL() || undefined
     });
-    .setTitle('🦋 Found!');
-    .setDescription(description);
-    .addFields(
+setTitle('🦋 Found!')
+setDescription(description);
+addFields(
       { name: '⏰ Next', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, }
     );
-    .;
+
 
   if (selectedCard.image_url) {
-    embed.setImage(selectedCard.image_url);
+    embed.setImage(selectedCard.image_url)
   }
 
   // Schedule reminder for next drop
