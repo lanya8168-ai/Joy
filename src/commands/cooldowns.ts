@@ -32,7 +32,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .addFields(
       { name: '📅 Daily Reward', value: formatCooldown(dailyCooldown), inline: true },
       { name: '📆 Weekly Reward', value: formatCooldown(weeklyCooldown), inline: true },
-      { name: '<a:5surfboard:1433597347031683114> Surf', value: formatCooldown(surfCooldown), inline: true },
+      { name: '<:fairy2:1457128704282071196> Explore', value: formatCooldown(surfCooldown), inline: true },
       { name: '🎣 Drop', value: formatCooldown(dropCooldown), inline: true }
     )
     .setFooter({ text: 'All times are approximate' })
