@@ -17,7 +17,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -27,16 +27,16 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const dropCooldown = getCooldownRemaining(user.last_drop, 0.0333); // 2 minutes = 0.0333 hours
 
   const embed = new EmbedBuilder()
-    .setColor(0x9933ff)
-    .setTitle('⏰ Your Cooldowns')
+    .setColor(0xff69b4)
+    .setTitle('⏰ Cooldowns')
     .addFields(
-      { name: '📅 Daily Reward', value: formatCooldown(dailyCooldown), inline: true },
-      { name: '📆 Weekly Reward', value: formatCooldown(weeklyCooldown), inline: true },
-      { name: '<:fairy2:1457128704282071196> Explore', value: formatCooldown(surfCooldown), inline: true },
-      { name: '🎣 Drop', value: formatCooldown(dropCooldown), inline: true }
+      { name: '📅 Daily Reward', value: formatCooldown(dailyCooldown), },
+      { name: '📆 Weekly Reward', value: formatCooldown(weeklyCooldown), },
+      { name: '🧚 Explore', value: formatCooldown(surfCooldown), },
+      { name: '🦋 Drop', value: formatCooldown(dropCooldown), }
     )
     .setFooter({ text: 'All times are approximate' })
-    .setTimestamp();
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 }

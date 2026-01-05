@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const member = interaction.member as any;
   if (!isAdminUser(userId) && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
     await interaction.editReply({ 
-      content: '<:fairy2:1457128704282071196> This command is only available to boosters!' 
+      content: '🧚 This command is only available to boosters!' 
     });
     return;
   }
@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -40,10 +40,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!isAdminUser(userId) && lastBooster && new Date(lastBooster).getTime() > Date.now() - BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
     const cooldownMs = new Date(lastBooster).getTime() + (BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
     const embed = new EmbedBuilder()
-      .setColor(0xff0000)
+      .setColor(0xff69b4)
       .setTitle('⏰ Booster Reward On Cooldown')
       .setDescription(`Come back in **${formatCooldown(cooldownMs)}**`)
-      .setTimestamp();
+      .;
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -66,7 +66,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   
   if (updateError) {
     console.error('Error updating coins:', updateError);
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming booster reward. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error claiming booster reward. Please try again!' });
     return;
   }
 
@@ -75,10 +75,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!allCards || allCards.length === 0) {
     const embed = new EmbedBuilder()
-      .setColor(0xffd700)
+      .setColor(0xff69b4)
       .setTitle('<a:5surfboard:1433597347031683114> Booster Reward Claimed!')
-      .setDescription(`<:fairy2:1457128704282071196> You received **10,000 coins**!\n\n*No cards available yet.*`)
-      .setTimestamp();
+      .setDescription(`🧚 Received **10,000 coins**!\n\n*No cards available yet.*`)
+      .;
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -130,22 +130,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x00d4ff)
-    .setTitle('🌿 Booster Reward Claimed!')
-    .setDescription(`<:rarity_star:1442247814540296343> You received **10,000 coins** and **15 cards**!`)
+    .setColor(0xff69b4)
+    .setTitle('🍃 Booster Reward Claimed!')
+    .setDescription(`⭐ Received **10,000 coins** and **15 cards**!`)
     .addFields(
       {
         name: '<:1_flower:1436124715797315687> Cards Received',
         value: cardsInfo,
-        inline: false
+       
       },
       {
-        name: '<:fairy2:1457128704282071196> New Balance',
+        name: '🧚 New Balance',
         value: `${newBalance} coins`,
-        inline: true
+       
       }
     )
-    .setTimestamp();
+    .;
 
   if (attachment) {
     embed.setImage('attachment://booster_cards.png');

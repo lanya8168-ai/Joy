@@ -28,7 +28,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming daily reward. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error claiming daily reward. Please try again!' });
     return;
   }
 
@@ -36,22 +36,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result || !result.success) {
     if (result && result.error === 'user_not_found') {
-      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+      await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
       return;
     }
 
     if (result && result.error === 'on_cooldown') {
       const embed = new EmbedBuilder()
-        .setColor(0xff0000)
+        .setColor(0xff69b4)
         .setTitle('⏰ Daily Reward On Cooldown')
         .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`)
-        .setTimestamp();
+        .;
 
       await interaction.editReply({ embeds: [embed] });
       return;
     }
 
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming daily reward. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error claiming daily reward. Please try again!' });
     return;
   }
 
@@ -87,38 +87,38 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       const coinsEarned = coinsReward;
       const nextAvailable = new Date(Date.now() + 24 * 60 * 60 * 1000);
       const embed = new EmbedBuilder()
-        .setColor(0xffcc00)
-        .setTitle('<:cottage:1457128646274973766> Daily Reward Claimed!')
-        .setDescription(`<:fairy2:1457128704282071196> You received **${coinsEarned} coins** and a **legendary card**!`)
+        .setColor(0xff69b4)
+        .setTitle('🏘️ Daily')
+        .setDescription(`🧚 Received **${coinsEarned} coins** and a **legendary card**!`)
         .addFields(
           {
             name: '🎴 Card Received',
-            value: `<:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343> **${mockCard.name}** (${mockCard.group}) • ${mockCard.era} • \`${mockCard.cardcode}\``,
-            inline: false
+            value: `⭐⭐⭐⭐⭐ **${mockCard.name}** (${mockCard.group}) • ${mockCard.era} • \`${mockCard.cardcode}\``,
+           
           },
           {
-            name: '<:fairy2:1457128704282071196> New Balance',
+            name: '🧚 New Balance',
             value: `${userBalance} coins`,
-            inline: true
+           
           },
           {
-            name: '⏰ Next Available',
+            name: '⏰ Next',
             value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-            inline: true
+           
           }
         )
         .setFooter({ text: `User ID: ${userId}` })
-        .setTimestamp()
+        .
         .setImage(mockCard.image_url);
 
       await interaction.editReply({ embeds: [embed] });
       return;
     }
     const embed = new EmbedBuilder()
-      .setColor(0x00ff00)
-      .setTitle('Daily Reward Claimed!')
-      .setDescription(`<:fairy2:1457128704282071196> You received **${coinsReward} coins**!\n\n*No legendary cards available yet.*`)
-      .setTimestamp();
+      .setColor(0xff69b4)
+      .setTitle('Daily')
+      .setDescription(`🧚 Received **${coinsReward} coins**!\n\n*No legendary cards available yet.*`)
+      .;
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -158,28 +158,28 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const nextAvailable = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
-    .setColor(0xffcc00)
-    .setTitle('<:cottage:1457128646274973766> Daily Reward Claimed!')
-    .setDescription(`<:fairy2:1457128704282071196> You received **${coinsEarned} coins** and a **legendary card**!`)
+    .setColor(0xff69b4)
+    .setTitle('🏘️ Daily')
+    .setDescription(`🧚 Received **${coinsEarned} coins** and a **legendary card**!`)
     .addFields(
       {
         name: '🎴 Card Received',
         value: `${getRarityEmoji(randomLegendary.rarity)} **${randomLegendary.name}** (${randomLegendary.group}) • ${randomLegendary.era || 'N/A'} • \`${randomLegendary.cardcode}\``,
-        inline: false
+       
       },
       {
-        name: '<:fairy2:1457128704282071196> New Balance',
+        name: '🧚 New Balance',
         value: `${newBalance} coins`,
-        inline: true
+       
       },
       {
-        name: '⏰ Next Available',
+        name: '⏰ Next',
         value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-        inline: true
+       
       }
     )
     .setFooter({ text: `User ID: ${userId}` })
-    .setTimestamp();
+    .;
 
   if (selectedCard.image_url) {
     embed.setImage(selectedCard.image_url);

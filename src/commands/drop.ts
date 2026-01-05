@@ -21,7 +21,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -92,7 +92,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       };
     } else {
       await interaction.editReply({
-        content: '<:fairy2:1457128704282071196> No droppable cards available yet!'
+        content: '🧚 No droppable cards available yet!'
       });
       return;
     }
@@ -131,7 +131,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Drop error updating last_drop:', error);
-    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Error processing drop: ${error.message}` });
+    await interaction.editReply({ content: `🧚 Error processing drop: ${error.message}` });
     return;
   }
 
@@ -145,12 +145,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       name: interaction.user.username,
       iconURL: interaction.user.avatarURL() || undefined
     })
-    .setTitle('<:wings5:1457127829438332969> You explored and found..')
+    .setTitle('🦋 Found!')
     .setDescription(description)
     .addFields(
-      { name: '⏰ Next Available', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, inline: true }
+      { name: '⏰ Next', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, }
     )
-    .setTimestamp();
+    .;
 
   if (selectedCard.image_url) {
     embed.setImage(selectedCard.image_url);

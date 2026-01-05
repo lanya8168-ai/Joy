@@ -58,7 +58,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> You need Administrator permission to use this command!' });
+    await interaction.editReply({ content: '🧚 You need Administrator permission to use this command!' });
     return;
   }
 
@@ -92,7 +92,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     if (imageUrl) updates.image_url = imageUrl;
 
     if (Object.keys(updates).length === 0) {
-      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please provide at least one field to update!' });
+      await interaction.editReply({ content: '🧚 Please provide at least one field to update!' });
       return;
     }
 
@@ -103,22 +103,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     if (error) {
       console.error('Database error:', error);
-      await interaction.editReply({ content: `<:fairy2:1457128704282071196> Error updating card: ${error.message}` });
+      await interaction.editReply({ content: `🧚 Error updating card: ${error.message}` });
       return;
     }
 
     const embed = new EmbedBuilder()
-      .setColor(0xffaa00)
-      .setTitle('<:cottage:1457128646274973766> Card Updated!')
+      .setColor(0xff69b4)
+      .setTitle('🏘️ Card Updated!')
       .setDescription(`Successfully updated card **${cardcode}**`)
-      .addFields({ name: 'Card ID', value: `${existingCard.card_id}`, inline: true })
-      .setTimestamp();
+      .addFields({ name: 'Card ID', value: `${existingCard.card_id}`, })
+      .;
 
-    if (name) embed.addFields({ name: 'Name', value: `${existingCard.name} → ${name}`, inline: true });
-    if (group) embed.addFields({ name: 'Group', value: `${existingCard.group} → ${group}`, inline: true });
-    if (rarity) embed.addFields({ name: 'Rarity', value: `${existingCard.rarity} → ${rarity}`, inline: true });
-    if (era) embed.addFields({ name: 'Era', value: `${existingCard.era || 'None'} → ${era}`, inline: true });
-    if (droppable !== null) embed.addFields({ name: 'Droppable', value: droppable ? '<:cottage:1457128646274973766> Yes' : '<:fairy2:1457128704282071196> No', inline: true });
+    if (name) embed.addFields({ name: 'Name', value: `${existingCard.name} → ${name}`, });
+    if (group) embed.addFields({ name: 'Group', value: `${existingCard.group} → ${group}`, });
+    if (rarity) embed.addFields({ name: 'Rarity', value: `${existingCard.rarity} → ${rarity}`, });
+    if (era) embed.addFields({ name: 'Era', value: `${existingCard.era || 'None'} → ${era}`, });
+    if (droppable !== null) embed.addFields({ name: 'Droppable', value: droppable ? '🏘️ Yes' : '🧚 No', });
     if (imageUrl) embed.setThumbnail(imageUrl);
 
     await interaction.editReply({ embeds: [embed] });
@@ -127,7 +127,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   // ADD MODE: card doesn't exist, create new one
   if (!name || !group || !rarity) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> To add a new card with code **' + cardcode + '**, please provide: name, group, and rarity!' });
+    await interaction.editReply({ content: '🧚 To add a new card with code **' + cardcode + '**, please provide: name, group, and rarity!' });
     return;
   }
 
@@ -148,25 +148,25 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Database error:', error);
-    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Error adding card to database: ${error.message}` });
+    await interaction.editReply({ content: `🧚 Error adding card to database: ${error.message}` });
     return;
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x00ff00)
-    .setTitle('<:cottage:1457128646274973766> Card Added!')
+    .setColor(0xff69b4)
+    .setTitle('🏘️ Card Added!')
     .setDescription(`Successfully added **${name}** from ${group}`)
     .addFields(
-      { name: 'Card ID', value: `${data[0].card_id}`, inline: true },
-      { name: 'Card Code', value: cardcode, inline: true },
-      { name: 'Rarity', value: `${rarity}`, inline: true },
-      { name: 'Group', value: group, inline: true },
-      { name: 'Droppable', value: droppable ?? true ? '<:cottage:1457128646274973766> Yes' : '<:fairy2:1457128704282071196> No', inline: true }
+      { name: 'Card ID', value: `${data[0].card_id}`, },
+      { name: 'Card Code', value: cardcode, },
+      { name: 'Rarity', value: `${rarity}`, },
+      { name: 'Group', value: group, },
+      { name: 'Droppable', value: droppable ?? true ? '🏘️ Yes' : '🧚 No', }
     )
-    .setTimestamp();
+    .;
 
   if (era) {
-    embed.addFields({ name: 'Era', value: era, inline: true });
+    embed.addFields({ name: 'Era', value: era, });
   }
 
   if (imageUrl) {

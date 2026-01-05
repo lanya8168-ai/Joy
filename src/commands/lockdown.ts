@@ -12,7 +12,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   // Only dev user can execute this
   if (userId !== DEV_USER_ID) {
     await interaction.reply({ 
-      content: '<:fairy2:1457128704282071196> Only the dev user can execute this command!',
+      content: '🧚 Only the dev user can execute this command!',
       ephemeral: true
     });
     return;
@@ -28,7 +28,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setDescription(globalState.lockdownMode 
       ? 'All commands are now **LOCKED**. Only the dev user can execute commands.'
       : 'All commands are now **UNLOCKED**. Everyone can use commands.')
-    .setTimestamp();
+    .;
 
   await interaction.reply({ embeds: [embed], ephemeral: false });
 }

@@ -26,7 +26,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming weekly reward. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -34,22 +34,22 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!result || !result.success) {
     if (result.error === 'user_not_found') {
-      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+      await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
       return;
     }
 
     if (result.error === 'on_cooldown') {
       const embed = new EmbedBuilder()
-        .setColor(0xff0000)
+        .setColor(0xff69b4)
         .setTitle('⏰ Weekly Reward On Cooldown')
         .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`)
-        .setTimestamp();
+        .;
 
       await interaction.editReply({ embeds: [embed] });
       return;
     }
 
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming weekly reward. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error claiming weekly reward. Please try again!' });
     return;
   }
 
@@ -70,28 +70,28 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         cardcode: 'TEST001',
         image_url: 'https://placehold.co/600x400?text=Test+Card'
       };
-      const cardInfos = Array(4).fill(0).map((_, i) => `**Card ${i + 1}:** ${mockCard.name} (${mockCard.group}) <:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343><:rarity_star:1442247814540296343> • ${mockCard.era} • \`${mockCard.cardcode}\``).join('\n');
+      const cardInfos = Array(4).fill(0).map((_, i) => `**Card ${i + 1}:** ${mockCard.name} (${mockCard.group}) ⭐⭐⭐⭐⭐ • ${mockCard.era} • \`${mockCard.cardcode}\``).join('\n');
       const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
       const embed = new EmbedBuilder()
-        .setColor(0x00ff00)
-        .setTitle('<:photos:1457128756316602410> Weekly Reward Claimed!')
-        .setDescription(`You received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`)
+        .setColor(0xff69b4)
+        .setTitle('📸 Weekly')
+        .setDescription(`Received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`)
         .addFields(
           {
-            name: '⏰ Next Available',
+            name: '⏰ Next',
             value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-            inline: true
+           
           }
         )
-        .setTimestamp();
+        .;
       await interaction.editReply({ embeds: [embed] });
       return;
     }
     const embed = new EmbedBuilder()
-      .setColor(0x00ff00)
-      .setTitle('<:cottage:1457128646274973766> Weekly Reward Claimed!')
-      .setDescription(`You received **${result.reward} coins**!\n\n*No cards available yet.*`)
-      .setTimestamp();
+      .setColor(0xff69b4)
+      .setTitle('🏘️ Weekly')
+      .setDescription(`Received **${result.reward} coins**!\n\n*No cards available yet.*`)
+      .;
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -151,7 +151,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return `**Card ${index + 1}:** ${card.name} (${card.group}) ${rarityEmoji} • ${card.era || 'N/A'} • \`${card.cardcode}\``;
   }).join('\n');
 
-  const description = `You received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`;
+  const description = `Received **${result.reward} coins**!\n\n**You also received 4 cards:**\n${cardInfos}`;
 
   let attachment = null;
   try {
@@ -169,17 +169,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const nextAvailable = new Date(Date.now() + WEEKLY_COOLDOWN_HOURS * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
-    .setColor(0x00ff00)
-    .setTitle('<:photos:1457128756316602410> Weekly Reward Claimed!')
+    .setColor(0xff69b4)
+    .setTitle('📸 Weekly')
     .setDescription(description)
     .addFields(
       {
-        name: '⏰ Next Available',
+        name: '⏰ Next',
         value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-        inline: true
+       
       }
     )
-    .setTimestamp();
+    .;
 
   // Schedule reminder for next weekly
   const client = interaction.client;

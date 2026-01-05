@@ -43,14 +43,14 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0xff0000)
+    .setColor(0xff69b4)
     .setTitle('🗑️ Card Deleted')
-    .setDescription(`Successfully deleted **${card.name}** from ${card.group}`)
+    .setDescription(`Deleted **${card.name}** from ${card.group}`)
     .addFields(
-      { name: 'Card ID', value: `${cardId}`, inline: true },
-      { name: 'Rarity', value: `${card.rarity}`, inline: true }
+      { name: 'Card ID', value: `${cardId}`, },
+      { name: 'Rarity', value: `${card.rarity}`, }
     )
-    .setTimestamp();
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 }

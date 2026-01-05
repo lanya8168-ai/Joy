@@ -65,7 +65,7 @@ async function handleView(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> This user has not started their journey yet!' });
+    await interaction.editReply({ content: '🧚 This user has not started their journey yet!' });
     return;
   }
 
@@ -98,14 +98,12 @@ async function handleView(interaction: ChatInputCommandInteraction) {
     .setTitle(`${targetUser.username}'s Profile`)
     .setThumbnail(targetUser.displayAvatarURL())
     .addFields(
-      { name: '<:fairy2:1457128704282071196> Coins', value: `${user.coins}`, inline: true },
-      { name: '<:rarity_star:1442247814540296343> Total Cards', value: `${totalCards}`, inline: true },
-      { name: '\u200B', value: '\u200B', inline: false },
-      { name: '📜 Bio', value: user.bio || '*No bio set*', inline: false },
-      { name: '<:fairy2:1457128704282071196> Favorite Card', value: favoriteCardText, inline: false }
+      { name: '🧚 Coins', value: `${user.coins}`, },
+      { name: '⭐ Cards', value: `${totalCards}`, },
+      { name: '📜 Bio', value: user.bio || '*No bio set*', },
+      { name: '🧚 Favorite', value: favoriteCardText, }
     )
-    .setFooter({ text: `Profile Color: ${user.profile_color || '#ff69b4'}` })
-    .setTimestamp();
+    .setFooter({ text: `Color: ${user.profile_color || '#ff69b4'}` });
 
   await interaction.editReply({ embeds: [embed] });
 }
@@ -121,7 +119,7 @@ async function handleBio(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -132,15 +130,15 @@ async function handleBio(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Error updating bio:', error);
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Failed to update bio. Please try again!' });
+    await interaction.editReply({ content: '🧚 Failed to update bio. Please try again!' });
     return;
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x00ff00)
+    .setColor(0xff69b4)
     .setTitle('✅ Bio Updated!')
-    .setDescription(`Your bio has been set to:\n\n${bioText}`)
-    .setTimestamp();
+    .setDescription(`Bio set to:\n\n${bioText}`)
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 }
@@ -152,7 +150,7 @@ async function handleColor(interaction: ChatInputCommandInteraction) {
   // Validate hex color
   const hexRegex = /^#[0-9A-Fa-f]{6}$/;
   if (!hexRegex.test(hexColor)) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Invalid hex color! Use format: #ff69b4' });
+    await interaction.editReply({ content: '🧚 Invalid hex color! Use format: #ff69b4' });
     return;
   }
 
@@ -163,7 +161,7 @@ async function handleColor(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -174,7 +172,7 @@ async function handleColor(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Error updating profile color:', error);
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Failed to update profile color. Please try again!' });
+    await interaction.editReply({ content: '🧚 Failed to update profile color. Please try again!' });
     return;
   }
 
@@ -183,8 +181,8 @@ async function handleColor(interaction: ChatInputCommandInteraction) {
   const embed = new EmbedBuilder()
     .setColor(color)
     .setTitle('✅ Profile Color Updated!')
-    .setDescription(`Your profile color has been set to ${hexColor}`)
-    .setTimestamp();
+    .setDescription(`Color set to ${hexColor}`)
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 }
@@ -200,7 +198,7 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -212,7 +210,7 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!card) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Card not found! Check the cardcode and try again.' });
+    await interaction.editReply({ content: '🧚 Card not found! Check the cardcode and try again.' });
     return;
   }
 
@@ -225,7 +223,7 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!inventoryItem) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> You don\'t own this card! You can only set cards you own as favorites.' });
+    await interaction.editReply({ content: '🧚 You don\'t own this card! You can only set cards you own as favorites.' });
     return;
   }
 
@@ -236,15 +234,15 @@ async function handleFavoriteCard(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Error updating favorite card:', error);
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Failed to update favorite card. Please try again!' });
+    await interaction.editReply({ content: '🧚 Failed to update favorite card. Please try again!' });
     return;
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x00ff00)
+    .setColor(0xff69b4)
     .setTitle('✅ Favorite Card Set!')
     .setDescription(`Your favorite card is now:\n**${card.name}** (${card.group}) • \`${card.cardcode}\``)
-    .setTimestamp();
+    .;
 
   if (card.image_url) {
     embed.setThumbnail(card.image_url);

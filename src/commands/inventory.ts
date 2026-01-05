@@ -63,7 +63,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -88,11 +88,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!inventory || inventory.length === 0) {
     const embed = new EmbedBuilder()
-      .setColor(0x808080)
-      .setTitle('📦 Your Inventory')
+      .setColor(0xff69b4)
+      .setTitle('📦 Inventory')
       .setDescription('Your collection is empty! Use `/drop` to get cards.')
-      .addFields({ name: '<:fairy2:1457128704282071196> Coins', value: `${user.coins}` })
-      .setTimestamp();
+      .addFields({ name: '🧚 Coins', value: `${user.coins}` })
+      .;
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -137,11 +137,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (filteredInventory.length === 0) {
     const embed = new EmbedBuilder()
-      .setColor(0x808080)
-      .setTitle('📦 Your Inventory')
+      .setColor(0xff69b4)
+      .setTitle('📦 Inventory')
       .setDescription('No cards match your filters!')
-      .addFields({ name: '<:fairy2:1457128704282071196> Coins', value: `${user.coins}` })
-      .setTimestamp();
+      .addFields({ name: '🧚 Coins', value: `${user.coins}` })
+      .;
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -192,14 +192,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   }
 
   const isOwnInventory = userId === interaction.user.id;
-  const title = isOwnInventory ? '🌲 Your K-pop Card Collection' : `🌲 ${targetUser?.username}'s K-pop Card Collection`;
+  const title = isOwnInventory ? '🌲 Inventory' : `🌲 ${targetUser?.username}'s Inventory`;
 
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
     .setTitle(title)
     .setDescription(cardList)
-    .setFooter({ text: `${filteredInventory.length} cards total` })
-    .setTimestamp();
+    .setFooter({ text: `${filteredInventory.length} cards total` });
 
   if (attachment) {
     embed.setImage('attachment://inventory_cards.png');

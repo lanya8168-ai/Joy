@@ -46,10 +46,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setTitle('🤝 Trade Proposal')
     .setDescription(`<@${interaction.user.id}> wants to trade with <@${targetUser.id}>`)
     .addFields(
-      { name: 'Giving', value: `**${ownCardData.name}** (${ownCardData.group})\nCode: \`${cardIdToGive}\``, inline: true },
-      { name: 'Receiving', value: `**${targetCardData.name}** (${targetCardData.group})\nCode: \`${cardIdToReceive}\``, inline: true }
+      { name: 'Giving', value: `**${ownCardData.name}** (${ownCardData.group})\nCode: \`${cardIdToGive}\``, },
+      { name: 'Receiving', value: `**${targetCardData.name}** (${targetCardData.group})\nCode: \`${cardIdToReceive}\``, }
     )
-    .setColor(0x00AE86)
+    .setColor(0xff69b4)
     .setFooter({ text: 'Target user must click Accept to complete the trade.' });
 
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(

@@ -63,7 +63,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
 
   if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> You need Administrator permission to use this command!' });
+    await interaction.editReply({ content: '🧚 You need Administrator permission to use this command!' });
     return;
   }
 
@@ -85,7 +85,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .maybeSingle();
 
   if (!existingCard) {
-    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Card with code **${cardcode}** not found!` });
+    await interaction.editReply({ content: `🧚 Card with code **${cardcode}** not found!` });
     return;
   }
 
@@ -101,7 +101,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (imageUrl) updates.image_url = imageUrl;
 
   if (Object.keys(updates).length === 0) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please provide at least one field to update!' });
+    await interaction.editReply({ content: '🧚 Please provide at least one field to update!' });
     return;
   }
 
@@ -112,40 +112,40 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (error) {
     console.error('Database error:', error);
-    await interaction.editReply({ content: `<:fairy2:1457128704282071196> Error updating card: ${error.message}` });
+    await interaction.editReply({ content: `🧚 Error updating card: ${error.message}` });
     return;
   }
 
   const fields = [];
   
   if (name) {
-    fields.push({ name: 'Name', value: `${existingCard.name} → ${name}`, inline: false });
+    fields.push({ name: 'Name', value: `${existingCard.name} → ${name}`, });
   }
   if (group) {
-    fields.push({ name: 'Group', value: `${existingCard.group} → ${group}`, inline: false });
+    fields.push({ name: 'Group', value: `${existingCard.group} → ${group}`, });
   }
   if (newCardcode) {
-    fields.push({ name: 'Card Code', value: `${existingCard.cardcode} → ${newCardcode.toUpperCase()}`, inline: false });
+    fields.push({ name: 'Card Code', value: `${existingCard.cardcode} → ${newCardcode.toUpperCase()}`, });
   }
   if (era) {
-    fields.push({ name: 'Era', value: `${existingCard.era || 'None'} → ${era}`, inline: false });
+    fields.push({ name: 'Era', value: `${existingCard.era || 'None'} → ${era}`, });
   }
   if (rarity) {
-    fields.push({ name: 'Rarity', value: `${existingCard.rarity} → ${rarity}`, inline: false });
+    fields.push({ name: 'Rarity', value: `${existingCard.rarity} → ${rarity}`, });
   }
   if (droppable !== null) {
-    fields.push({ name: 'Droppable', value: `${existingCard.droppable ? 'Yes' : 'No'} → ${droppable ? 'Yes' : 'No'}`, inline: false });
+    fields.push({ name: 'Droppable', value: `${existingCard.droppable ? 'Yes' : 'No'} → ${droppable ? 'Yes' : 'No'}`, });
   }
   if (imageUrl) {
-    fields.push({ name: 'Image URL', value: 'Updated', inline: false });
+    fields.push({ name: 'Image URL', value: 'Updated', });
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x00bfff)
+    .setColor(0xff69b4)
     .setTitle('✏️ Card Updated!')
     .setDescription(`Successfully updated card **${cardcode}**`)
     .addFields(...fields)
-    .setTimestamp();
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 }

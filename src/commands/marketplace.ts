@@ -72,7 +72,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   const card = allCards?.find((c: any) => c.cardcode.toLowerCase() === cardcode.toLowerCase());
 
   if (!card) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Card not found! Check the card code.' });
+    await interaction.editReply({ content: '🧚 Card not found! Check the card code.' });
     return;
   }
 
@@ -101,7 +101,7 @@ async function handleList(interaction: ChatInputCommandInteraction) {
     if (!result.success) {
       if (result.error === 'insufficient_cards') {
         await interaction.editReply({ 
-          content: `<:fairy2:1457128704282071196> You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`
+          content: `🧚 You don't have enough of this card! You have ${result.available}. Check your inventory with \`/inventory\`.`
         });
         return;
       }
@@ -113,21 +113,21 @@ async function handleList(interaction: ChatInputCommandInteraction) {
   }
 
   if (hasError) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error creating listing.' });
+    await interaction.editReply({ content: '🧚 Error creating listing.' });
     return;
   }
 
   const codesDisplay = listingCodes.map(code => `\`${code}\``).join(', ');
   const embed = new EmbedBuilder()
-    .setColor(0x00d4ff)
-    .setTitle('<:cottage:1457128646274973766> Card Listed!')
+    .setColor(0xff69b4)
+    .setTitle('🏘️ Card Listed!')
     .setDescription(`Your card has been listed on the marketplace!`)
     .addFields(
-      { name: 'Listing Codes', value: codesDisplay, inline: false },
-      { name: 'Price Per Card', value: `${price} coins`, inline: true },
-      { name: 'Total Quantity', value: `${quantity}`, inline: true }
+      { name: 'Listing Codes', value: codesDisplay, },
+      { name: 'Price Per Card', value: `${price} coins`, },
+      { name: 'Total Quantity', value: `${quantity}`, }
     )
-    .setTimestamp();
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 }
@@ -175,11 +175,11 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
   ).then(lines => lines.join('\n'));
 
   const embed = new EmbedBuilder()
-    .setColor(0x00d4ff)
+    .setColor(0xff69b4)
     .setTitle('🌲 Fairy Marketplace')
     .setDescription(listingText)
     .setFooter({ text: 'Use /mp buy <code> to purchase' })
-    .setTimestamp();
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 }
@@ -206,7 +206,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!listing) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Listing not found! Check the code.' });
+    await interaction.editReply({ content: '🧚 Listing not found! Check the code.' });
     return;
   }
 
@@ -216,7 +216,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error purchasing card.' });
+    await interaction.editReply({ content: '🧚 Error purchasing card.' });
     return;
   }
 
@@ -224,43 +224,43 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   if (!result.success) {
     if (result.error === 'listing_not_found') {
-      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Listing not found or already sold!' });
+      await interaction.editReply({ content: '🧚 Listing not found or already sold!' });
       return;
     }
 
     if (result.error === 'cannot_buy_own_listing') {
-      await interaction.editReply({ content: '<:fairy2:1457128704282071196> You cannot buy your own listing!' });
+      await interaction.editReply({ content: '🧚 You cannot buy your own listing!' });
       return;
     }
 
     if (result.error === 'buyer_not_found') {
-      await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+      await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
       return;
     }
 
     if (result.error === 'insufficient_funds') {
       await interaction.editReply({ 
-        content: `<:fairy2:1457128704282071196> You need ${result.required} coins! You have ${result.available} coins.`
+        content: `🧚 You need ${result.required} coins! You have ${result.available} coins.`
       });
       return;
     }
 
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error purchasing card.' });
+    await interaction.editReply({ content: '🧚 Error purchasing card.' });
     return;
   }
 
   const card = listing.cards as any;
   const eraText = card.era ? ` - ${card.era}` : '';
   const embed = new EmbedBuilder()
-    .setColor(0x00d4ff)
-    .setTitle('<:cottage:1457128646274973766> Purchase Complete!')
+    .setColor(0xff69b4)
+    .setTitle('🏘️ Purchase Complete!')
     .setDescription(`You bought ${card.name}!`)
     .addFields(
-      { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, inline: true },
-      { name: 'Price', value: `${result.price} coins`, inline: true },
-      { name: 'Remaining Coins', value: `${result.new_balance}`, inline: true }
+      { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, },
+      { name: 'Price', value: `${result.price} coins`, },
+      { name: 'Remaining Coins', value: `${result.new_balance}`, }
     )
-    .setTimestamp();
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 
@@ -270,16 +270,16 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     const buyerName = interaction.user.username;
     
     const sellerEmbed = new EmbedBuilder()
-      .setColor(0x00d4ff)
-      .setTitle('<:cottage:1457128646274973766> Card Sold!')
+      .setColor(0xff69b4)
+      .setTitle('🏘️ Card Sold!')
       .setDescription(`Your card was purchased!`)
       .addFields(
-        { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, inline: true },
-        { name: 'Quantity', value: `x${result.quantity}`, inline: true },
-        { name: 'Buyer', value: `@${buyerName}`, inline: true },
-        { name: 'Price', value: `${result.price} coins`, inline: true }
+        { name: 'Card', value: `${getRarityEmoji(card.rarity)} ${card.name} (${card.group}${eraText})`, },
+        { name: 'Quantity', value: `x${result.quantity}`, },
+        { name: 'Buyer', value: `@${buyerName}`, },
+        { name: 'Price', value: `${result.price} coins`, }
       )
-      .setTimestamp();
+      .;
     
     await seller.send({ embeds: [sellerEmbed] });
   } catch (e) {

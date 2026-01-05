@@ -43,5 +43,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return interaction.editReply('Failed to add question.');
   }
 
-  await interaction.editReply(`✅ Added ${type} question: **${answer}** with ${reward} coins reward.`);
+  await interaction.editReply(`✅ Added ${type} question: **${answer}** with ${reward} coins.`);
 }

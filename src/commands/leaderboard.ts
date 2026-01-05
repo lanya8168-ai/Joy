@@ -28,7 +28,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setTitle('💰 Richest Users Leaderboard')
-      .setColor(0xFFD700)
+      .setColor(0xff69b4)
       .setDescription(
         users.map((u, i) => `**${i + 1}.** <@${u.user_id}> — ${u.coins.toLocaleString()} coins`).join('\n') || 'No data found.'
       );
@@ -59,7 +59,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
       const embed = new EmbedBuilder()
         .setTitle('🎴 Top Collectors Leaderboard')
-        .setColor(0x00FF00)
+        .setColor(0xff69b4)
         .setDescription(
           sorted.map((u, i) => `**${i + 1}.** <@${u.userId}> — ${u.count} unique cards`).join('\n') || 'No data found.'
         );
@@ -69,7 +69,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     const embed = new EmbedBuilder()
       .setTitle('🎴 Top Collectors Leaderboard')
-      .setColor(0x00FF00)
+      .setColor(0xff69b4)
       .setDescription(
         counts.map((u: any, i: number) => `**${i + 1}.** <@${u.user_id}> — ${u.card_count} unique cards`).join('\n')
       );

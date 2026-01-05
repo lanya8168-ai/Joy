@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .order('card_id', { ascending: true });
 
   if (!allCards || allCards.length === 0) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> No cards available yet!' });
+    await interaction.editReply({ content: '🧚 No cards available yet!' });
     return;
   }
 
@@ -42,11 +42,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .join('\n');
 
   const embed = new EmbedBuilder()
-    .setColor(0x00d4ff)
+    .setColor(0xff69b4)
     .setTitle('🎴 All Card IDs')
     .setDescription(cardList)
     .setFooter({ text: `Page ${validPage} / ${totalPages}` })
-    .setTimestamp();
+    .;
 
   // Create pagination buttons
   const row = new ActionRowBuilder<ButtonBuilder>()

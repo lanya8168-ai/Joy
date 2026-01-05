@@ -25,18 +25,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!user) {
     await interaction.editReply({ 
       content: targetUser.id === interaction.user.id 
-        ? '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' 
-        : '<:fairy2:1457128704282071196> This user has not started their journey yet!' 
+        ? '🧚 Please use `/start` first to create your account!' 
+        : '🧚 This user has not started their journey yet!' 
     });
     return;
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0xffd700)
+    .setColor(0xff69b4)
     .setTitle(`${targetUser.username}'s Balance`)
-    .setDescription(`<:fairy2:1457128704282071196> **${user.coins}** coins`)
+    .setDescription(`🧚 **${user.coins}** coins`)
     .setThumbnail(targetUser.displayAvatarURL())
-    .setTimestamp();
+    .;
 
   await interaction.editReply({ embeds: [embed] });
 }

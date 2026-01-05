@@ -19,7 +19,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const member = interaction.member as any;
   if (!isAdminUser(userId) && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
     await interaction.editReply({ 
-      content: '<:fairy2:1457128704282071196> This command is only available to boosters!' 
+      content: '🧚 This command is only available to boosters!' 
     });
     return;
   }
@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
@@ -40,10 +40,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   if (!isAdminUser(userId) && lastBonanza && new Date(lastBonanza).getTime() > Date.now() - BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000) {
     const cooldownMs = new Date(lastBonanza).getTime() + (BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
     const embed = new EmbedBuilder()
-      .setColor(0xff0000)
+      .setColor(0xff69b4)
       .setTitle('⏰ Bonanza On Cooldown')
       .setDescription(`Come back in **${formatCooldown(cooldownMs)}**`)
-      .setTimestamp();
+      .;
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -66,7 +66,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   
   if (updateError) {
     console.error('Error updating coins:', updateError);
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Error claiming bonanza. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error claiming bonanza. Please try again!' });
     return;
   }
 
@@ -78,10 +78,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   if (!legendaryCards || legendaryCards.length === 0) {
     const embed = new EmbedBuilder()
-      .setColor(0x00d4ff)
-      .setTitle('<:cottage:1457128646274973766> Bonanza Claimed!')
-      .setDescription(`<:fairy2:1457128704282071196> You received **25,000 coins**!\n\n*No legendary cards available yet.*`)
-      .setTimestamp();
+      .setColor(0xff69b4)
+      .setTitle('🏘️ Bonanza Claimed!')
+      .setDescription(`🧚 Received **25,000 coins**!\n\n*No legendary cards available yet.*`)
+      .;
 
     await interaction.editReply({ embeds: [embed] });
     return;
@@ -130,23 +130,23 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const nextAvailable = new Date(Date.now() + BONANZA_COOLDOWN_HOURS * 60 * 60 * 1000);
   const embed = new EmbedBuilder()
-    .setColor(0xffcc00)
-    .setTitle('<:cottage:1457128646274973766> Bonanza Claimed!')
-    .setDescription(`<:fairy2:1457128704282071196> You received **25,000 coins** and **20 legendary cards**!`)
+    .setColor(0xff69b4)
+    .setTitle('🏘️ Bonanza Claimed!')
+    .setDescription(`🧚 Received **25,000 coins** and **20 legendary cards**!`)
     .addFields(
       {
-        name: '<:fairy2:1457128704282071196> New Balance',
+        name: '🧚 New Balance',
         value: `${newBalance} coins`,
-        inline: true
+       
       },
       {
-        name: '⏰ Next Available',
+        name: '⏰ Next',
         value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-        inline: true
+       
       }
     )
     .setFooter({ text: `User ID: ${userId}` })
-    .setTimestamp();
+    .;
 
   // Schedule reminder for next bonanza
   const client = interaction.client;

@@ -62,7 +62,7 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.reply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!', ephemeral: true });
+    await interaction.reply({ content: '🧚 Please use `/start` first to create your account!', ephemeral: true });
     return;
   }
 
@@ -71,27 +71,27 @@ async function handleBrowse(interaction: ChatInputCommandInteraction) {
     .join('\n');
 
   const embed = new EmbedBuilder()
-    .setColor(0xffd700)
-    .setTitle('<:cottage:1457128646274973766> Card Pack Shop')
-    .setDescription('Buy packs for your garden! <:fairy2:1457128704282071196>')
+    .setColor(0xff69b4)
+    .setTitle('🏘️ Shop')
+    .setDescription('Buy packs for your garden! 🧚')
     .addFields(
       {
         name: '📜 Available Packs',
         value: packList,
-        inline: false
+       
       },
       {
-        name: '<:fairy2:1457128704282071196> Your Balance',
+        name: '🧚 Balance',
         value: `${user.coins} coins`,
-        inline: false
+       
       },
       {
-        name: '✨ How to Buy',
+        name: '🧚 How to Buy',
         value: 'Use `/shop buy` and select the pack you want!',
-        inline: false
+       
       }
     )
-    .setTimestamp();
+    .;
 
   await interaction.reply({ embeds: [embed] });
 }
@@ -104,7 +104,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
 
   const pack = PACKS.find(p => p.id === packId);
   if (!pack) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Invalid pack!' });
+    await interaction.editReply({ content: '🧚 Invalid pack!' });
     return;
   }
 
@@ -115,13 +115,13 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '<:fairy2:1457128704282071196> Please use `/start` first to create your account!' });
+    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
 
   if (user.coins < pack.cost) {
     await interaction.editReply({ 
-      content: `<:fairy2:1457128704282071196> You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
+      content: `🧚 You need ${pack.cost} coins but only have ${user.coins}!\nUse \`/daily\`, \`/weekly\`, or \`/surf\` to earn more coins.` 
     });
     return;
   }
@@ -151,7 +151,7 @@ async function handleBuy(interaction: ChatInputCommandInteraction) {
       return;
     }
     await interaction.editReply({ 
-      content: '<:fairy2:1457128704282071196> No cards available yet! Ask an admin to add cards.' 
+      content: '🧚 No cards available yet! Ask an admin to add cards.' 
     });
     return;
   }
@@ -284,22 +284,22 @@ async function processShopPurchase(interaction: ChatInputCommandInteraction, use
   }
 
   const embed = new EmbedBuilder()
-    .setColor(0x00ff00)
-    .setTitle(`✨ ${pack.name} Purchased!`)
+    .setColor(0xff69b4)
+    .setTitle(`🧚 ${pack.name} Purchased!`)
     .setDescription(`You bought the ${pack.name} for ${pack.cost} coins!`)
     .addFields(
       {
         name: '🎴 Cards Received',
         value: cardsInfo || 'No cards',
-        inline: false
+       
       },
       {
-        name: '<:fairy2:1457128704282071196> New Balance',
+        name: '🧚 New Balance',
         value: `${newBalance} coins`,
-        inline: true
+       
       }
     )
-    .setTimestamp();
+    .;
 
   if (attachment) {
     embed.setImage('attachment://pack_cards.png');

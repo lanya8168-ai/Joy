@@ -68,10 +68,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setTitle('🔒 Limited Card Added!')
     .setDescription(`Added **${name}** as a limited card. It will be harder to obtain.`)
     .addFields(
-      { name: 'Code', value: cardcode, inline: true },
-      { name: 'Rarity', value: `${rarity}`, inline: true }
+      { name: 'Code', value: cardcode, },
+      { name: 'Rarity', value: `${rarity}`, }
     )
-    .setColor(0xFFD700);
+    .setColor(0xff69b4);
 
   await interaction.editReply({ embeds: [embed] });
 }
