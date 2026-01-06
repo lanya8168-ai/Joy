@@ -1,21 +1,21 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { supabase } from './database/supabase.js';
-import { formatCooldown } from './utils/cooldowns.js';
-import { isAdminUser } from './utils/constants.js';
-import { scheduleReminder } from './utils/reminders.js';
+import { supabase } from '../database/supabase.js';
+import { formatCooldown } from '../utils/cooldowns.js';
+import { isAdminUser } from '../utils/constants.js';
+import { scheduleReminder } from '../utils/reminders.js';
 
-const SURF_COOLDOWN_HOURS = 1;
+const EXPLORE_COOLDOWN_HOURS = 1;
 
 export const data = new SlashCommandBuilder()
-setName('explore')
-setDescription('Explore for coins!');
+  .setName('explore')
+  .setDescription('Explore for coins!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
   const reward = Math.floor(Math.random() * 1500) + 1500;
+  const cooldownHours = isAdminUser(userId) ? 0 : EXPLORE_COOLDOWN_HOURS;
 
-  const cooldownHours = isAdminUser(userId) ? 0 : SURF_COOLDOWN_HOURS;
   const { data, error } = await supabase.rpc('claim_explore_reward', {
     p_user_id: userId,
     p_reward: reward,
@@ -23,78 +23,34 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   });
 
   if (error || !data) {
-    if (userId === '1403958587843149937') {
-        const { data: user } = await supabase.from('users').select('coins').eq('user_id', userId).single()
-        // Mock successful result for owner testing
-        const mockResult = {
-            success: true,
-            reward: reward,
-            new_balance: (user?.coins || 0) + reward
-        };
-        const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
-        const embed = new EmbedBuilder()
-setColor(0xff69b4)
-setTitle('🧚 Exploring Complete!')
-setDescription(`You were exploring in the woods when you stumbled across ${mockResult.reward} coins!`);
-addFields(
-            { name: '💎 Reward', value: `${mockResult.reward} coins`, },
-            { name: '🧚 New Balance', value: `${mockResult.new_balance} coins`, },
-            {
-              name: '⏰ Next',
-              value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-             
-            }
-          );
-
-        await interaction.editReply({ embeds: [embed] });
-        return;
-    }
-    await interaction.editReply({ content: '🧚 Error surfing. Please try again!' });
+    await interaction.editReply({ content: '🧚 Error exploring. Please try again!' });
     return;
   }
 
   const result = data as any;
-
   if (!result.success) {
-    if (result.error === 'user_not_found') {
-      await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
-      return;
-    }
-
+    if (result.error === 'user_not_found') return interaction.editReply({ content: '🧚 Use `/start` first!' });
     if (result.error === 'on_cooldown') {
       const embed = new EmbedBuilder()
-setColor(0xff69b4)
-setTitle('⏰ Surf On Cooldown')
-setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
-
-
-      await interaction.editReply({ embeds: [embed] });
-      return;
+        .setColor(0xff69b4)
+        .setTitle('⏰ Explore On Cooldown')
+        .setDescription(`Come back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
+      return interaction.editReply({ embeds: [embed] });
     }
-
-    await interaction.editReply({ content: '🧚 Error surfing. Please try again!' });
-    return;
+    return interaction.editReply({ content: '🧚 Error exploring.' });
   }
 
-  const nextAvailable = new Date(Date.now() + 60 * 60 * 1000);
+  const nextAvailable = new Date(Date.now() + result.cooldown_remaining_ms);
   const embed = new EmbedBuilder()
-setColor(0xff69b4)
-setTitle('🧚 Exploring Complete!')
-setDescription(`You were exploring in the woods when you stumbled across ${result.reward} coins!`);
-addFields(
-      { name: '💎 Reward', value: `${result.reward} coins`, },
-      { name: '🧚 New Balance', value: `${result.new_balance} coins`, },
-      {
-        name: '⏰ Next',
-        value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`,
-       
-      }
+    .setColor(0xff69b4)
+    .setTitle('🧚 Exploring Complete!')
+    .setDescription(`You found ${result.reward} coins in the magical woods!`)
+    .addFields(
+      { name: '💎 Reward', value: `${result.reward} coins` },
+      { name: '🧚 Balance', value: `${result.new_balance} coins` },
+      { name: '⏰ Next', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>` }
     );
 
-
-  // Schedule reminder for next surf
-  const client = interaction.client;
-  scheduleReminder(client, userId, interaction.channelId, 'explore', SURF_COOLDOWN_HOURS * 60 * 60 * 1000);
-
+  scheduleReminder(interaction.client, userId, interaction.channelId, 'explore', EXPLORE_COOLDOWN_HOURS * 60 * 60 * 1000);
   await interaction.editReply({ embeds: [embed] });
 }
