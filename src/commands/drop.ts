@@ -1,14 +1,15 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { getRandomRarity, getRarityColor, getRarityEmoji } from '../utils/cards.js';
 import { isAdminUser } from '../utils/constants.js';
 import { scheduleReminder } from '../utils/reminders.js';
+import { mergeCardImages } from '../utils/imageUtils.js';
 
 const COOLDOWN_MINUTES = 2;
 
 export const data = new SlashCommandBuilder()
   .setName('drop')
-  .setDescription('Open a FREE card pack! (2 minute cooldown)');
+  .setDescription('Reveal 3 magical cards and choose one to claim!');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
@@ -21,108 +22,78 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .single();
 
   if (!user) {
-    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
-    return;
+    return interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
   }
 
-  if (!isAdminUser(userId) && user.last_drop) {
-    const lastDropTime = new Date(user.last_drop).getTime();
-    const nowTime = Date.now();
-    const minutesPassed = (nowTime - lastDropTime) / (1000 * 60);
-
-    if (minutesPassed < COOLDOWN_MINUTES) {
-      const secondsRemaining = Math.ceil((COOLDOWN_MINUTES - minutesPassed) * 60);
-      await interaction.editReply({
-        content: `⏳ You can use /drop again in **${secondsRemaining}** seconds!`
-      });
-      return;
-    }
+  const lastDrop = user.last_drop ? new Date(user.last_drop).getTime() : 0;
+  if (!isAdminUser(userId) && Date.now() - lastDrop < COOLDOWN_MINUTES * 60 * 1000) {
+    const remaining = Math.ceil((COOLDOWN_MINUTES * 60 * 1000 - (Date.now() - lastDrop)) / 1000);
+    return interaction.editReply({ content: `⏳ Wait **${remaining}s** before next drop!` });
   }
 
-  let selectedCard;
-  if (Math.random() < 0.10) {
-    const { data: eventCards } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('droppable', true)
-      .not('event_type', 'is', null);
-    
-    if (eventCards && eventCards.length > 0) {
-      selectedCard = eventCards[Math.floor(Math.random() * eventCards.length)];
-    }
-  }
+  const { data: allCards } = await supabase.from('cards').select('*').eq('droppable', true);
+  if (!allCards || allCards.length < 3) return interaction.editReply('🧚 Not enough cards in the garden!');
 
-  if (!selectedCard) {
+  const selectedCards: any[] = [];
+  for (let i = 0; i < 3; i++) {
     const rarity = getRandomRarity();
-    const { data: possibleCards } = await supabase
-      .from('cards')
-      .select('*')
-      .eq('droppable', true)
-      .eq('rarity', rarity)
-      .eq('is_limited', false)
-      .is('event_type', null);
+    let pool = allCards.filter(c => c.rarity === rarity);
+    if (pool.length === 0) pool = allCards;
+    selectedCards.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
 
-    if (possibleCards && possibleCards.length > 0) {
-      selectedCard = possibleCards[Math.floor(Math.random() * possibleCards.length)];
-    } else {
-      const { data: fallbackCards } = await supabase
-        .from('cards')
-        .select('*')
-        .eq('droppable', true)
-        .eq('is_limited', false)
-        .is('event_type', null);
-      selectedCard = fallbackCards?.[Math.floor(Math.random() * (fallbackCards?.length || 1))];
+  let attachment = null;
+  try {
+    const images = selectedCards.map(c => c.image_url).filter(Boolean);
+    if (images.length > 0) {
+      const buffer = await mergeCardImages(images);
+      attachment = new AttachmentBuilder(buffer, { name: 'drop.png' });
     }
-  }
+  } catch (e) { console.error(e); }
 
-  if (!selectedCard) {
-    if (userId === '1403958587843149937') {
-      selectedCard = {
-        card_id: 1,
-        name: 'Test Idol',
-        group: 'Test Group',
-        era: 'Test Era',
-        rarity: 5,
-        cardcode: 'TEST001',
-        image_url: 'https://placehold.co/600x400?text=Test+Card'
-      };
-    } else {
-      await interaction.editReply({ content: '🧚 No droppable cards available yet!' });
-      return;
-    }
-  }
-
-  const { data: existingItem } = await supabase
-    .from('inventory')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('card_id', selectedCard.card_id)
-    .maybeSingle();
-
-  if (existingItem) {
-    await supabase.from('inventory').update({ quantity: (existingItem as any).quantity + 1 }).eq('id', (existingItem as any).id);
-  } else {
-    await supabase.from('inventory').insert({ user_id: userId, card_id: selectedCard.card_id, quantity: 1 });
-  }
-
-  const { error: updateError } = await supabase.from('users').update({ last_drop: new Date().toISOString() }).eq('user_id', userId);
-
-  if (updateError) {
-    console.error('Drop error:', updateError);
-    await interaction.editReply({ content: `🧚 Error: ${updateError.message}` });
-    return;
-  }
-
-  const rarityEmoji = getRarityEmoji(selectedCard.rarity);
-  const nextAvailable = new Date(Date.now() + COOLDOWN_MINUTES * 60 * 1000);
   const embed = new EmbedBuilder()
-    .setColor(getRarityColor(selectedCard.rarity))
-    .setAuthor({ name: interaction.user.username, iconURL: interaction.user.displayAvatarURL() })
-    .setTitle('🦋 Found!')
-    .setDescription(`**${selectedCard.name}** (${selectedCard.group}) ${rarityEmoji}\n${selectedCard.era || 'N/A'} • \`${selectedCard.cardcode}\``)
-    .addFields({ name: '⏰ Next', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>` });
+    .setColor(0xff69b4)
+    .setTitle('🦋 Magical Cards Appear!')
+    .setDescription('Three cards have appeared from the mist! Choose **one** to claim.')
+    .setFooter({ text: 'Only you can claim a card!' });
 
-  if (selectedCard.image_url) embed.setImage(selectedCard.image_url);
-  scheduleReminder(interaction.client, userId, interaction.channelId, 'drop', COOLDOWN_MINUTES * 60 * 1000);
-  await interaction.editReply({ embeds: [embed] });
+  if (attachment) embed.setImage('attachment://drop.png');
+
+  const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+    new ButtonBuilder().setCustomId('claim_0').setLabel('Card 1').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('claim_1').setLabel('Card 2').setStyle(ButtonStyle.Primary),
+    new ButtonBuilder().setCustomId('claim_2').setLabel('Card 3').setStyle(ButtonStyle.Primary)
+  );
+
+  const msg = await interaction.editReply({ embeds: [embed], components: [row], files: attachment ? [attachment] : [] });
+  const collector = msg.createMessageComponentCollector({ componentType: ComponentType.Button, time: 30000 });
+
+  collector.on('collect', async i => {
+    if (i.user.id !== userId) return i.reply({ content: '🧚 These aren\'t your cards!', ephemeral: true });
+    
+    await i.deferUpdate();
+    const index = parseInt(i.customId.split('_')[1]);
+    const card = selectedCards[index];
+
+    const { data: ex } = await supabase.from('inventory').select('*').eq('user_id', userId).eq('card_id', card.card_id).maybeSingle();
+    if (ex) await supabase.from('inventory').update({ quantity: (ex as any).quantity + 1 }).eq('id', (ex as any).id);
+    else await supabase.from('inventory').insert({ user_id: userId, card_id: card.card_id, quantity: 1 });
+
+    await supabase.from('users').update({ last_drop: new Date().toISOString() }).eq('user_id', userId);
+
+    const resultEmbed = new EmbedBuilder()
+      .setColor(getRarityColor(card.rarity))
+      .setTitle('✨ Card Claimed!')
+      .setDescription(`You chose ${getRarityEmoji(card.rarity)} **${card.name}** (${card.group})!\n\`${card.cardcode}\``);
+    
+    if (card.image_url) resultEmbed.setImage(card.image_url);
+    
+    await i.editReply({ embeds: [resultEmbed], components: [], files: [] });
+    scheduleReminder(interaction.client, userId, interaction.channelId, 'drop', COOLDOWN_MINUTES * 60 * 1000);
+    collector.stop();
+  });
+
+  collector.on('end', (_, reason) => {
+    if (reason === 'time') interaction.editReply({ content: '⏰ Time expired!', components: [] });
+  });
 }

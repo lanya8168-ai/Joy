@@ -1,156 +1,56 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
-import { supabase } from './database/supabase.js';
-import { formatCooldown } from './utils/cooldowns.js';
-import { mergeCardImages } from './utils/imageUtils.js';
-import { AttachmentBuilder } from 'discord.js';
-import { BOOSTER_ROLE_ID, isAdminUser } from './utils/constants.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, AttachmentBuilder } from 'discord.js';
+import { supabase } from '../database/supabase.js';
+import { formatCooldown } from '../utils/cooldowns.js';
+import { mergeCardImages } from '../utils/imageUtils.js';
+import { BOOSTER_ROLE_ID, isAdminUser } from '../utils/constants.js';
 
 const BOOSTER_COOLDOWN_HOURS = 6;
 
 export const data = new SlashCommandBuilder()
-setName('booster')
-setDescription('Exclusive booster reward! (6 hour cooldown)');
+  .setName('booster')
+  .setDescription('Exclusive booster reward! (6 hour cooldown)');
 
 export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
 
-  // Check if user is booster or admin
   const member = interaction.member as any;
   if (!isAdminUser(userId) && !member?.roles?.cache?.has(BOOSTER_ROLE_ID)) {
-    await interaction.editReply({ 
-      content: '🧚 This command is only available to boosters!' 
-    });
-    return;
+    return interaction.editReply({ content: '🧚 Boosters only!' });
   }
 
-  const { data: user } = await supabase
-from('users')
-select('*')
-eq('user_id', userId)
-single()
+  const { data: user } = await supabase.from('users').select('*').eq('user_id', userId).single();
+  if (!user) return interaction.editReply({ content: '🧚 Use `/start` first!' });
 
-  if (!user) {
-    await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
-    return;
+  const lastBooster = user.last_booster ? new Date(user.last_booster).getTime() : 0;
+  if (!isAdminUser(userId) && Date.now() - lastBooster < BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
+    const remaining = (BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) - (Date.now() - lastBooster);
+    return interaction.editReply({ embeds: [new EmbedBuilder().setColor(0xff69b4).setTitle('⏰ Cooldown').setDescription(`Back in **${formatCooldown(remaining)}**`)] });
   }
 
-  // Check cooldown (skip for admin users) - handle missing column gracefully
-  const lastBooster = user.last_booster;
-  if (!isAdminUser(userId) && lastBooster && new Date(lastBooster).getTime() > Date.now() - BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) {
-    const cooldownMs = new Date(lastBooster).getTime() + (BOOSTER_COOLDOWN_HOURS * 60 * 60 * 1000) - Date.now();
-    const embed = new EmbedBuilder()
-setColor(0xff69b4)
-setTitle('⏰ Booster Reward On Cooldown')
-setDescription(`Come back in **${formatCooldown(cooldownMs)}**`);
-
-
-    await interaction.editReply({ embeds: [embed] });
-    return;
-  }
-
-  // Give 10,000 coins - try with last_booster, fallback without it
-  const newBalance = user.coins + 10000;
-  let updateError = null;
-  
-  // Try updating with last_booster column first
-  const { error: error1 } = await supabase.from('users').update({ coins: newBalance, last_booster: new Date().toISOString() }).eq('user_id', userId)
-  
-  if (error1 && error1.code === 'PGRST204') {
-    // Column doesn't exist, update only coins
-    const { error: error2 } = await supabase.from('users').update({ coins: newBalance }).eq('user_id', userId)
-    updateError = error2;
-  } else {
-    updateError = error1;
-  }
-  
-  if (updateError) {
-    console.error('Error updating coins:', updateError);
-    await interaction.editReply({ content: '🧚 Error claiming booster reward. Please try again!' });
-    return;
-  }
-
-  // Get all cards
-  const { data: allCards } = await supabase.from('cards').select('*')
+  const rewardCoins = 10000;
+  const { data: allCards } = await supabase.from('cards').select('*').eq('droppable', true);
 
   if (!allCards || allCards.length === 0) {
-    const embed = new EmbedBuilder()
-setColor(0xff69b4)
-setTitle('<a:5surfboard:1433597347031683114> Booster Reward Claimed!')
-setDescription(`🧚 Received **10,000 coins**!\n\n*No cards available yet.*`);
-
-
-    await interaction.editReply({ embeds: [embed] });
-    return;
+    await supabase.from('users').update({ coins: user.coins + rewardCoins, last_booster: new Date().toISOString() }).eq('user_id', userId);
+    return interaction.editReply({ content: `🧚 Received **${rewardCoins} coins**!` });
   }
 
-  // Give 15 random cards - batch for performance
-  const selectedCards = [];
-  const cardCounts = new Map<number, number>();
-  
+  const pulled = [];
   for (let i = 0; i < 15; i++) {
-    const randomCard = allCards[Math.floor(Math.random() * allCards.length)];
-    selectedCards.push(randomCard);
-    cardCounts.set(randomCard.card_id, (cardCounts.get(randomCard.card_id) || 0) + 1);
+    const card = allCards[Math.floor(Math.random() * allCards.length)];
+    pulled.push(card);
+    const { data: ex } = await supabase.from('inventory').select('*').eq('user_id', userId).eq('card_id', card.card_id).maybeSingle();
+    if (ex) await supabase.from('inventory').update({ quantity: (ex as any).quantity + 1 }).eq('id', (ex as any).id);
+    else await supabase.from('inventory').insert({ user_id: userId, card_id: card.card_id, quantity: 1 });
   }
 
-  // Get existing inventory items for all selected cards
-  const cardIds = Array.from(cardCounts.keys());
-  const { data: existingItems } = await supabase
-from('inventory')
-select('*')
-eq('user_id', userId)
-in('card_id', cardIds);
-
-  const existingMap = new Map((existingItems || []).map(item => [item.card_id, item]));
-
-  // Batch updates and inserts
-  for (const [cardId, count] of cardCounts) {
-    const existing = existingMap.get(cardId);
-    if (existing) {
-      await supabase.from('inventory').update({ quantity: existing.quantity + count }).eq('id', existing.id)
-    } else {
-      await supabase.from('inventory').insert({ user_id: userId, card_id: cardId, quantity: count })
-    }
-  }
-
-  const cardsInfo = selectedCards
-map((card: any) => `• **${card.name}** (${card.group}) • ${card.era || 'N/A'} • \`${card.cardcode}\``);
-join('\n')
-
-  let attachment = null;
-  try {
-    const imageUrls = selectedCards.filter((card: any) => card.image_url).map((card: any) => card.image_url);
-    if (imageUrls.length > 0) {
-      const mergedImageBuffer = await mergeCardImages(imageUrls, 5);
-      attachment = new AttachmentBuilder(mergedImageBuffer, { name: 'booster_cards.png' });
-    }
-  } catch (error) {
-    console.error('Error merging images:', error);
-  }
+  await supabase.from('users').update({ coins: user.coins + rewardCoins, last_booster: new Date().toISOString() }).eq('user_id', userId);
 
   const embed = new EmbedBuilder()
-setColor(0xff69b4)
-setTitle('🍃 Booster Reward Claimed!')
-setDescription(`⭐ Received **10,000 coins** and **15 cards**!`);
-addFields(
-      {
-        name: '<:1_flower:1436124715797315687> Cards Received',
-        value: cardsInfo,
-       
-      },
-      {
-        name: '🧚 New Balance',
-        value: `${newBalance} coins`,
-       
-      }
-    );
+    .setColor(0xff69b4)
+    .setTitle('🍃 Booster Reward Claimed!')
+    .setDescription(`Received **${rewardCoins} coins** and **15 cards**!`);
 
-
-  if (attachment) {
-    embed.setImage('attachment://booster_cards.png')
-    await interaction.editReply({ embeds: [embed], files: [attachment] });
-  } else {
-    await interaction.editReply({ embeds: [embed] });
-  }
+  await interaction.editReply({ embeds: [embed] });
 }
