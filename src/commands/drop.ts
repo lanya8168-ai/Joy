@@ -51,10 +51,17 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
   } catch (e) { console.error(e); }
 
+  const cardList = selectedCards.map((c, i) => {
+    const rarityEmoji = getRarityEmoji(c.rarity);
+    const eraText = c.era ? ` (${c.era})` : '';
+    const imageLink = c.image_url || 'https://via.placeholder.com/150';
+    return `**${i + 1}.** [${c.name}](${imageLink}) - __${c.group}__${eraText}`;
+  }).join('\n');
+
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
     .setTitle('🦋 Magical Cards Appear!')
-    .setDescription('Three cards have appeared from the mist! Choose **one** to claim.')
+    .setDescription(`Three cards have appeared from the mist! Choose **one** to claim.\n\n${cardList}`)
     .setFooter({ text: 'Only you can claim a card!' });
 
   if (attachment) embed.setImage('attachment://drop.png');
