@@ -15,13 +15,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
 
-  const { data: user } = await supabase
+  const { data: user, error: userError } = await supabase
     .from('users')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
-  if (!user) {
+  if (userError || !user) {
     return interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
   }
 

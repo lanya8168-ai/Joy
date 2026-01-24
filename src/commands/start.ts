@@ -9,19 +9,44 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
 
-  const { data: existing } = await supabase.from('users').select('*').eq('user_id', userId).maybeSingle();
-  if (existing) {
-    return interaction.editReply({ embeds: [new EmbedBuilder().setColor(0xff69b4).setTitle('Welcome Back!').setDescription(`You already have **${existing.coins} coins**!`)] });
+  // Use maybeSingle() and check if data exists
+  const { data: existing, error: fetchError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (fetchError) {
+    console.error('Error fetching user:', fetchError);
+    return interaction.editReply('🧚 Error checking your account status.');
   }
 
-  const { error } = await supabase.from('users').insert([{ user_id: userId, coins: 100 }]);
-  if (error) return interaction.editReply('🧚 Error starting your journey.');
+  if (existing) {
+    const embed = new EmbedBuilder()
+      .setColor(0xff69b4)
+      .setTitle('Welcome Back!')
+      .setDescription(`You already have an account with **${existing.coins} coins**!`)
+      .addFields(
+        { name: 'Total Cards', value: 'Use `/inventory` to view' },
+        { name: 'Coins', value: `${existing.coins}` }
+      );
+    return interaction.editReply({ embeds: [embed] });
+  }
+
+  const { error: insertError } = await supabase
+    .from('users')
+    .insert([{ user_id: userId, coins: 100 }]);
+
+  if (insertError) {
+    console.error('Error creating user:', insertError);
+    return interaction.editReply('🧚 Error starting your journey. Please try again!');
+  }
 
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
     .setTitle('🌸 Welcome to the Fairy Garden!')
     .setDescription('Your magical journey begins now! 🧚')
-    .addFields({ name: '🧚 Coins', value: '100' });
+    .addFields({ name: '🧚 Starting Coins', value: '100' });
 
   await interaction.editReply({ embeds: [embed] });
 }

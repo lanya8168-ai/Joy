@@ -28,7 +28,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
   const result = data as any;
   if (!result.success) {
-    if (result.error === 'user_not_found') return interaction.editReply({ content: '🧚 Use `/start` first!' });
+    if (result.error === 'user_not_found') return interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     if (result.error === 'on_cooldown') {
       const embed = new EmbedBuilder().setColor(0xff69b4).setTitle('⏰ Weekly Cooldown').setDescription(`Back in **${formatCooldown(result.cooldown_remaining_ms)}**`);
       return interaction.editReply({ embeds: [embed] });

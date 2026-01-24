@@ -56,13 +56,13 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   const eraFilter = interaction.options.getString('era');
   const searchFilter = interaction.options.getString('search');
 
-  const { data: user } = await supabase
+  const { data: user, error: userError } = await supabase
     .from('users')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
 
-  if (!user) {
+  if (userError || !user) {
     await interaction.editReply({ content: '🧚 Please use `/start` first to create your account!' });
     return;
   }
