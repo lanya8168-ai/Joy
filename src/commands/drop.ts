@@ -52,7 +52,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   } catch (e) { console.error(e); }
 
   const cardList = selectedCards.map((c, i) => {
-    const rarityEmoji = getRarityEmoji(c.rarity);
     const eraText = c.era ? ` (${c.era})` : '';
     const imageLink = c.image_url || 'https://via.placeholder.com/150';
     return `**${i + 1}.** [${c.name}](${imageLink}) - __${c.group}__${eraText}`;
@@ -62,7 +61,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     .setColor(0xff69b4)
     .setTitle('🦋 Magical Cards Appear!')
     .setDescription(`Three cards have appeared from the mist! Choose **one** to claim.\n\n${cardList}`)
-    .setFooter({ text: 'Only you can claim a card!' });
+    .setFooter({ text: 'Only you can claim a card! (Expires in 30s)' });
 
   if (attachment) embed.setImage('attachment://drop.png');
 
@@ -100,7 +99,12 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     collector.stop();
   });
 
-  collector.on('end', (_, reason) => {
-    if (reason === 'time') interaction.editReply({ content: '⏰ Time expired!', components: [] });
+  collector.on('end', async (_, reason) => {
+    if (reason === 'time') {
+      const expiredEmbed = EmbedBuilder.from(embed)
+        .setDescription('⏰ **Time expired!** The magical mist has faded and the cards have vanished.')
+        .setColor(0x808080);
+      await interaction.editReply({ embeds: [expiredEmbed], components: [], files: attachment ? [attachment] : [] });
+    }
   });
 }
