@@ -1,9 +1,10 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { isAdminUser } from '../utils/constants.js';
 
 export const data = new SlashCommandBuilder()
   .setName('addcard')
-  .setDescription('Add or edit a K-pop card (Admin only)')
+  .setDescription('Add or edit a K-pop card (Staff only)')
   .addStringOption(option =>
     option.setName('cardcode')
       .setDescription('Card code (e.g., BP001)')
@@ -32,10 +33,13 @@ export const data = new SlashCommandBuilder()
       .setDescription('Can it be dropped?'))
   .addStringOption(option =>
     option.setName('image_url')
-      .setDescription('Image URL'))
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+      .setDescription('Image URL'));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  if (!isAdminUser(interaction.member)) {
+    return interaction.reply({ content: '🧚 This command is for Staff only!', ephemeral: true });
+  }
+
   await interaction.deferReply();
   const cardcode = interaction.options.getString('cardcode', true).toUpperCase();
   const name = interaction.options.getString('name');

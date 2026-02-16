@@ -1,30 +1,28 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { isAdminUser } from '../utils/constants.js';
 
 export const data = new SlashCommandBuilder()
   .setName('deletecard')
-  .setDescription('Delete a card from the database (Admin only)')
+  .setDescription('Delete a card from the database (Staff only)')
   .addIntegerOption(option =>
     option.setName('card_id')
       .setDescription('The ID of the card to delete')
-      .setRequired(true))
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+      .setRequired(true));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-  if (!interaction.deferred) await interaction.deferReply();
-  
-  if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-    await interaction.editReply({ content: '🧚 You need Administrator permission to use this command!' });
-    return;
+  if (!isAdminUser(interaction.member)) {
+    return interaction.reply({ content: '🧚 This command is for Staff only!', ephemeral: true });
   }
 
+  await interaction.deferReply();
   const cardId = interaction.options.getInteger('card_id', true);
 
   const { data: card } = await supabase
     .from('cards')
     .select('*')
     .eq('card_id', cardId)
-    .single();
+    .maybeSingle();
 
   if (!card) {
     await interaction.editReply({ content: '🧚 Card not found!' });

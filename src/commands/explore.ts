@@ -14,9 +14,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
   await interaction.deferReply();
   const userId = interaction.user.id;
   const reward = Math.floor(Math.random() * 1500) + 1500;
-  const cooldownHours = isAdminUser(userId) ? 0 : EXPLORE_COOLDOWN_HOURS;
+  
+  // Pass the member object to check for both ID and Role
+  const isStaff = isAdminUser(interaction.member);
+  const cooldownHours = isStaff ? 0 : EXPLORE_COOLDOWN_HOURS;
 
-  // The RPC likely expects a snake_case JSON response
   const { data, error } = await supabase.rpc('claim_explore_reward', {
     p_user_id: userId,
     p_reward: reward,
@@ -43,17 +45,24 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     return interaction.editReply({ content: '🧚 Error exploring. Something went wrong.' });
   }
 
-  const nextAvailable = new Date(Date.now() + (result.cooldown_remaining_ms || (EXPLORE_COOLDOWN_HOURS * 60 * 60 * 1000)));
+  const cooldownMs = result.cooldown_remaining_ms || (EXPLORE_COOLDOWN_HOURS * 60 * 60 * 1000);
+  const nextAvailable = new Date(Date.now() + (isStaff ? 0 : cooldownMs));
+  
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
     .setTitle('🧚 Exploring Complete!')
     .setDescription(`You found **${result.reward || reward} coins** in the magical woods!`)
     .addFields(
       { name: '💎 Reward', value: `${result.reward || reward} coins`, inline: true },
-      { name: '🧚 Balance', value: `${result.new_balance} coins`, inline: true },
-      { name: '⏰ Next', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, inline: true }
+      { name: '🧚 Balance', value: `${result.new_balance} coins`, inline: true }
     );
 
-  scheduleReminder(interaction.client, userId, interaction.channelId, 'explore', EXPLORE_COOLDOWN_HOURS * 60 * 60 * 1000);
+  if (!isStaff) {
+    embed.addFields({ name: '⏰ Next', value: `<t:${Math.floor(nextAvailable.getTime() / 1000)}:R>`, inline: true });
+    scheduleReminder(interaction.client, userId, interaction.channelId, 'explore', EXPLORE_COOLDOWN_HOURS * 60 * 60 * 1000);
+  } else {
+    embed.addFields({ name: '✨ Staff Perk', value: 'No cooldown active!', inline: true });
+  }
+
   await interaction.editReply({ embeds: [embed] });
 }

@@ -1,9 +1,10 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { isAdminUser } from '../utils/constants.js';
 
 export const data = new SlashCommandBuilder()
   .setName('editcard')
-  .setDescription('Edit a card (Admin only)')
+  .setDescription('Edit a card (Staff only)')
   .addStringOption(option =>
     option.setName('cardcode')
       .setDescription('Card code to edit')
@@ -19,10 +20,13 @@ export const data = new SlashCommandBuilder()
       .setDescription('New rarity')
       .addChoices(
         { name: '1', value: 1 }, { name: '2', value: 2 }, { name: '3', value: 3 }, { name: '4', value: 4 }, { name: '5', value: 5 }
-      ))
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
+      ));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  if (!isAdminUser(interaction.member)) {
+    return interaction.reply({ content: '🧚 This command is for Staff only!', ephemeral: true });
+  }
+
   await interaction.deferReply();
   const code = interaction.options.getString('cardcode', true).toUpperCase();
   const name = interaction.options.getString('name');

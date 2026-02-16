@@ -5,11 +5,25 @@ export const ADMIN_USERS = [
   '996524280869302492'    // Admin user
 ];
 
+// Role IDs
+export const STAFF_ROLE_ID = '1441490367777079306';
+export const BOOSTER_ROLE_ID = '1442680565479510077';
+
 // Users who can use bot during lockdown
 export const LOCKDOWN_WHITELIST = ADMIN_USERS;
 
-// Role IDs
-export const BOOSTER_ROLE_ID = '1442680565479510077';
+// Helper function to check if user is admin or staff
+export const isAdminUser = (member: any): boolean => {
+  if (!member) return false;
+  
+  // Check if ID is in ADMIN_USERS list
+  const userId = typeof member === 'string' ? member : member.id;
+  if (ADMIN_USERS.includes(userId)) return true;
 
-// Helper function to check if user is admin (no cooldown)
-export const isAdminUser = (userId: string): boolean => ADMIN_USERS.includes(userId);
+  // Check for staff role if member object is provided
+  if (typeof member !== 'string' && member.roles) {
+    return member.roles.cache.has(STAFF_ROLE_ID);
+  }
+
+  return false;
+};
