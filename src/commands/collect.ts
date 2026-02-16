@@ -30,24 +30,30 @@ export async function execute(interaction: ChatInputCommandInteraction | ButtonI
   const missing = options?.getBoolean('missing');
   const page = options?.getInteger('page') || 1;
 
-  let query = supabase.from('cards').select('*').order('group').order('name');
+  // Base query for counts and display
+  let query = supabase.from('cards').select('*', { count: 'exact' }).order('group').order('name');
   if (idol) query = query.ilike('name', `%${idol}%`);
   if (group) query = query.ilike('group', `%${group}%`);
   if (rarity) query = query.eq('rarity', rarity);
 
-  const { data: cards } = await query;
+  const { data: cards, count: totalCards } = await query;
   if (!cards || cards.length === 0) {
     const msg = { content: 'No cards found!', components: [] };
     return interaction.editReply(msg);
   }
 
+  // Get user's inventory
   const { data: inv } = await supabase.from('inventory').select('card_id').eq('user_id', userId);
-  const owned = new Set(inv?.map(i => i.card_id) || []);
+  const ownedIds = new Set(inv?.map(i => i.card_id) || []);
+
+  // Calculate progress for the current filter
+  const ownedInFilter = cards.filter(c => ownedIds.has(c.card_id)).length;
+  const totalInFilter = cards.length;
 
   let display = cards;
-  if (missing) display = cards.filter(c => !owned.has(c.card_id));
+  if (missing) display = cards.filter(c => !ownedIds.has(c.card_id));
   if (display.length === 0) {
-    const msg = { content: 'No cards match!', components: [] };
+    const msg = { content: `You own all cards in this category! (${ownedInFilter}/${totalInFilter})`, components: [] };
     return interaction.editReply(msg);
   }
 
@@ -56,7 +62,12 @@ export async function execute(interaction: ChatInputCommandInteraction | ButtonI
   const start = (validPage - 1) * CARDS_PER_PAGE;
   const paged = display.slice(start, start + CARDS_PER_PAGE);
 
-  const list = paged.map(c => `${owned.has(c.card_id) ? '🏘️' : '🧚'} **${c.name}** (${c.group}) ${getRarityEmoji(c.rarity)} • \`${c.cardcode}\``).join('\n');
+  // Use distinct icons for owned vs missing
+  const list = paged.map(c => {
+    const isOwned = ownedIds.has(c.card_id);
+    const ownershipIcon = isOwned ? '✅' : '❌';
+    return `${ownershipIcon} **${c.name}** (${c.group}) ${getRarityEmoji(c.rarity)} • \`${c.cardcode}\``;
+  }).join('\n');
 
   let attachment = null;
   try {
@@ -67,10 +78,16 @@ export async function execute(interaction: ChatInputCommandInteraction | ButtonI
     }
   } catch (e) { console.error(e); }
 
+  const filterDesc = [];
+  if (idol) filterDesc.push(`Idol: ${idol}`);
+  if (group) filterDesc.push(`Group: ${group}`);
+  if (rarity) filterDesc.push(`Rarity: ${rarity}`);
+  const activeFilters = filterDesc.length > 0 ? ` [${filterDesc.join(', ')}]` : '';
+
   const embed = new EmbedBuilder()
     .setColor(0xff69b4)
-    .setTitle('🌸 Collection')
-    .setDescription(list)
+    .setTitle(`🌸 Collection Progress${activeFilters}`)
+    .setDescription(`**Progress:** ${ownedInFilter} / ${totalInFilter} cards collected\n\n${list}`)
     .setFooter({ text: `Page ${validPage}/${totalPages}` });
 
   if (attachment) embed.setImage('attachment://collect.png');
