@@ -1,10 +1,10 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } from 'discord.js';
 import { supabase } from '../database/supabase.js';
+import { isAdminUser } from '../utils/constants.js';
 
 export const data = new SlashCommandBuilder()
   .setName('staffpay')
   .setDescription('Staff only: Send coins to a user')
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .addUserOption(option =>
     option.setName('user')
       .setDescription('User to pay')
@@ -16,14 +16,15 @@ export const data = new SlashCommandBuilder()
       .setMinValue(1));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-  await interaction.deferReply();
-  const OWNER_ID = '1403958587843149937';
-  if (interaction.user.id !== OWNER_ID) return interaction.editReply({ content: '🧚 Owner only!' });
+  if (!isAdminUser(interaction.member)) {
+    return interaction.reply({ content: '🧚 This command is for Staff only!', ephemeral: true });
+  }
 
+  await interaction.deferReply();
   const receiverUser = interaction.options.getUser('user', true);
   const amount = interaction.options.getInteger('amount', true);
 
-  const { data: receiver } = await supabase.from('users').select('*').eq('user_id', receiverUser.id).single();
+  const { data: receiver } = await supabase.from('users').select('*').eq('user_id', receiverUser.id).maybeSingle();
   if (!receiver) return interaction.editReply({ content: '🧚 User needs to use `/start`!' });
 
   await supabase.from('users').update({ coins: receiver.coins + amount }).eq('user_id', receiverUser.id);

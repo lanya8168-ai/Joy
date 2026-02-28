@@ -1,12 +1,12 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, AttachmentBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
 import { supabase } from '../database/supabase.js';
 import { mergeCardImages } from '../utils/imageUtils.js';
 import { getRarityEmoji } from '../utils/cards.js';
+import { isAdminUser } from '../utils/constants.js';
 
 export const data = new SlashCommandBuilder()
   .setName('staffgift')
   .setDescription('Staff only: Gift cards to a user')
-  .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
   .addUserOption(option =>
     option.setName('user')
       .setDescription('User to gift to')
@@ -21,21 +21,22 @@ export const data = new SlashCommandBuilder()
       .setMinValue(1));
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+  if (!isAdminUser(interaction.member)) {
+    return interaction.reply({ content: '🧚 This command is for Staff only!', ephemeral: true });
+  }
+
   await interaction.deferReply();
   const senderUserId = interaction.user.id;
   const receiverUser = interaction.options.getUser('user', true);
   const receiverUserId = receiverUser.id;
-  const OWNER_ID = '1403958587843149937';
 
-  if (senderUserId !== OWNER_ID) return interaction.editReply({ content: '🧚 Owner only!' });
-
-  const { data: receiver } = await supabase.from('users').select('*').eq('user_id', receiverUserId).single();
+  const { data: receiver } = await supabase.from('users').select('*').eq('user_id', receiverUserId).maybeSingle();
   if (!receiver) return interaction.editReply({ content: '🧚 User needs to use `/start`!' });
 
-  const code1 = interaction.options.getString('card1', true);
+  const code1 = interaction.options.getString('card1', true).toUpperCase();
   const amount1 = interaction.options.getInteger('amount1') || 1;
 
-  const { data: card } = await supabase.from('cards').select('*').eq('cardcode', code1.toUpperCase()).maybeSingle();
+  const { data: card } = await supabase.from('cards').select('*').eq('cardcode', code1).maybeSingle();
   if (!card) return interaction.editReply({ content: '🧚 Card not found!' });
 
   const confirmEmbed = new EmbedBuilder()
