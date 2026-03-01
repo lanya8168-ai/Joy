@@ -33,7 +33,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
       const { data: card } = await supabase.from('cards').select('*').eq('card_id', (user as any).favorite_card).maybeSingle();
       if (card) {
         embed.addFields({ name: '✨ Favorite Card', value: `${getRarityEmoji(card.rarity)} **${card.name}** (${card.group})` });
-        if (card.image_url) embed.setThumbnail(card.image_url);
+        if (card.image_url) embed.setImage(card.image_url);
       }
     }
 
