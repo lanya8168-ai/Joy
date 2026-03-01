@@ -75,20 +75,23 @@ const server = createServer((req, res) => {
   res.end('Bot is running.');
 });
 
+const PORT = process.env.PORT || 3000;
+
+// START SERVER FIRST (important)
+server.listen(PORT, () => {
+  console.log(`Web server running on port ${PORT}`);
+});
+
+// THEN start the bot
 async function start() {
-  await loadCommands();
-  await registerCommands();
-
-  await client.login(process.env.DISCORD_TOKEN);
-
-  const PORT = process.env.PORT || 3000;
-  server.listen(PORT, () => {
-    console.log(`Web server running on port ${PORT}`);
-  });
+  try {
+    await loadCommands();
+    await registerCommands();
+    await client.login(process.env.DISCORD_TOKEN);
+    console.log("Discord bot logged in successfully.");
+  } catch (err) {
+    console.error("Startup error:", err);
+  }
 }
 
 start();
-
-/* =========================
-   RENDER PORT FIX END
-========================= */
